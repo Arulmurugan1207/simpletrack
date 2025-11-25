@@ -1,0 +1,2 @@
+# Ignore analytics.js so it is not tracked by git
+analytics.js
