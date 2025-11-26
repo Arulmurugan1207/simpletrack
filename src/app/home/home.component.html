@@ -1,0 +1,83 @@
+<!-- Navigation Bar -->
+<nav class="w-full bg-white shadow-md py-4 px-6 flex justify-between items-center">
+	<div class="flex items-center gap-2">
+		<span class="font-bold text-xl text-indigo-600">SimpleTrack</span>
+	</div>
+	<ul class="flex gap-6 items-center text-gray-700 font-medium">
+		<li class="nav-item"><a class="nav-link" href="#features">Features</a></li>
+		<li class="nav-item"><a class="nav-link" href="#pricing">Pricing</a></li>
+		<li class="nav-item"><a class="nav-link" href="#docs">Docs</a></li>
+		<li class="nav-item"><a class="nav-link" href="#blog">Blog</a></li>
+		<li class="nav-item"><button class="btn btn-link nav-link" (click)="openLoginModal()">Login</button></li>
+		<li class="nav-item"><button class="btn btn-primary rounded-pill px-4" (click)="openSignupModal()">Sign Up</button></li>
+	</ul>
+</nav>
+
+<!-- Hero Section -->
+<section class="bg-gradient-to-br from-indigo-200 to-purple-100 py-16 px-4 flex flex-col items-center text-center">
+	<h1 class="text-4xl md:text-5xl font-extrabold text-gray-900 mb-4">SimpleTrack Analytics SDK</h1>
+	<p class="text-lg md:text-xl text-gray-700 mb-6 max-w-2xl">Zero-config analytics for modern web applications. Lightweight, automatic tracking, custom events, and comprehensive reporting. Free, open-source, and developer-friendly.</p>
+	<div class="flex flex-col md:flex-row gap-4 mb-8">
+		<a href="https://simpletrack.dev/downloads/stk-analytics.min.js" download class="btn btn-primary btn-lg rounded-pill fw-semibold shadow">📥 Download (5KB)</a>
+		<div class="d-flex align-items-center bg-white px-3 py-2 rounded-pill shadow">
+			<code class="text-primary">&lt;script src=\"https://simpletrack.dev/stk-analytics.min.js\"&gt;&lt;/script&gt;</code>
+			<button class="btn btn-outline-primary btn-sm ms-2">📋 Copy</button>
+		</div>
+	</div>
+	<div class="flex flex-wrap gap-3 justify-center mb-6">
+		<span class="badge bg-primary">Zero Config</span>
+		<span class="badge bg-secondary">5KB Size</span>
+		<span class="badge bg-info">Auto Tracking</span>
+		<span class="badge bg-success">Custom Events</span>
+		<span class="badge bg-warning text-dark">Free & Open Source</span>
+	</div>
+</section>
+
+<!-- Features Section -->
+<section id="features" class="py-12 px-4 max-w-4xl mx-auto">
+	<h2 class="text-2xl font-bold text-gray-900 mb-6 text-center">🚀 Why Choose SimpleTrack Analytics SDK?</h2>
+	<p class="text-center text-gray-700 mb-8">SimpleTrack is a lightweight, zero-configuration web analytics SDK designed for modern web applications. With just 5KB of JavaScript, you get automatic page tracking, custom event monitoring, user analytics, performance metrics, and comprehensive reporting capabilities.</p>
+	<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+		<div class="bg-white rounded-lg shadow p-6">
+			<h3 class="text-lg font-semibold text-indigo-600 mb-2">Automatic Tracking</h3>
+			<ul class="list-disc list-inside text-gray-700">
+				<li>Page views, session start, scroll depth, clicks, page exit, performance</li>
+				<li>All events include user/session info, browser data, attribution, and path</li>
+			</ul>
+		</div>
+		<div class="bg-white rounded-lg shadow p-6">
+			<h3 class="text-lg font-semibold text-indigo-600 mb-2">Custom Events</h3>
+			<ul class="list-disc list-inside text-gray-700">
+				<li>Track business events, promo campaigns, user engagement, conversions</li>
+				<li>Convenience methods for common patterns (interactions, navigation, errors, performance)</li>
+			</ul>
+		</div>
+		<div class="bg-white rounded-lg shadow p-6">
+			<h3 class="text-lg font-semibold text-indigo-600 mb-2">User Management</h3>
+			<ul class="list-disc list-inside text-gray-700">
+				<li>Track authenticated users by email (local only, never sent to server)</li>
+				<li>Complies with basic GDPR requirements</li>
+			</ul>
+		</div>
+		<div class="bg-white rounded-lg shadow p-6">
+			<h3 class="text-lg font-semibold text-indigo-600 mb-2">Privacy & Security</h3>
+			<ul class="list-disc list-inside text-gray-700">
+				<li>No cookies by default, anonymous UUIDs, optional email storage</li>
+				<li>All data sent over HTTPS to secure endpoint</li>
+			</ul>
+		</div>
+	</div>
+</section>
+
+<!-- Footer -->
+<footer class="bg-white mt-16 py-8 px-4 rounded-lg shadow text-center">
+	<p class="text-gray-600 mb-2">&copy; 2025 SimpleTrack Analytics. Built with ❤️ for easy web analytics.</p>
+	<div class="flex flex-wrap justify-center gap-6 mb-2">
+		<a href="mailto:support@simpletrack.dev" class="text-indigo-600 hover:underline">📧 Contact Us</a>
+		<a href="https://github.com/simpletrack-dev/stk-analytics" class="text-gray-700 hover:underline">🐙 GitHub</a>
+		<a href="/privacy-policy" class="text-red-500 hover:underline">🔒 Privacy Policy</a>
+		<a href="/terms-of-service" class="text-purple-500 hover:underline">📋 Terms of Service</a>
+		<a href="#" class="text-green-500 hover:underline">⬆️ Back to Top</a>
+	</div>
+	<p class="text-xs text-gray-400 mt-2">Keywords: web analytics SDK, JavaScript tracking library, zero-config analytics, custom event tracking, user analytics, performance monitoring, conversion tracking, page view analytics</p>
+</footer>
