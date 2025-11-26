@@ -1087,7 +1087,25 @@ STKAnalytics.updateConfig({
         <script>
         // Accordion functionality (existing)
         document.addEventListener('DOMContentLoaded', function() {
-            // ...existing code...
+            // Accordion open/close logic
+            document.querySelectorAll('.accordion-header').forEach(function(header) {
+                header.addEventListener('click', function() {
+                    // Toggle active class on header
+                    document.querySelectorAll('.accordion-header').forEach(function(h) {
+                        h.classList.remove('active');
+                    });
+                    header.classList.add('active');
+
+                    // Show/hide content
+                    document.querySelectorAll('.accordion-content').forEach(function(content) {
+                        content.classList.remove('show');
+                    });
+                    var nextContent = header.nextElementSibling;
+                    if (nextContent && nextContent.classList.contains('accordion-content')) {
+                        nextContent.classList.add('show');
+                    }
+                });
+            });
         });
 
         // --- SimpleTrack Analytics Integration ---
