@@ -1,263 +1,487 @@
+
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SimpleTrack Analytics SDK - Easy Integration Guide</title>
-    
-    <!-- SEO Meta Tags -->
-    <meta name="description" content="SimpleTrack Analytics SDK - Zero-config web analytics for modern applications. Easy JavaScript integration, automatic tracking, custom events, and comprehensive reporting. Free, lightweight (5KB), and developer-friendly.">
-    <meta name="keywords" content="analytics SDK, web analytics, JavaScript analytics, tracking library, zero-config analytics, custom events, page tracking, user analytics, performance monitoring, conversion tracking">
-    <meta name="author" content="SimpleTrack Analytics">
-    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
-    <link rel="canonical" href="https://simpletrack.dev/analytics-sdk">
-    
-    <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://simpletrack.dev/analytics-sdk">
-    <meta property="og:title" content="SimpleTrack Analytics SDK - Zero-Config Web Analytics">
-    <meta property="og:description" content="Easy-to-integrate JavaScript analytics SDK with automatic tracking, custom events, and comprehensive reporting. Perfect for modern web applications.">
-    <meta property="og:image" content="https://simpletrack.dev/assets/analytics-sdk-preview.png">
-    <meta property="og:site_name" content="SimpleTrack Analytics">
-    <meta property="og:locale" content="en_US">
-    
-    <!-- Twitter -->
-    <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:url" content="https://simpletrack.dev/analytics-sdk">
-    <meta property="twitter:title" content="SimpleTrack Analytics SDK - Zero-Config Web Analytics">
-    <meta property="twitter:description" content="Easy-to-integrate JavaScript analytics SDK with automatic tracking, custom events, and comprehensive reporting. Perfect for modern web applications.">
-    <meta property="twitter:image" content="https://simpletrack.dev/assets/analytics-sdk-preview.png">
-    
-    <!-- Additional SEO -->
-    <meta name="theme-color" content="#667eea">
-    <meta name="msapplication-TileColor" content="#667eea">
-    <link rel="icon" type="image/x-icon" href="/favicon.ico">
-    <link rel="sitemap" type="application/xml" href="/sitemap.xml">
-    
-    <!-- Structured Data -->
-    <script type="application/ld+json">
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "SimpleTrack Analytics SDK",
-        "description": "Zero-config web analytics SDK for modern applications with automatic tracking, custom events, and comprehensive reporting capabilities.",
-    "url": "https://simpletrack.dev/analytics-sdk",
-        "applicationCategory": "DeveloperApplication",
-        "operatingSystem": "Web Browser",
-        "programmingLanguage": "JavaScript",
-        "fileSize": "5KB",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "USD"
-        },
-        "author": {
-            "@type": "Organization",
-            "name": "SimpleTrack Analytics"
-        },
-        "featureList": [
-            "Zero-configuration setup",
-            "Automatic page view tracking",
-            "Custom event tracking",
-            "User management",
-            "Performance monitoring",
-            "Scroll depth tracking",
-            "Click tracking",
-            "Promo campaign tracking",
-            "Batch event sending",
-            "Debug mode"
-        ],
-    "screenshot": "https://simpletrack.dev/assets/analytics-sdk-preview.png"
-    <!-- FAQ Structured Data -->
-    <script type="application/ld+json">
-    {
-        "@context": "https://schema.org",
-        "@type": "FAQPage",
-        "mainEntity": [
-            {
-                "@type": "Question",
-                "name": "How do I get my analytics reports?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Contact us with your serviceName to access your website's analytics data and reports."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "Is the SimpleTrack Analytics SDK free?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "The SDK is free and open-source (MIT licensed). Hosting and report access may have associated costs."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "What data is collected by the analytics SDK?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Only what you track: anonymized UUIDs, browser/session info, events. No IP logging by default."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "Does it work with React/Vue/Angular?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Yes! Use window.STKAnalytics in components - no wrapper code needed."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "How do I track custom events?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Use window.STKAnalytics.trackEvent('event_name', { data }) anywhere in your code."
-                }
-            }
-        ]
-    }
-    </script>
-    <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            line-height: 1.6;
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 20px;
-            color: #2c3e50;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            min-height: 100vh;
-        }
-        h1, h2, h3 { color: #2c3e50; margin-bottom: 15px; font-weight: 600; }
-        code { background: rgba(52, 152, 219, 0.1); color: #2980b9; padding: 3px 6px; border-radius: 4px; font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace; font-size: 0.9em; border: 1px solid rgba(52, 152, 219, 0.2); }
-        pre { background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%); color: #ffffff; padding: 20px; border-radius: 8px; overflow-x: auto; margin: 15px 0; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); border: 1px solid rgba(255, 255, 255, 0.1); }
-        .example { background: linear-gradient(135deg, #e8f8f5 0%, #d5f4e6 100%); border-left: 4px solid #27ae60; padding: 20px; margin: 15px 0; border-radius: 0 8px 8px 0; box-shadow: 0 2px 10px rgba(39, 174, 96, 0.1); }
-        ul, ol { padding-left: 20px; }
-        pre code { 
-            color: #ffffff; 
-           
-        }
-        a { color: #3498db; text-decoration: none; transition: all 0.3s ease; }
-        a:hover { color: #2980b9; text-decoration: underline; }
-        .accordion { margin: 30px 0; }
-        .accordion-item { border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 12px; margin-bottom: 15px; background: rgba(255, 255, 255, 0.95); box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); backdrop-filter: blur(10px); overflow: hidden; transition: all 0.3s ease; }
-        .accordion-item:hover { box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12); transform: translateY(-2px); }
-        .accordion-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 18px 20px; cursor: pointer; border: none; width: 100%; text-align: left; font-size: 18px; font-weight: 600; border-radius: 12px; position: relative; transition: all 0.3s ease; }
-        .accordion-header:hover { background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%); }
-        .accordion-header.active { background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%); }
-        .accordion-arrow { position: absolute; right: 20px; top: 50%; transform: translateY(-50%); transition: all 0.3s ease; width: 0; height: 0; border-left: 6px solid rgba(255, 255, 255, 0.9); border-top: 6px solid transparent; border-bottom: 6px solid transparent; }
-        .accordion-header.active .accordion-arrow { transform: translateY(-50%) rotate(90deg); }
-        .accordion-content { display: none; padding: 25px; border-top: 1px solid rgba(255, 255, 255, 0.3); background: rgba(255, 255, 255, 0.9); }
-        .accordion-content.show { display: block; }
-        .copy-btn { float: right; background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%); color: white; border: none; padding: 6px 12px; border-radius: 15px; cursor: pointer; font-size: 12px; font-weight: 600; box-shadow: 0 2px 8px rgba(39, 174, 96, 0.3); transition: all 0.3s ease; }
-        .copy-btn:hover { background: linear-gradient(135deg, #229954 0%, #27ae60 100%); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(39, 174, 96, 0.4); }
-        .copy-btn.copied { background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%); }
-        .implementation-note { background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%); border-left: 4px solid #f39c12; padding: 20px; margin: 20px 0; border-radius: 0 8px 8px 0; box-shadow: 0 2px 10px rgba(243, 156, 18, 0.1); }
-        .step-list { counter-reset: step-counter; list-style: none; padding-left: 0; }
-        .step-list li { counter-increment: step-counter; margin: 10px 0; padding-left: 25px; position: relative; }
-        .step-list li::before { content: counter(step-counter) "."; font-weight: bold; color: #3498db; position: absolute; left: 0; }
 
-        /* Animations */
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-    </style>
-</head>
-<body>
-    <header style="text-align: center; margin-bottom: 20px; padding: 20px 15px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 20px; box-shadow: 0 15px 35px rgba(102, 126, 234, 0.3); position: relative; overflow: hidden;">
-        <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: url('data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20100%20100%22%3E%3Ccircle%20cx%3D%2220%22%20cy%3D%2220%22%20r%3D%222%22%20fill%3D%22rgba(255,255,255,0.1)%22%2F%3E%3Ccircle%20cx%3D%2280%22%20cy%3D%2280%22%20r%3D%221%22%20fill%3D%22rgba(255,255,255,0.1)%22%2F%3E%3Ccircle%20cx%3D%2260%22%20cy%3D%2230%22%20r%3D%221.5%22%20fill%3D%22rgba(255,255,255,0.1)%22%2F%3E%3C%2Fsvg%3E'); opacity: 0.5;"></div>
-        <div style="position: relative; z-index: 1; max-width: 800px; margin: 0 auto;">
-            <h1 style="color: white; margin-bottom: 8px; font-size: 2em; font-weight: 700; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3); letter-spacing: -0.5px; animation: fadeInUp 0.8s ease-out;">SimpleTrack Analytics SDK</h1>
-            <p style="color: rgba(255, 255, 255, 0.9); font-size: 1.1em; margin-bottom: 20px; font-weight: 300; line-height: 1.4; animation: fadeInUp 1s ease-out 0.2s both;">Zero-config analytics for modern web applications</p>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>SimpleTrack Analytics SDK - Easy Integration Guide</title>
 
-            <div style="display: flex; justify-content: center; align-items: center; gap: 15px; margin-bottom: 15px; flex-wrap: wrap; animation: fadeInUp 1.2s ease-out 0.4s both;">
-                <a href="https://simpletrack.dev/downloads/stk-analytics.min.js" download style="background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(10px); color: white; padding: 10px 20px; border-radius: 25px; text-decoration: none; font-weight: 500; border: 1px solid rgba(255, 255, 255, 0.3); transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);" onmouseover="this.style.background='rgba(255, 255, 255, 0.3)'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 25px rgba(0, 0, 0, 0.2)';" onmouseout="this.style.background='rgba(255, 255, 255, 0.2)'; this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(0, 0, 0, 0.1)';">
-                    📥 Download (5KB)
-                </a>
-                <div style="display: flex; align-items: center; gap: 10px; background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); padding: 8px 15px; border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.2); animation: fadeInUp 1.4s ease-out 0.6s both;">
-                    <code style="color: white; font-size: 0.85em; font-family: 'SF Mono', 'Monaco', monospace; background: transparent; border: none; padding: 0;">&lt;script src="https://simpletrack.dev/stk-analytics.min.js"&gt;&lt;/script&gt;</code>
-                    <button onclick="navigator.clipboard.writeText('&lt;script src=&quot;https://simpletrack.dev/stk-analytics.min.js&quot;&gt;&lt;/script&gt;'); this.textContent='✅ Copied!'; setTimeout(() => this.textContent='📋 Copy', 2000);" style="background: rgba(255, 255, 255, 0.2); color: white; border: none; padding: 4px 8px; border-radius: 10px; cursor: pointer; font-size: 0.75em; transition: all 0.3s ease;" onmouseover="this.style.background='rgba(255, 255, 255, 0.3)';" onmouseout="this.style.background='rgba(255, 255, 255, 0.2)';">📋 Copy</button>
+        <!-- SEO Meta Tags -->
+        <meta name="description"
+            content="SimpleTrack Analytics SDK - Zero-config web analytics for modern applications. Easy JavaScript integration, automatic tracking, custom events, and comprehensive reporting. Free, lightweight (5KB), and developer-friendly.">
+        <meta name="keywords"
+            content="analytics SDK, web analytics, JavaScript analytics, tracking library, zero-config analytics, custom events, page tracking, user analytics, performance monitoring, conversion tracking">
+        <meta name="author" content="SimpleTrack Analytics">
+        <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+        <link rel="canonical" href="https://simpletrack.dev/analytics-sdk">
+
+        <!-- Open Graph / Facebook -->
+        <meta property="og:type" content="website">
+        <meta property="og:url" content="https://simpletrack.dev/analytics-sdk">
+        <meta property="og:title" content="SimpleTrack Analytics SDK - Zero-Config Web Analytics">
+        <meta property="og:description"
+            content="Easy-to-integrate JavaScript analytics SDK with automatic tracking, custom events, and comprehensive reporting. Perfect for modern web applications.">
+        <meta property="og:image" content="https://simpletrack.dev/assets/analytics-sdk-preview.png">
+        <meta property="og:site_name" content="SimpleTrack Analytics">
+        <meta property="og:locale" content="en_US">
+
+        <!-- Twitter -->
+        <meta property="twitter:card" content="summary_large_image">
+        <meta property="twitter:url" content="https://simpletrack.dev/analytics-sdk">
+        <meta property="twitter:title" content="SimpleTrack Analytics SDK - Zero-Config Web Analytics">
+        <meta property="twitter:description"
+            content="Easy-to-integrate JavaScript analytics SDK with automatic tracking, custom events, and comprehensive reporting. Perfect for modern web applications.">
+        <meta property="twitter:image" content="https://simpletrack.dev/assets/analytics-sdk-preview.png">
+
+        <!-- Additional SEO -->
+        <meta name="theme-color" content="#667eea">
+        <meta name="msapplication-TileColor" content="#667eea">
+        <link rel="icon" type="image/x-icon" href="/favicon.ico">
+        <link rel="sitemap" type="application/xml" href="/sitemap.xml">
+
+        <!-- Structured Data -->
+        <script type="application/ld+json">
+            {
+                "@context": "https://schema.org",
+                "@type": "SoftwareApplication",
+                "name": "SimpleTrack Analytics SDK",
+                "description": "Zero-config web analytics SDK for modern applications with automatic tracking, custom events, and comprehensive reporting capabilities.",
+                "url": "https://simpletrack.dev/analytics-sdk",
+                "applicationCategory": "DeveloperApplication",
+                "operatingSystem": "Web Browser",
+                "programmingLanguage": "JavaScript",
+                "fileSize": "5KB",
+                "offers": {
+                    "@type": "Offer",
+                    "price": "0",
+                    "priceCurrency": "USD"
+                },
+                "author": {
+                    "@type": "Organization",
+                    "name": "SimpleTrack Analytics"
+                },
+                "featureList": [
+                    "Zero-configuration setup",
+                    "Automatic page view tracking",
+                    "Custom event tracking",
+                    "User management",
+                    "Performance monitoring",
+                    "Scroll depth tracking",
+                    "Click tracking",
+                    "Promo campaign tracking",
+                    "Batch event sending",
+                    "Debug mode"
+                ],
+                "screenshot": "https://simpletrack.dev/assets/analytics-sdk-preview.png" <
+                    !--FAQ Structured Data-- >
+                    <
+                    script type = "application/ld+json" > {
+                        "@context": "https://schema.org",
+                        "@type": "FAQPage",
+                        "mainEntity": [{
+                                "@type": "Question",
+                                "name": "How do I get my analytics reports?",
+                                "acceptedAnswer": {
+                                    "@type": "Answer",
+                                    "text": "Contact us with your serviceName to access your website's analytics data and reports."
+                                }
+                            },
+                            {
+                                "@type": "Question",
+                                "name": "Is the SimpleTrack Analytics SDK free?",
+                                "acceptedAnswer": {
+                                    "@type": "Answer",
+                                    "text": "The SDK is free and open-source (MIT licensed). Hosting and report access may have associated costs."
+                                }
+                            },
+                            {
+                                "@type": "Question",
+                                "name": "What data is collected by the analytics SDK?",
+                                "acceptedAnswer": {
+                                    "@type": "Answer",
+                                    "text": "Only what you track: anonymized UUIDs, browser/session info, events. No IP logging by default."
+                                }
+                            },
+                            {
+                                "@type": "Question",
+                                "name": "Does it work with React/Vue/Angular?",
+                                "acceptedAnswer": {
+                                    "@type": "Answer",
+                                    "text": "Yes! Use window.STKAnalytics in components - no wrapper code needed."
+                                }
+                            },
+                            {
+                                "@type": "Question",
+                                "name": "How do I track custom events?",
+                                "acceptedAnswer": {
+                                    "@type": "Answer",
+                                    "text": "Use window.STKAnalytics.trackEvent('event_name', { data }) anywhere in your code."
+                                }
+                            }
+                        ]
+                    }
+
+        </script>
+        <style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+                line-height: 1.6;
+                max-width: 900px;
+                margin: 0 auto;
+                padding: 20px;
+                color: #2c3e50;
+                background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+                min-height: 100vh;
+            }
+
+            h1,
+            h2,
+            h3 {
+                color: #2c3e50;
+                margin-bottom: 15px;
+                font-weight: 600;
+            }
+
+            code {
+                background: rgba(52, 152, 219, 0.1);
+                color: #2980b9;
+                padding: 3px 6px;
+                border-radius: 4px;
+                font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
+                font-size: 0.9em;
+                border: 1px solid rgba(52, 152, 219, 0.2);
+            }
+
+            pre {
+                background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+                color: #ffffff;
+                padding: 20px;
+                border-radius: 8px;
+                overflow-x: auto;
+                margin: 15px 0;
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+            }
+
+            .example {
+                background: linear-gradient(135deg, #e8f8f5 0%, #d5f4e6 100%);
+                border-left: 4px solid #27ae60;
+                padding: 20px;
+                margin: 15px 0;
+                border-radius: 0 8px 8px 0;
+                box-shadow: 0 2px 10px rgba(39, 174, 96, 0.1);
+            }
+
+            ul,
+            ol {
+                padding-left: 20px;
+            }
+
+            pre code {
+                color: #ffffff;
+
+            }
+
+            a {
+                color: #3498db;
+                text-decoration: none;
+                transition: all 0.3s ease;
+            }
+
+            a:hover {
+                color: #2980b9;
+                text-decoration: underline;
+            }
+
+            .accordion {
+                margin: 30px 0;
+            }
+
+            .accordion-item {
+                border: 1px solid rgba(255, 255, 255, 0.2);
+                border-radius: 12px;
+                margin-bottom: 15px;
+                background: rgba(255, 255, 255, 0.95);
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+                backdrop-filter: blur(10px);
+                overflow: hidden;
+                transition: all 0.3s ease;
+            }
+
+            .accordion-item:hover {
+                box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+                transform: translateY(-2px);
+            }
+
+            .accordion-header {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                padding: 18px 20px;
+                cursor: pointer;
+                border: none;
+                width: 100%;
+                text-align: left;
+                font-size: 18px;
+                font-weight: 600;
+                border-radius: 12px;
+                position: relative;
+                transition: all 0.3s ease;
+            }
+
+            .accordion-header:hover {
+                background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+            }
+
+            .accordion-header.active {
+                background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            }
+
+            .accordion-arrow {
+                position: absolute;
+                right: 20px;
+                top: 50%;
+                transform: translateY(-50%);
+                transition: all 0.3s ease;
+                width: 0;
+                height: 0;
+                border-left: 6px solid rgba(255, 255, 255, 0.9);
+                border-top: 6px solid transparent;
+                border-bottom: 6px solid transparent;
+            }
+
+            .accordion-header.active .accordion-arrow {
+                transform: translateY(-50%) rotate(90deg);
+            }
+
+            .accordion-content {
+                display: none;
+                padding: 25px;
+                border-top: 1px solid rgba(255, 255, 255, 0.3);
+                background: rgba(255, 255, 255, 0.9);
+            }
+
+            .accordion-content.show {
+                display: block;
+            }
+
+            .copy-btn {
+                float: right;
+                background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+                color: white;
+                border: none;
+                padding: 6px 12px;
+                border-radius: 15px;
+                cursor: pointer;
+                font-size: 12px;
+                font-weight: 600;
+                box-shadow: 0 2px 8px rgba(39, 174, 96, 0.3);
+                transition: all 0.3s ease;
+            }
+
+            .copy-btn:hover {
+                background: linear-gradient(135deg, #229954 0%, #27ae60 100%);
+                transform: translateY(-1px);
+                box-shadow: 0 4px 12px rgba(39, 174, 96, 0.4);
+            }
+
+            .copy-btn.copied {
+                background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+            }
+
+            .implementation-note {
+                background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+                border-left: 4px solid #f39c12;
+                padding: 20px;
+                margin: 20px 0;
+                border-radius: 0 8px 8px 0;
+                box-shadow: 0 2px 10px rgba(243, 156, 18, 0.1);
+            }
+
+            .step-list {
+                counter-reset: step-counter;
+                list-style: none;
+                padding-left: 0;
+            }
+
+            .step-list li {
+                counter-increment: step-counter;
+                margin: 10px 0;
+                padding-left: 25px;
+                position: relative;
+            }
+
+            .step-list li::before {
+                content: counter(step-counter) ".";
+                font-weight: bold;
+                color: #3498db;
+                position: absolute;
+                left: 0;
+            }
+
+            /* Animations */
+            @keyframes fadeInUp {
+                from {
+                    opacity: 0;
+                    transform: translateY(30px);
+                }
+
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+        </style>
+    </head>
+
+    <body>
+        <header
+            style="text-align: center; margin-bottom: 20px; padding: 20px 15px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 20px; box-shadow: 0 15px 35px rgba(102, 126, 234, 0.3); position: relative; overflow: hidden;">
+            <div
+                style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: url('data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20100%20100%22%3E%3Ccircle%20cx%3D%2220%22%20cy%3D%2220%22%20r%3D%222%22%20fill%3D%22rgba(255,255,255,0.1)%22%2F%3E%3Ccircle%20cx%3D%2280%22%20cy%3D%2280%22%20r%3D%221%22%20fill%3D%22rgba(255,255,255,0.1)%22%2F%3E%3Ccircle%20cx%3D%2260%22%20cy%3D%2230%22%20r%3D%221.5%22%20fill%3D%22rgba(255,255,255,0.1)%22%2F%3E%3C%2Fsvg%3E'); opacity: 0.5;">
+            </div>
+            <div style="position: relative; z-index: 1; max-width: 800px; margin: 0 auto;">
+                <h1
+                    style="color: white; margin-bottom: 8px; font-size: 2em; font-weight: 700; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3); letter-spacing: -0.5px; animation: fadeInUp 0.8s ease-out;">
+                    SimpleTrack Analytics SDK</h1>
+                <p
+                    style="color: rgba(255, 255, 255, 0.9); font-size: 1.1em; margin-bottom: 20px; font-weight: 300; line-height: 1.4; animation: fadeInUp 1s ease-out 0.2s both;">
+                    Zero-config analytics for modern web applications</p>
+
+                <div
+                    style="display: flex; justify-content: center; align-items: center; gap: 15px; margin-bottom: 15px; flex-wrap: wrap; animation: fadeInUp 1.2s ease-out 0.4s both;">
+                    <a href="https://simpletrack.dev/downloads/stk-analytics.min.js" download
+                        style="background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(10px); color: white; padding: 10px 20px; border-radius: 25px; text-decoration: none; font-weight: 500; border: 1px solid rgba(255, 255, 255, 0.3); transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);"
+                        onmouseover="this.style.background='rgba(255, 255, 255, 0.3)'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 25px rgba(0, 0, 0, 0.2)';"
+                        onmouseout="this.style.background='rgba(255, 255, 255, 0.2)'; this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(0, 0, 0, 0.1)';">
+                        📥 Download (5KB)
+                    </a>
+                    <div
+                        style="display: flex; align-items: center; gap: 10px; background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); padding: 8px 15px; border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.2); animation: fadeInUp 1.4s ease-out 0.6s both;">
+                        <code
+                            style="color: white; font-size: 0.85em; font-family: 'SF Mono', 'Monaco', monospace; background: transparent; border: none; padding: 0;">&lt;script
+                            src="https://simpletrack.dev/stk-analytics.min.js"&gt;&lt;/script&gt;</code>
+                        <button
+                            onclick="navigator.clipboard.writeText('&lt;script src=&quot;https://simpletrack.dev/stk-analytics.min.js&quot;&gt;&lt;/script&gt;'); this.textContent='✅ Copied!'; setTimeout(() => this.textContent='📋 Copy', 2000);"
+                            style="background: rgba(255, 255, 255, 0.2); color: white; border: none; padding: 4px 8px; border-radius: 10px; cursor: pointer; font-size: 0.75em; transition: all 0.3s ease;"
+                            onmouseover="this.style.background='rgba(255, 255, 255, 0.3)';"
+                            onmouseout="this.style.background='rgba(255, 255, 255, 0.2)';">📋 Copy</button>
+                    </div>
+                </div>
+
+                <nav style="animation: fadeInUp 1.6s ease-out 0.8s both;">
+                    <div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;">
+                        <a href="#getting-started"
+                            style="color: rgba(255, 255, 255, 0.9); text-decoration: none; font-weight: 500; padding: 6px 12px; border-radius: 15px; transition: all 0.3s ease; border: 1px solid transparent;"
+                            onmouseover="this.style.background='rgba(255, 255, 255, 0.1)'; this.style.color='white'; this.style.borderColor='rgba(255, 255, 255, 0.3)'; this.style.transform='translateY(-2px)';"
+                            onmouseout="this.style.background='transparent'; this.style.color='rgba(255, 255, 255, 0.9)'; this.style.borderColor='transparent'; this.style.transform='translateY(0)';">🚀
+                            Getting Started</a>
+                        <a href="#configuration"
+                            style="color: rgba(255, 255, 255, 0.9); text-decoration: none; font-weight: 500; padding: 6px 12px; border-radius: 15px; transition: all 0.3s ease; border: 1px solid transparent;"
+                            onmouseover="this.style.background='rgba(255, 255, 255, 0.1)'; this.style.color='white'; this.style.borderColor='rgba(255, 255, 255, 0.3)'; this.style.transform='translateY(-2px)';"
+                            onmouseout="this.style.background='transparent'; this.style.color='rgba(255, 255, 255, 0.9)'; this.style.borderColor='transparent'; this.style.transform='translateY(0)';">⚙️
+                            Configuration</a>
+                        <a href="#automatic-tracking"
+                            style="color: rgba(255, 255, 255, 0.9); text-decoration: none; font-weight: 500; padding: 6px 12px; border-radius: 15px; transition: all 0.3s ease; border: 1px solid transparent;"
+                            onmouseover="this.style.background='rgba(255, 255, 255, 0.1)'; this.style.color='white'; this.style.borderColor='rgba(255, 255, 255, 0.3)'; this.style.transform='translateY(-2px)';"
+                            onmouseout="this.style.background='transparent'; this.style.color='rgba(255, 255, 255, 0.9)'; this.style.borderColor='transparent'; this.style.transform='translateY(0)';">🎯
+                            Auto Tracking</a>
+                        <a href="#custom-events"
+                            style="color: rgba(255, 255, 255, 0.9); text-decoration: none; font-weight: 500; padding: 6px 12px; border-radius: 15px; transition: all 0.3s ease; border: 1px solid transparent;"
+                            onmouseover="this.style.background='rgba(255, 255, 255, 0.1)'; this.style.color='white'; this.style.borderColor='rgba(255, 255, 255, 0.3)'; this.style.transform='translateY(-2px)';"
+                            onmouseout="this.style.background='transparent'; this.style.color='rgba(255, 255, 255, 0.9)'; this.style.borderColor='transparent'; this.style.transform='translateY(0)';">📊
+                            Custom Events</a>
+                        <a href="#debugging"
+                            style="color: rgba(255, 255, 255, 0.9); text-decoration: none; font-weight: 500; padding: 6px 12px; border-radius: 15px; transition: all 0.3s ease; border: 1px solid transparent;"
+                            onmouseover="this.style.background='rgba(255, 255, 255, 0.1)'; this.style.color='white'; this.style.borderColor='rgba(255, 255, 255, 0.3)'; this.style.transform='translateY(-2px)';"
+                            onmouseout="this.style.background='transparent'; this.style.color='rgba(255, 255, 255, 0.9)'; this.style.borderColor='transparent'; this.style.transform='translateY(0)';">🔧
+                            Debugging</a>
+                    </div>
+                </nav>
+            </div>
+        </header>
+
+        <div class="accordion">
+            <div
+                style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); padding: 30px; border-radius: 15px; margin-bottom: 30px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);">
+                <h2 style="color: #2c3e50; margin-bottom: 15px; text-align: center;">🚀 Why Choose SimpleTrack Analytics
+                    SDK?</h2>
+                <p
+                    style="text-align: center; color: #5a6c7d; font-size: 1.1em; line-height: 1.6; max-width: 800px; margin: 0 auto;">
+                    SimpleTrack is a lightweight, zero-configuration web analytics SDK designed for modern web
+                    applications.
+                    With just 5KB of JavaScript, you get automatic page tracking, custom event monitoring, user
+                    analytics,
+                    performance metrics, and comprehensive reporting capabilities. Perfect for developers who want
+                    powerful
+                    analytics without the complexity of traditional tracking solutions.
+                </p>
+                <div style="display: flex; justify-content: center; gap: 20px; margin-top: 20px; flex-wrap: wrap;">
+                    <span
+                        style="background: #667eea; color: white; padding: 8px 16px; border-radius: 20px; font-size: 0.9em; font-weight: 500;">Zero
+                        Config</span>
+                    <span
+                        style="background: #764ba2; color: white; padding: 8px 16px; border-radius: 20px; font-size: 0.9em; font-weight: 500;">5KB
+                        Size</span>
+                    <span
+                        style="background: #f093fb; color: white; padding: 8px 16px; border-radius: 20px; font-size: 0.9em; font-weight: 500;">Auto
+                        Tracking</span>
+                    <span
+                        style="background: #4facfe; color: white; padding: 8px 16px; border-radius: 20px; font-size: 0.9em; font-weight: 500;">Custom
+                        Events</span>
+                    <span
+                        style="background: #43e97b; color: white; padding: 8px 16px; border-radius: 20px; font-size: 0.9em; font-weight: 500;">Free
+                        & Open Source</span>
                 </div>
             </div>
+            <div class="accordion-item">
+                <button class="accordion-header active" id="getting-started">🚀 Getting Started - Quick Setup Guide<span
+                        class="accordion-arrow"></span></button>
+                <div class="accordion-content show">
+                    <div class="implementation-note">
+                        <h4>Implementation Steps:</h4>
+                        <ol class="step-list">
+                            <li>Add the analytics script to your HTML head</li>
+                            <li>Initialize with your unique service name</li>
+                            <li>Start tracking events immediately</li>
+                            <li>Access reports through our dashboard</li>
+                        </ol>
+                    </div>
 
-            <nav style="animation: fadeInUp 1.6s ease-out 0.8s both;">
-                <div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;">
-                    <a href="#getting-started" style="color: rgba(255, 255, 255, 0.9); text-decoration: none; font-weight: 500; padding: 6px 12px; border-radius: 15px; transition: all 0.3s ease; border: 1px solid transparent;" onmouseover="this.style.background='rgba(255, 255, 255, 0.1)'; this.style.color='white'; this.style.borderColor='rgba(255, 255, 255, 0.3)'; this.style.transform='translateY(-2px)';" onmouseout="this.style.background='transparent'; this.style.color='rgba(255, 255, 255, 0.9)'; this.style.borderColor='transparent'; this.style.transform='translateY(0)';">🚀 Getting Started</a>
-                    <a href="#configuration" style="color: rgba(255, 255, 255, 0.9); text-decoration: none; font-weight: 500; padding: 6px 12px; border-radius: 15px; transition: all 0.3s ease; border: 1px solid transparent;" onmouseover="this.style.background='rgba(255, 255, 255, 0.1)'; this.style.color='white'; this.style.borderColor='rgba(255, 255, 255, 0.3)'; this.style.transform='translateY(-2px)';" onmouseout="this.style.background='transparent'; this.style.color='rgba(255, 255, 255, 0.9)'; this.style.borderColor='transparent'; this.style.transform='translateY(0)';">⚙️ Configuration</a>
-                    <a href="#automatic-tracking" style="color: rgba(255, 255, 255, 0.9); text-decoration: none; font-weight: 500; padding: 6px 12px; border-radius: 15px; transition: all 0.3s ease; border: 1px solid transparent;" onmouseover="this.style.background='rgba(255, 255, 255, 0.1)'; this.style.color='white'; this.style.borderColor='rgba(255, 255, 255, 0.3)'; this.style.transform='translateY(-2px)';" onmouseout="this.style.background='transparent'; this.style.color='rgba(255, 255, 255, 0.9)'; this.style.borderColor='transparent'; this.style.transform='translateY(0)';">🎯 Auto Tracking</a>
-                    <a href="#custom-events" style="color: rgba(255, 255, 255, 0.9); text-decoration: none; font-weight: 500; padding: 6px 12px; border-radius: 15px; transition: all 0.3s ease; border: 1px solid transparent;" onmouseover="this.style.background='rgba(255, 255, 255, 0.1)'; this.style.color='white'; this.style.borderColor='rgba(255, 255, 255, 0.3)'; this.style.transform='translateY(-2px)';" onmouseout="this.style.background='transparent'; this.style.color='rgba(255, 255, 255, 0.9)'; this.style.borderColor='transparent'; this.style.transform='translateY(0)';">📊 Custom Events</a>
-                    <a href="#debugging" style="color: rgba(255, 255, 255, 0.9); text-decoration: none; font-weight: 500; padding: 6px 12px; border-radius: 15px; transition: all 0.3s ease; border: 1px solid transparent;" onmouseover="this.style.background='rgba(255, 255, 255, 0.1)'; this.style.color='white'; this.style.borderColor='rgba(255, 255, 255, 0.3)'; this.style.transform='translateY(-2px)';" onmouseout="this.style.background='transparent'; this.style.color='rgba(255, 255, 255, 0.9)'; this.style.borderColor='transparent'; this.style.transform='translateY(0)';">🔧 Debugging</a>
-                </div>
-            </nav>
-        </div>
-    </header>
+                    <h3>Step 1: Include the Script</h3>
+                    <p>Add this to the <code>&lt;head&gt;</code> or <code>&lt;body&gt;</code> of your HTML:</p>
+                    <pre><code>&lt;script src="https://simpletrack.dev/stk-analytics.min.js"&gt;&lt;/script&gt;</code><button class="copy-btn">Copy</button></pre>
 
-    <div class="accordion">
-        <div style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); padding: 30px; border-radius: 15px; margin-bottom: 30px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);">
-            <h2 style="color: #2c3e50; margin-bottom: 15px; text-align: center;">🚀 Why Choose SimpleTrack Analytics SDK?</h2>
-            <p style="text-align: center; color: #5a6c7d; font-size: 1.1em; line-height: 1.6; max-width: 800px; margin: 0 auto;">
-                SimpleTrack is a lightweight, zero-configuration web analytics SDK designed for modern web applications. 
-                With just 5KB of JavaScript, you get automatic page tracking, custom event monitoring, user analytics, 
-                performance metrics, and comprehensive reporting capabilities. Perfect for developers who want powerful 
-                analytics without the complexity of traditional tracking solutions.
-            </p>
-            <div style="display: flex; justify-content: center; gap: 20px; margin-top: 20px; flex-wrap: wrap;">
-                <span style="background: #667eea; color: white; padding: 8px 16px; border-radius: 20px; font-size: 0.9em; font-weight: 500;">Zero Config</span>
-                <span style="background: #764ba2; color: white; padding: 8px 16px; border-radius: 20px; font-size: 0.9em; font-weight: 500;">5KB Size</span>
-                <span style="background: #f093fb; color: white; padding: 8px 16px; border-radius: 20px; font-size: 0.9em; font-weight: 500;">Auto Tracking</span>
-                <span style="background: #4facfe; color: white; padding: 8px 16px; border-radius: 20px; font-size: 0.9em; font-weight: 500;">Custom Events</span>
-                <span style="background: #43e97b; color: white; padding: 8px 16px; border-radius: 20px; font-size: 0.9em; font-weight: 500;">Free & Open Source</span>
-            </div>
-        </div>
-        <div class="accordion-item">
-            <button class="accordion-header active" id="getting-started">🚀 Getting Started - Quick Setup Guide<span class="accordion-arrow"></span></button>
-            <div class="accordion-content show">
-                <div class="implementation-note">
-                    <h4>Implementation Steps:</h4>
-                    <ol class="step-list">
-                        <li>Add the analytics script to your HTML head</li>
-                        <li>Initialize with your unique service name</li>
-                        <li>Start tracking events immediately</li>
-                        <li>Access reports through our dashboard</li>
-                    </ol>
-                </div>
-                
-                <h3>Step 1: Include the Script</h3>
-                <p>Add this to the <code>&lt;head&gt;</code> or <code>&lt;body&gt;</code> of your HTML:</p>
-                <pre><code>&lt;script src="https://simpletrack.dev/stk-analytics.min.js"&gt;&lt;/script&gt;</code><button class="copy-btn">Copy</button></pre>
-
-                <h3>Step 2: Initialize</h3>
-                <p>After the script loads, initialize with your unique service name. This identifies your website in the analytics reports.</p>
-                <div class="example">
-                    <pre><code>&lt;script&gt;
+                    <h3>Step 2: Initialize</h3>
+                    <p>After the script loads, initialize with your unique service name. This identifies your website in
+                        the analytics reports.</p>
+                    <div class="example">
+                        <pre><code>&lt;script&gt;
   STKAnalytics.init({
     serviceName: 'my-website-name'
   });
 &lt;/script&gt;</code><button class="copy-btn">Copy</button></pre>
-                </div>
-                <p><strong>Note:</strong> Each website should use a unique <code>serviceName</code> to separate their analytics data and reports. Contact us to get your reports.</p>
+                    </div>
+                    <p><strong>Note:</strong> Each website should use a unique <code>serviceName</code> to separate
+                        their analytics data and reports. Contact us to get your reports.</p>
 
-                <h3>Using in Angular/React/Vue Components</h3>
-                <p>The script automatically creates a global <code>STKAnalytics</code> object for easy component access:</p>
-                <div class="example">
-                    <pre><code>// In any component - no wrapper code needed!
+                    <h3>Using in Angular/React/Vue Components</h3>
+                    <p>The script automatically creates a global <code>STKAnalytics</code> object for easy component
+                        access:</p>
+                    <div class="example">
+                        <pre><code>// In any component - no wrapper code needed!
 window.STKAnalytics.trackEvent('button_click', { button: 'signup' });
 window.STKAnalytics.trackPromoImpression('promo_123');
 window.STKAnalytics.trackPromoClick('promo_123', 'learn_more');
 window.STKAnalytics.trackError('API Error', { code: 500 });</code><button class="copy-btn">Copy</button></pre>
-                </div>
+                    </div>
 
-                <h3>Using in Regular JavaScript Apps</h3>
-                <p>For vanilla JavaScript applications without frameworks, use the same global <code>analytics</code> object:</p>
-                <div class="example">
-                    <pre><code>// After script loads and initializes
+                    <h3>Using in Regular JavaScript Apps</h3>
+                    <p>For vanilla JavaScript applications without frameworks, use the same global
+                        <code>analytics</code> object:</p>
+                    <div class="example">
+                        <pre><code>// After script loads and initializes
 document.getElementById('signup-btn').addEventListener('click', function() {
   window.STKAnalytics.trackEvent('signup_click', { 
     source: 'hero_section',
@@ -277,142 +501,175 @@ document.getElementById('contact-form').addEventListener('submit', function(e) {
 function trackCustomAction(action, data) {
   window.STKAnalytics.trackEvent(action, data);
 }</code><button class="copy-btn">Copy</button></pre>
-                </div>
+                    </div>
 
-                <h3>Step 3: Verify Setup</h3>
-                <p>Open your browser's console and enable debug mode (see <a href="#debugging">Debugging</a>). You should see logs like "[Analytics] Initialized with config: ...".</p>
+                    <h3>Step 3: Verify Setup</h3>
+                    <p>Open your browser's console and enable debug mode (see <a href="#debugging">Debugging</a>). You
+                        should see logs like "[Analytics] Initialized with config: ...".</p>
+                </div>
             </div>
-        </div>
 
-        <div class="accordion-item">
-            <button class="accordion-header" id="configuration">⚙️ Configuration Options - Customize Your Setup<span class="accordion-arrow"></span></button>
-            <div class="accordion-content">
-                <div class="implementation-note">
-                    <h4>Implementation Steps:</h4>
-                    <ol class="step-list">
-                        <li>Choose your serviceName (required)</li>
-                        <li>Configure optional settings as needed</li>
-                        <li>Test with debug mode enabled</li>
-                        <li>Deploy with production settings</li>
-                    </ol>
-                </div>
-                
-                <h3>Configuration Options</h3>
-                <p>Pass an object to <code>STKAnalytics.init(options)</code>. The <code>apiUrl</code> is automatically configured to our central analytics endpoint.</p>
-                
-                <div style="overflow-x: auto; margin: 20px 0;">
-                    <table style="width: 100%; border-collapse: collapse; margin: 20px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border-radius: 8px; overflow: hidden;">
-                        <thead>
-                            <tr style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
-                                <th style="padding: 15px; text-align: left; font-weight: 600; border: none;">Option</th>
-                                <th style="padding: 15px; text-align: left; font-weight: 600; border: none;">Type</th>
-                                <th style="padding: 15px; text-align: left; font-weight: 600; border: none;">Default</th>
-                                <th style="padding: 15px; text-align: left; font-weight: 600; border: none;">Description</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr style="background: #f8f9fa; border-bottom: 1px solid #e9ecef;">
-                                <td style="padding: 12px 15px; font-weight: 600; color: #2196F3;"><code>serviceName</code></td>
-                                <td style="padding: 12px 15px; color: #6c757d;">string</td>
-                                <td style="padding: 12px 15px; color: #6c757d;">'unknown'</td>
-                                <td style="padding: 12px 15px;"><strong style="color: #dc3545;">Required:</strong> Your unique website/app identifier for reports.</td>
-                            </tr>
-                            <tr style="background: white; border-bottom: 1px solid #e9ecef;">
-                                <td style="padding: 12px 15px; font-weight: 600; color: #2196F3;"><code>apiUrl</code></td>
-                                <td style="padding: 12px 15px; color: #6c757d;">string</td>
-                                <td style="padding: 12px 15px; color: #6c757d;">Production URL</td>
-                                <td style="padding: 12px 15px;">Override for testing (e.g., localhost). Defaults to our production endpoint.</td>
-                            </tr>
-                            <tr style="background: #f8f9fa; border-bottom: 1px solid #e9ecef;">
-                                <td style="padding: 12px 15px; font-weight: 600; color: #2196F3;"><code>batchIntervalMs</code></td>
-                                <td style="padding: 12px 15px; color: #6c757d;">number</td>
-                                <td style="padding: 12px 15px; color: #6c757d;">5000</td>
-                                <td style="padding: 12px 15px;">Batch send interval in ms (e.g., 10000 for 10s).</td>
-                            </tr>
-                            <tr style="background: white; border-bottom: 1px solid #e9ecef;">
-                                <td style="padding: 12px 15px; font-weight: 600; color: #2196F3;"><code>debug</code></td>
-                                <td style="padding: 12px 15px; color: #6c757d;">boolean</td>
-                                <td style="padding: 12px 15px; color: #6c757d;">false</td>
-                                <td style="padding: 12px 15px;">Enable console logs for troubleshooting. <strong style="color: #ffc107;">Note:</strong> In debug mode, data is NOT sent to backend.</td>
-                            </tr>
-                            <tr style="background: #f8f9fa; border-bottom: 1px solid #e9ecef;">
-                                <td style="padding: 12px 15px; font-weight: 600; color: #2196F3;"><code>autoTrackPageViews</code></td>
-                                <td style="padding: 12px 15px; color: #6c757d;">boolean</td>
-                                <td style="padding: 12px 15px; color: #6c757d;">true</td>
-                                <td style="padding: 12px 15px;">Auto-track page views on load.</td>
-                            </tr>
-                            <tr style="background: white; border-bottom: 1px solid #e9ecef;">
-                                <td style="padding: 12px 15px; font-weight: 600; color: #2196F3;"><code>autoTrackClicks</code></td>
-                                <td style="padding: 12px 15px; color: #6c757d;">boolean</td>
-                                <td style="padding: 12px 15px; color: #6c757d;">true</td>
-                                <td style="padding: 12px 15px;">Auto-track clicks on [data-click] elements.</td>
-                            </tr>
-                            <tr style="background: #f8f9fa; border-bottom: 1px solid #e9ecef;">
-                                <td style="padding: 12px 15px; font-weight: 600; color: #2196F3;"><code>autoTrackScroll</code></td>
-                                <td style="padding: 12px 15px; color: #6c757d;">boolean</td>
-                                <td style="padding: 12px 15px; color: #6c757d;">true</td>
-                                <td style="padding: 12px 15px;">Track max scroll depth (%).</td>
-                            </tr>
-                            <tr style="background: white;">
-                                <td style="padding: 12px 15px; font-weight: 600; color: #2196F3;"><code>autoTrackPerformance</code></td>
-                                <td style="padding: 12px 15px; color: #6c757d;">boolean</td>
-                                <td style="padding: 12px 15px; color: #6c757d;">true</td>
-                                <td style="padding: 12px 15px;">Track page load times.</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-                <p><strong>Example with Custom Config:</strong></p>
-                <pre><code>STKAnalytics.init({
+            <div class="accordion-item">
+                <button class="accordion-header" id="configuration">⚙️ Configuration Options - Customize Your Setup<span
+                        class="accordion-arrow"></span></button>
+                <div class="accordion-content">
+                    <div class="implementation-note">
+                        <h4>Implementation Steps:</h4>
+                        <ol class="step-list">
+                            <li>Choose your serviceName (required)</li>
+                            <li>Configure optional settings as needed</li>
+                            <li>Test with debug mode enabled</li>
+                            <li>Deploy with production settings</li>
+                        </ol>
+                    </div>
+
+                    <h3>Configuration Options</h3>
+                    <p>Pass an object to <code>STKAnalytics.init(options)</code>. The <code>apiUrl</code> is
+                        automatically configured to our central analytics endpoint.</p>
+
+                    <div style="overflow-x: auto; margin: 20px 0;">
+                        <table
+                            style="width: 100%; border-collapse: collapse; margin: 20px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border-radius: 8px; overflow: hidden;">
+                            <thead>
+                                <tr
+                                    style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                                    <th style="padding: 15px; text-align: left; font-weight: 600; border: none;">Option
+                                    </th>
+                                    <th style="padding: 15px; text-align: left; font-weight: 600; border: none;">Type
+                                    </th>
+                                    <th style="padding: 15px; text-align: left; font-weight: 600; border: none;">Default
+                                    </th>
+                                    <th style="padding: 15px; text-align: left; font-weight: 600; border: none;">
+                                        Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr style="background: #f8f9fa; border-bottom: 1px solid #e9ecef;">
+                                    <td style="padding: 12px 15px; font-weight: 600; color: #2196F3;">
+                                        <code>serviceName</code></td>
+                                    <td style="padding: 12px 15px; color: #6c757d;">string</td>
+                                    <td style="padding: 12px 15px; color: #6c757d;">'unknown'</td>
+                                    <td style="padding: 12px 15px;"><strong style="color: #dc3545;">Required:</strong>
+                                        Your unique website/app identifier for reports.</td>
+                                </tr>
+                                <tr style="background: white; border-bottom: 1px solid #e9ecef;">
+                                    <td style="padding: 12px 15px; font-weight: 600; color: #2196F3;">
+                                        <code>apiUrl</code></td>
+                                    <td style="padding: 12px 15px; color: #6c757d;">string</td>
+                                    <td style="padding: 12px 15px; color: #6c757d;">Production URL</td>
+                                    <td style="padding: 12px 15px;">Override for testing (e.g., localhost). Defaults to
+                                        our production endpoint.</td>
+                                </tr>
+                                <tr style="background: #f8f9fa; border-bottom: 1px solid #e9ecef;">
+                                    <td style="padding: 12px 15px; font-weight: 600; color: #2196F3;">
+                                        <code>batchIntervalMs</code></td>
+                                    <td style="padding: 12px 15px; color: #6c757d;">number</td>
+                                    <td style="padding: 12px 15px; color: #6c757d;">5000</td>
+                                    <td style="padding: 12px 15px;">Batch send interval in ms (e.g., 10000 for 10s).
+                                    </td>
+                                </tr>
+                                <tr style="background: white; border-bottom: 1px solid #e9ecef;">
+                                    <td style="padding: 12px 15px; font-weight: 600; color: #2196F3;"><code>debug</code>
+                                    </td>
+                                    <td style="padding: 12px 15px; color: #6c757d;">boolean</td>
+                                    <td style="padding: 12px 15px; color: #6c757d;">false</td>
+                                    <td style="padding: 12px 15px;">Enable console logs for troubleshooting. <strong
+                                            style="color: #ffc107;">Note:</strong> In debug mode, data is NOT sent to
+                                        backend.</td>
+                                </tr>
+                                <tr style="background: #f8f9fa; border-bottom: 1px solid #e9ecef;">
+                                    <td style="padding: 12px 15px; font-weight: 600; color: #2196F3;">
+                                        <code>autoTrackPageViews</code></td>
+                                    <td style="padding: 12px 15px; color: #6c757d;">boolean</td>
+                                    <td style="padding: 12px 15px; color: #6c757d;">true</td>
+                                    <td style="padding: 12px 15px;">Auto-track page views on load.</td>
+                                </tr>
+                                <tr style="background: white; border-bottom: 1px solid #e9ecef;">
+                                    <td style="padding: 12px 15px; font-weight: 600; color: #2196F3;">
+                                        <code>autoTrackClicks</code></td>
+                                    <td style="padding: 12px 15px; color: #6c757d;">boolean</td>
+                                    <td style="padding: 12px 15px; color: #6c757d;">true</td>
+                                    <td style="padding: 12px 15px;">Auto-track clicks on [data-click] elements.</td>
+                                </tr>
+                                <tr style="background: #f8f9fa; border-bottom: 1px solid #e9ecef;">
+                                    <td style="padding: 12px 15px; font-weight: 600; color: #2196F3;">
+                                        <code>autoTrackScroll</code></td>
+                                    <td style="padding: 12px 15px; color: #6c757d;">boolean</td>
+                                    <td style="padding: 12px 15px; color: #6c757d;">true</td>
+                                    <td style="padding: 12px 15px;">Track max scroll depth (%).</td>
+                                </tr>
+                                <tr style="background: white;">
+                                    <td style="padding: 12px 15px; font-weight: 600; color: #2196F3;">
+                                        <code>autoTrackPerformance</code></td>
+                                    <td style="padding: 12px 15px; color: #6c757d;">boolean</td>
+                                    <td style="padding: 12px 15px; color: #6c757d;">true</td>
+                                    <td style="padding: 12px 15px;">Track page load times.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p><strong>Example with Custom Config:</strong></p>
+                    <pre><code>STKAnalytics.init({
   serviceName: 'my-ecommerce-site',
   batchIntervalMs: 10000,
   debug: true,
   autoTrackScroll: false  // Disable if not needed
 });</code><button class="copy-btn">Copy</button></pre>
-                <p><strong>Testing with Local Backend:</strong></p>
-                <pre><code>STKAnalytics.init({
+                    <p><strong>Testing with Local Backend:</strong></p>
+                    <pre><code>STKAnalytics.init({
   serviceName: 'my-website-name',
   apiUrl: 'http://localhost:3004/analytics/log',  // Your local endpoint
   debug: true  // Enable debug to see logs
 });</code><button class="copy-btn">Copy</button></pre>
-                <p>Update config later with <code>STKAnalytics.updateConfig({ debug: true })</code>.</p>
-            </div>
-        </div>
-
-        <div class="accordion-item">
-            <button class="accordion-header" id="automatic-tracking">🎯 Automatic Tracking Features - Zero-Code Analytics<span class="accordion-arrow"></span></button>
-            <div class="accordion-content">
-                <div class="implementation-note">
-                    <h4>Implementation Steps:</h4>
-                    <ol class="step-list">
-                        <li>Initialize analytics (automatic tracking starts)</li>
-                        <li>Add data-click attributes to elements you want to track</li>
-                        <li>SPA users: call trackNavigation() on route changes</li>
-                        <li>Review automatic data collection</li>
-                    </ol>
+                    <p>Update config later with <code>STKAnalytics.updateConfig({ debug: true })</code>.</p>
                 </div>
-                
-                <p>Once initialized, STK Analytics tracks common interactions out-of-the-box. No extra code needed!</p>
-                <ul>
-                    <li><strong>Page Views:</strong> Fires <code>page_view</code> on load, including attribution (UTM params, referrer).</li>
-                    <li><strong>Session Start:</strong> Logs <code>session_start</code> with visit count and first-visit timestamp.</li>
-                    <li><strong>Scroll Depth:</strong> Tracks max scroll % (e.g., 25%, 50%) via <code>scroll</code> events.</li>
-                    <li><strong>Clicks:</strong> Listens for clicks on elements with <code>data-click="button|link|etc"</code>. Example: <code>&lt;button data-click="purchase"&gt;Buy Now&lt;/button&gt;</code> → <code>click</code> event with label and coords.</li>
-                    <li><strong>Page Exit/Hidden:</strong> Captures <code>page_exit</code> or <code>page_hidden</code> with time-on-page and scroll data.</li>
-                    <li><strong>Performance:</strong> Logs <code>page_load_complete</code> with load time, DOM ready, etc.</li>
-                </ul>
-                <p>All events include: user ID (UUID), session ID, browser info (UA, screen res, timezone), attribution, and page path.</p>
-                
-                <h3>Adding Click Tracking</h3>
-                <p>Add <code>data-click</code> attributes to elements for automatic click tracking:</p>
-                <pre><code>&lt;!-- Examples --&gt;
+            </div>
+
+            <div class="accordion-item">
+                <button class="accordion-header" id="automatic-tracking">🎯 Automatic Tracking Features - Zero-Code
+                    Analytics<span class="accordion-arrow"></span></button>
+                <div class="accordion-content">
+                    <div class="implementation-note">
+                        <h4>Implementation Steps:</h4>
+                        <ol class="step-list">
+                            <li>Initialize analytics (automatic tracking starts)</li>
+                            <li>Add data-click attributes to elements you want to track</li>
+                            <li>SPA users: call trackNavigation() on route changes</li>
+                            <li>Review automatic data collection</li>
+                        </ol>
+                    </div>
+
+                    <p>Once initialized, STK Analytics tracks common interactions out-of-the-box. No extra code needed!
+                    </p>
+                    <ul>
+                        <li><strong>Page Views:</strong> Fires <code>page_view</code> on load, including attribution
+                            (UTM params, referrer).</li>
+                        <li><strong>Session Start:</strong> Logs <code>session_start</code> with visit count and
+                            first-visit timestamp.</li>
+                        <li><strong>Scroll Depth:</strong> Tracks max scroll % (e.g., 25%, 50%) via <code>scroll</code>
+                            events.</li>
+                        <li><strong>Clicks:</strong> Listens for clicks on elements with
+                            <code>data-click="button|link|etc"</code>. Example: <code>&lt;button
+                                data-click="purchase"&gt;Buy Now&lt;/button&gt;</code> → <code>click</code> event with
+                            label and coords.</li>
+                        <li><strong>Page Exit/Hidden:</strong> Captures <code>page_exit</code> or
+                            <code>page_hidden</code> with time-on-page and scroll data.</li>
+                        <li><strong>Performance:</strong> Logs <code>page_load_complete</code> with load time, DOM
+                            ready, etc.</li>
+                    </ul>
+                    <p>All events include: user ID (UUID), session ID, browser info (UA, screen res, timezone),
+                        attribution, and page path.</p>
+
+                    <h3>Adding Click Tracking</h3>
+                    <p>Add <code>data-click</code> attributes to elements for automatic click tracking:</p>
+                    <pre><code>&lt;!-- Examples --&gt;
 &lt;button data-click="signup"&gt;Sign Up&lt;/button&gt;
 &lt;a href="/pricing" data-click="pricing_link"&gt;View Pricing&lt;/a&gt;
 &lt;div data-click="promo_banner" class="promo"&gt;Special Offer!&lt;/div&gt;</code><button class="copy-btn">Copy</button></pre>
 
-                <h3>SPA Navigation Tracking</h3>
-                <p>For Single Page Applications, track route changes:</p>
-                <pre><code>// Angular example
+                    <h3>SPA Navigation Tracking</h3>
+                    <p>For Single Page Applications, track route changes:</p>
+                    <pre><code>// Angular example
 import { Router, NavigationEnd } from '@angular/router';
 
 constructor(private router: Router) {
@@ -424,42 +681,49 @@ constructor(private router: Router) {
     }
   });
 }</code><button class="copy-btn">Copy</button></pre>
-            </div>
-        </div>
-
-        <div class="accordion-item">
-            <button class="accordion-header" id="custom-events">📊 Custom Events & Tracking - Track What Matters<span class="accordion-arrow"></span></button>
-            <div class="accordion-content">
-                <div class="implementation-note">
-                    <h4>Implementation Steps:</h4>
-                    <ol class="step-list">
-                        <li>Use trackEvent() for custom business events</li>
-                        <li>Leverage convenience methods for common patterns</li>
-                        <li>Call sendBatch() for immediate sending on important events</li>
-                        <li>Structure event data consistently</li>
-                    </ol>
                 </div>
-                
-                <p>Use <code>STKAnalytics.trackEvent(name, data)</code> for custom logic. <code>data</code> can include <code>category</code>, <code>label</code>, <code>value</code>, and <code>custom</code> object.</p>
-                
-                <h3>Basic Event</h3>
-                <pre><code>STKAnalytics.trackEvent('signup_complete', {
+            </div>
+
+            <div class="accordion-item">
+                <button class="accordion-header" id="custom-events">📊 Custom Events & Tracking - Track What
+                    Matters<span class="accordion-arrow"></span></button>
+                <div class="accordion-content">
+                    <div class="implementation-note">
+                        <h4>Implementation Steps:</h4>
+                        <ol class="step-list">
+                            <li>Use trackEvent() for custom business events</li>
+                            <li>Leverage convenience methods for common patterns</li>
+                            <li>Call sendBatch() for immediate sending on important events</li>
+                            <li>Structure event data consistently</li>
+                        </ol>
+                    </div>
+
+                    <p>Use <code>STKAnalytics.trackEvent(name, data)</code> for custom logic. <code>data</code> can
+                        include <code>category</code>, <code>label</code>, <code>value</code>, and <code>custom</code>
+                        object.</p>
+
+                    <h3>Basic Event</h3>
+                    <pre><code>STKAnalytics.trackEvent('signup_complete', {
   category: 'conversion',
   label: 'email-signup',
   value: 1,
   custom: { plan: 'premium' }
 });</code><button class="copy-btn">Copy</button></pre>
 
-                <h3>Convenience Methods</h3>
-                <ul>
-                    <li><strong>Interactions:</strong> <code>STKAnalytics.trackInteraction('button_click', 'Add to Cart')</code></li>
-                    <li><strong>Navigation:</strong> <code>STKAnalytics.trackNavigation('/checkout', { step: 'payment' })</code></li>
-                    <li><strong>Errors:</strong> <code>STKAnalytics.trackError('Payment failed', { errorCode: 500 })</code></li>
-                    <li><strong>Performance:</strong> <code>STKAnalytics.trackPerformance('api_call', 250, { endpoint: '/users' })</code> (ms)</li>
-                </ul>
+                    <h3>Convenience Methods</h3>
+                    <ul>
+                        <li><strong>Interactions:</strong> <code>STKAnalytics.trackInteraction('button_click', 'Add to
+                                Cart')</code></li>
+                        <li><strong>Navigation:</strong> <code>STKAnalytics.trackNavigation('/checkout', { step:
+                                'payment' })</code></li>
+                        <li><strong>Errors:</strong> <code>STKAnalytics.trackError('Payment failed', { errorCode: 500
+                                })</code></li>
+                        <li><strong>Performance:</strong> <code>STKAnalytics.trackPerformance('api_call', 250, {
+                                endpoint: '/users' })</code> (ms)</li>
+                    </ul>
 
-                <h3>Business Event Examples</h3>
-                <pre><code>// E-commerce events
+                    <h3>Business Event Examples</h3>
+                    <pre><code>// E-commerce events
 window.STKAnalytics.trackEvent('product_view', {
   category: 'ecommerce',
   custom: { productId: '123', productName: 'Widget' }
@@ -483,39 +747,42 @@ window.STKAnalytics.trackEvent('feature_used', {
   custom: { previousTheme: 'light', newTheme: 'dark' }
 });</code><button class="copy-btn">Copy</button></pre>
 
-                <h3>Force Send Batch</h3>
-                <p>Send queued events immediately: <code>await STKAnalytics.sendBatch();</code> (useful on form submits).</p>
-                <pre><code>// Example: Send immediately on form submit
+                    <h3>Force Send Batch</h3>
+                    <p>Send queued events immediately: <code>await STKAnalytics.sendBatch();</code> (useful on form
+                        submits).</p>
+                    <pre><code>// Example: Send immediately on form submit
 document.getElementById('contact-form').onsubmit = async function() {
   window.STKAnalytics.trackEvent('form_submit', { form: 'contact' });
   await STKAnalytics.sendBatch(); // Send immediately
 };</code><button class="copy-btn">Copy</button></pre>
-            </div>
-        </div>
-
-        <div class="accordion-item">
-            <button class="accordion-header" id="user-management">👤 User Management - Track Authenticated Users<span class="accordion-arrow"></span></button>
-            <div class="accordion-content">
-                <div class="implementation-note">
-                    <h4>Implementation Steps:</h4>
-                    <ol class="step-list">
-                        <li>Call setUserEmail() after successful login</li>
-                        <li>Call clearUserEmail() on logout</li>
-                        <li>All subsequent events will be tagged as authenticated</li>
-                        <li>User email is stored in localStorage for persistence</li>
-                    </ol>
                 </div>
-                
-                <p>Track authenticated users by setting email (stored in localStorage for persistence).</p>
-                <pre><code>// After login
+            </div>
+
+            <div class="accordion-item">
+                <button class="accordion-header" id="user-management">👤 User Management - Track Authenticated
+                    Users<span class="accordion-arrow"></span></button>
+                <div class="accordion-content">
+                    <div class="implementation-note">
+                        <h4>Implementation Steps:</h4>
+                        <ol class="step-list">
+                            <li>Call setUserEmail() after successful login</li>
+                            <li>Call clearUserEmail() on logout</li>
+                            <li>All subsequent events will be tagged as authenticated</li>
+                            <li>User email is stored in localStorage for persistence</li>
+                        </ol>
+                    </div>
+
+                    <p>Track authenticated users by setting email (stored in localStorage for persistence).</p>
+                    <pre><code>// After login
 STKAnalytics.setUserEmail('user@example.com');
 
 // Clear on logout
 STKAnalytics.clearUserEmail();</code><button class="copy-btn">Copy</button></pre>
-                <p>Events will include <code>user_email</code> and <code>user_type: 'authenticated'</code>. Anonymous users default to UUID.</p>
+                    <p>Events will include <code>user_email</code> and <code>user_type: 'authenticated'</code>.
+                        Anonymous users default to UUID.</p>
 
-                <h3>Integration Examples</h3>
-                <pre><code>// React login component
+                    <h3>Integration Examples</h3>
+                    <pre><code>// React login component
 const handleLogin = async (email, password) => {
   const response = await loginAPI(email, password);
   if (response.success) {
@@ -525,7 +792,7 @@ const handleLogin = async (email, password) => {
 };
 
 // Angular auth service
-@Injectable({ providedIn: 'root' })
+@Injectable( { providedIn: 'root' })
 export class AuthService {
   login(credentials: any) {
     return this.http.post('/api/login', credentials).pipe(
@@ -545,41 +812,42 @@ export class AuthService {
   }
 }</code><button class="copy-btn">Copy</button></pre>
 
-                <h3>Privacy Considerations</h3>
-                <ul>
-                    <li>Email is stored locally (localStorage) - never sent to our servers</li>
-                    <li>Only used to tag events as authenticated vs anonymous</li>
-                    <li>Clear on logout to maintain privacy</li>
-                    <li>Complies with basic GDPR requirements</li>
-                </ul>
-            </div>
-        </div>
-
-        <div class="accordion-item">
-            <button class="accordion-header" id="promo-tracking">📢 Promo & Marketing Tracking - Campaign Analytics<span class="accordion-arrow"></span></button>
-            <div class="accordion-content">
-                <div class="implementation-note">
-                    <h4>Implementation Steps:</h4>
-                    <ol class="step-list">
-                        <li>Track promo impressions when banners/ads become visible</li>
-                        <li>Track promo clicks when users interact with campaigns</li>
-                        <li>Use unique promo IDs for each campaign</li>
-                        <li>Attribution data is automatically included</li>
-                    </ol>
+                    <h3>Privacy Considerations</h3>
+                    <ul>
+                        <li>Email is stored locally (localStorage) - never sent to our servers</li>
+                        <li>Only used to tag events as authenticated vs anonymous</li>
+                        <li>Clear on logout to maintain privacy</li>
+                        <li>Complies with basic GDPR requirements</li>
+                    </ul>
                 </div>
-                
-                <p>Built-in methods for campaigns:</p>
-                <pre><code>// Impression (e.g., banner view)
+            </div>
+
+            <div class="accordion-item">
+                <button class="accordion-header" id="promo-tracking">📢 Promo & Marketing Tracking - Campaign
+                    Analytics<span class="accordion-arrow"></span></button>
+                <div class="accordion-content">
+                    <div class="implementation-note">
+                        <h4>Implementation Steps:</h4>
+                        <ol class="step-list">
+                            <li>Track promo impressions when banners/ads become visible</li>
+                            <li>Track promo clicks when users interact with campaigns</li>
+                            <li>Use unique promo IDs for each campaign</li>
+                            <li>Attribution data is automatically included</li>
+                        </ol>
+                    </div>
+
+                    <p>Built-in methods for campaigns:</p>
+                    <pre><code>// Impression (e.g., banner view)
 STKAnalytics.trackPromoImpression('promo_2024_black_friday', {
   position: 'homepage_top'
 });
 
 // Click
 STKAnalytics.trackPromoClick('promo_2024_black_friday', 'view_details');</code><button class="copy-btn">Copy</button></pre>
-                <p>Includes attribution data automatically.</p>
+                    <p>Includes attribution data automatically.</p>
 
-                <h3>Implementation Examples</h3>
-                <pre><code>// Banner component with intersection observer
+                    <h3>Implementation Examples</h3>
+                    <pre><code>// Banner component with intersection observer
 class PromoBanner extends Component {
   componentDidMount() {
     const observer = new IntersectionObserver((entries) => {
@@ -610,8 +878,8 @@ class PromoBanner extends Component {
   }
 }</code><button class="copy-btn">Copy</button></pre>
 
-                <h3>Email Campaign Tracking</h3>
-                <pre><code>// Track email opens (UTM parameters)
+                    <h3>Email Campaign Tracking</h3>
+                    <pre><code>// Track email opens (UTM parameters)
 STKAnalytics.trackPromoImpression('newsletter_dec_2024', {
   campaign: 'monthly_newsletter',
   source: 'email',
@@ -626,35 +894,38 @@ function trackEmailClick(campaignId, linkType) {
   });
 }</code><button class="copy-btn">Copy</button></pre>
 
-                <h3>Campaign Performance Metrics</h3>
-                <p>Track these key metrics for campaign analysis:</p>
-                <ul>
-                    <li><strong>Impression Rate:</strong> How often promos are viewed</li>
-                    <li><strong>Click Rate:</strong> Percentage of impressions that convert to clicks</li>
-                    <li><strong>Conversion Rate:</strong> Clicks that lead to desired actions</li>
-                    <li><strong>Attribution:</strong> UTM parameters and referrer data</li>
-                </ul>
-            </div>
-        </div>
-
-        <div class="accordion-item">
-            <button class="accordion-header" id="debugging">🔧 Debugging & Advanced Config - Troubleshoot Issues<span class="accordion-arrow"></span></button>
-            <div class="accordion-content">
-                <div class="implementation-note">
-                    <h4>Implementation Steps:</h4>
-                    <ol class="step-list">
-                        <li>Enable debug mode during development</li>
-                        <li>Check console logs for event tracking</li>
-                        <li>Verify network requests in browser dev tools</li>
-                        <li>Check configuration with getConfig()</li>
-                    </ol>
+                    <h3>Campaign Performance Metrics</h3>
+                    <p>Track these key metrics for campaign analysis:</p>
+                    <ul>
+                        <li><strong>Impression Rate:</strong> How often promos are viewed</li>
+                        <li><strong>Click Rate:</strong> Percentage of impressions that convert to clicks</li>
+                        <li><strong>Conversion Rate:</strong> Clicks that lead to desired actions</li>
+                        <li><strong>Attribution:</strong> UTM parameters and referrer data</li>
+                    </ul>
                 </div>
-                
-                <p>Set <code>debug: true</code> in init to log events and errors to console. <strong>Important:</strong> When debug mode is enabled, analytics data is NOT sent to the backend - only logged to console for testing.</p>
-                <p>Get current config: <code>console.log(STKAnalytics.getConfig());</code></p>
-                
-                <h3>Debug Mode Examples</h3>
-                <pre><code>// Enable debug for development
+            </div>
+
+            <div class="accordion-item">
+                <button class="accordion-header" id="debugging">🔧 Debugging & Advanced Config - Troubleshoot
+                    Issues<span class="accordion-arrow"></span></button>
+                <div class="accordion-content">
+                    <div class="implementation-note">
+                        <h4>Implementation Steps:</h4>
+                        <ol class="step-list">
+                            <li>Enable debug mode during development</li>
+                            <li>Check console logs for event tracking</li>
+                            <li>Verify network requests in browser dev tools</li>
+                            <li>Check configuration with getConfig()</li>
+                        </ol>
+                    </div>
+
+                    <p>Set <code>debug: true</code> in init to log events and errors to console.
+                        <strong>Important:</strong> When debug mode is enabled, analytics data is NOT sent to the
+                        backend - only logged to console for testing.</p>
+                    <p>Get current config: <code>console.log(STKAnalytics.getConfig());</code></p>
+
+                    <h3>Debug Mode Examples</h3>
+                    <pre><code>// Enable debug for development
 STKAnalytics.init({
   serviceName: 'my-app',
   debug: window.location.hostname === 'localhost'  // Auto-enable on localhost
@@ -669,170 +940,298 @@ STKAnalytics.updateConfig({
   batchIntervalMs: 10000  // Slower batching
 });</code><button class="copy-btn">Copy</button></pre>
 
-                <h3>Troubleshooting Guide</h3>
-                <div style="background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 15px 0;">
-                    <h4>❌ No events sending?</h4>
-                    <ul>
-                        <li>Check browser console for errors</li>
-                        <li>Verify <code>serviceName</code> is set</li>
-                        <li>Check network tab for POST requests to our endpoint</li>
-                        <li>Ensure debug mode is disabled for production</li>
-                    </ul>
+                    <h3>Troubleshooting Guide</h3>
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 15px 0;">
+                        <h4>❌ No events sending?</h4>
+                        <ul>
+                            <li>Check browser console for errors</li>
+                            <li>Verify <code>serviceName</code> is set</li>
+                            <li>Check network tab for POST requests to our endpoint</li>
+                            <li>Ensure debug mode is disabled for production</li>
+                        </ul>
 
-                    <h4>❌ Storage issues?</h4>
-                    <ul>
-                        <li>Falls back to in-memory UUIDs if localStorage fails</li>
-                        <li>Check browser privacy settings</li>
-                        <li>Some browsers block third-party storage</li>
-                    </ul>
+                        <h4>❌ Storage issues?</h4>
+                        <ul>
+                            <li>Falls back to in-memory UUIDs if localStorage fails</li>
+                            <li>Check browser privacy settings</li>
+                            <li>Some browsers block third-party storage</li>
+                        </ul>
 
-                    <h4>❌ SPA navigation not tracking?</h4>
+                        <h4>❌ SPA navigation not tracking?</h4>
+                        <ul>
+                            <li>Call <code>trackNavigation()</code> on route changes</li>
+                            <li>See Automatic Tracking section for examples</li>
+                        </ul>
+                    </div>
+
+                    <h3>Privacy & Security</h3>
+                    <p><strong>Privacy Notes:</strong> Uses sessionStorage for sessions, localStorage for user ID/email
+                        (opt-in). No third-party trackers. Complies with basic GDPR (no PII without consent).</p>
                     <ul>
-                        <li>Call <code>trackNavigation()</code> on route changes</li>
-                        <li>See Automatic Tracking section for examples</li>
+                        <li>No cookies by default (respects privacy)</li>
+                        <li>Anonymous UUIDs for non-authenticated users</li>
+                        <li>Optional email storage for authenticated tracking</li>
+                        <li>All data sent over HTTPS to our secure endpoint</li>
                     </ul>
                 </div>
+            </div>
 
-                <h3>Privacy & Security</h3>
-                <p><strong>Privacy Notes:</strong> Uses sessionStorage for sessions, localStorage for user ID/email (opt-in). No third-party trackers. Complies with basic GDPR (no PII without consent).</p>
-                <ul>
-                    <li>No cookies by default (respects privacy)</li>
-                    <li>Anonymous UUIDs for non-authenticated users</li>
-                    <li>Optional email storage for authenticated tracking</li>
-                    <li>All data sent over HTTPS to our secure endpoint</li>
-                </ul>
+            <div class="accordion-item">
+                <button class="accordion-header" id="faq">❓ FAQ - Common Questions & Answers<span
+                        class="accordion-arrow"></span></button>
+                <div class="accordion-content">
+                    <div class="implementation-note">
+                        <h4>Quick Implementation Checklist:</h4>
+                        <ol class="step-list">
+                            <li>Added script to HTML?</li>
+                            <li>Set unique serviceName?</li>
+                            <li>Tested with debug mode?</li>
+                            <li>Contacted for reports access?</li>
+                        </ol>
+                    </div>
+
+                    <dl>
+                        <dt>How do I get my analytics reports?</dt>
+                        <dd>Contact us with your <code>serviceName</code> to access your website's analytics data and
+                            reports.</dd>
+
+                        <dt>Is it free? Open-source?</dt>
+                        <dd>SDK is free and open-source (MIT licensed). Hosting and report access may have associated
+                            costs.</dd>
+
+                        <dt>What data is collected?</dt>
+                        <dd>Only what you track: anonymized UUIDs, browser/session info, events. No IP logging by
+                            default.</dd>
+
+                        <dt>Works on React/Vue/etc.?</dt>
+                        <dd>Yes! Use <code>window.STKAnalytics</code> in components - no wrapper code needed. See
+                            component examples above.</dd>
+
+                        <dt>Minification?</dt>
+                        <dd>Download includes minified version. Use a bundler like Webpack for production.</dd>
+
+                        <dt>Can I host the data myself?</dt>
+                        <dd>Currently, all data is sent to our central endpoint. Custom hosting may be available in
+                            enterprise plans.</dd>
+
+                        <dt>How do I track custom events?</dt>
+                        <dd>Use <code>window.STKAnalytics.trackEvent('event_name', { data })</code> anywhere in your
+                            code.</dd>
+
+                        <dt>What's the difference between debug and production?</dt>
+                        <dd>Debug mode logs to console but doesn't send data. Production sends data but no console logs.
+                        </dd>
+                    </dl>
+                </div>
             </div>
         </div>
 
-        <div class="accordion-item">
-            <button class="accordion-header" id="faq">❓ FAQ - Common Questions & Answers<span class="accordion-arrow"></span></button>
-            <div class="accordion-content">
-                <div class="implementation-note">
-                    <h4>Quick Implementation Checklist:</h4>
-                    <ol class="step-list">
-                        <li>Added script to HTML?</li>
-                        <li>Set unique serviceName?</li>
-                        <li>Tested with debug mode?</li>
-                        <li>Contacted for reports access?</li>
-                    </ol>
-                </div>
-                
-                <dl>
-                    <dt>How do I get my analytics reports?</dt>
-                    <dd>Contact us with your <code>serviceName</code> to access your website's analytics data and reports.</dd>
-                    
-                    <dt>Is it free? Open-source?</dt>
-                    <dd>SDK is free and open-source (MIT licensed). Hosting and report access may have associated costs.</dd>
-                    
-                    <dt>What data is collected?</dt>
-                    <dd>Only what you track: anonymized UUIDs, browser/session info, events. No IP logging by default.</dd>
-                    
-                    <dt>Works on React/Vue/etc.?</dt>
-                    <dd>Yes! Use <code>window.STKAnalytics</code> in components - no wrapper code needed. See component examples above.</dd>
-                    
-                    <dt>Minification?</dt>
-                    <dd>Download includes minified version. Use a bundler like Webpack for production.</dd>
-                    
-                    <dt>Can I host the data myself?</dt>
-                    <dd>Currently, all data is sent to our central endpoint. Custom hosting may be available in enterprise plans.</dd>
-                    
-                    <dt>How do I track custom events?</dt>
-                    <dd>Use <code>window.STKAnalytics.trackEvent('event_name', { data })</code> anywhere in your code.</dd>
-                    
-                    <dt>What's the difference between debug and production?</dt>
-                    <dd>Debug mode logs to console but doesn't send data. Production sends data but no console logs.</dd>
-                </dl>
+        <footer
+            style="text-align: center; margin-top: 50px; padding: 30px 20px; background: rgba(255, 255, 255, 0.9); border-radius: 15px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1); backdrop-filter: blur(10px);">
+            <p style="color: #7f8c8d; margin-bottom: 15px; font-size: 1.1em;">&copy; 2025 SimpleTrack Analytics. Built
+                with ❤️ for easy web analytics.</p>
+            <p
+                style="color: #95a5a6; font-size: 0.9em; margin-bottom: 20px; max-width: 600px; margin-left: auto; margin-right: auto;">
+                SimpleTrack Analytics SDK provides zero-configuration web analytics, automatic tracking, custom events,
+                user management, and comprehensive reporting for modern web applications.</p>
+            <div style="display: flex; justify-content: center; gap: 30px; flex-wrap: wrap;">
+                <a href="mailto:support@simpletrack.dev"
+                    style="color: #3498db; text-decoration: none; font-weight: 500; transition: all 0.3s ease;"
+                    onmouseover="this.style.color='#2980b9'; this.style.transform='translateY(-2px)';"
+                    onmouseout="this.style.color='#3498db'; this.style.transform='translateY(0)';">📧 Contact Us</a>
+                <a href="https://github.com/simpletrack-dev/stk-analytics"
+                    style="color: #34495e; text-decoration: none; font-weight: 500; transition: all 0.3s ease;"
+                    onmouseover="this.style.color='#2c3e50'; this.style.transform='translateY(-2px)';"
+                    onmouseout="this.style.color='#34495e'; this.style.transform='translateY(0)';">🐙 GitHub</a>
+                <a href="/privacy-policy"
+                    style="color: #e74c3c; text-decoration: none; font-weight: 500; transition: all 0.3s ease;"
+                    onmouseover="this.style.color='#c0392b'; this.style.transform='translateY(-2px)';"
+                    onmouseout="this.style.color='#e74c3c'; this.style.transform='translateY(0)';">🔒 Privacy Policy</a>
+                <a href="/terms-of-service"
+                    style="color: #9b59b6; text-decoration: none; font-weight: 500; transition: all 0.3s ease;"
+                    onmouseover="this.style.color='#8e44ad'; this.style.transform='translateY(-2px)';"
+                    onmouseout="this.style.color='#9b59b6'; this.style.transform='translateY(0)';">📋 Terms of
+                    Service</a>
+                <a href="#getting-started"
+                    style="color: #27ae60; text-decoration: none; font-weight: 500; transition: all 0.3s ease;"
+                    onmouseover="this.style.color='#229954'; this.style.transform='translateY(-2px)';"
+                    onmouseout="this.style.color='#27ae60'; this.style.transform='translateY(0)';">⬆️ Back to Top</a>
             </div>
-        </div>
-    </div>
-
-    <footer style="text-align: center; margin-top: 50px; padding: 30px 20px; background: rgba(255, 255, 255, 0.9); border-radius: 15px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1); backdrop-filter: blur(10px);">
-        <p style="color: #7f8c8d; margin-bottom: 15px; font-size: 1.1em;">&copy; 2025 SimpleTrack Analytics. Built with ❤️ for easy web analytics.</p>
-        <p style="color: #95a5a6; font-size: 0.9em; margin-bottom: 20px; max-width: 600px; margin-left: auto; margin-right: auto;">SimpleTrack Analytics SDK provides zero-configuration web analytics, automatic tracking, custom events, user management, and comprehensive reporting for modern web applications.</p>
-        <div style="display: flex; justify-content: center; gap: 30px; flex-wrap: wrap;">
-            <a href="mailto:support@simpletrack.dev" style="color: #3498db; text-decoration: none; font-weight: 500; transition: all 0.3s ease;" onmouseover="this.style.color='#2980b9'; this.style.transform='translateY(-2px)';" onmouseout="this.style.color='#3498db'; this.style.transform='translateY(0)';">📧 Contact Us</a>
-            <a href="https://github.com/simpletrack-dev/stk-analytics" style="color: #34495e; text-decoration: none; font-weight: 500; transition: all 0.3s ease;" onmouseover="this.style.color='#2c3e50'; this.style.transform='translateY(-2px)';" onmouseout="this.style.color='#34495e'; this.style.transform='translateY(0)';">🐙 GitHub</a>
-            <a href="/privacy-policy" style="color: #e74c3c; text-decoration: none; font-weight: 500; transition: all 0.3s ease;" onmouseover="this.style.color='#c0392b'; this.style.transform='translateY(-2px)';" onmouseout="this.style.color='#e74c3c'; this.style.transform='translateY(0)';">🔒 Privacy Policy</a>
-            <a href="/terms-of-service" style="color: #9b59b6; text-decoration: none; font-weight: 500; transition: all 0.3s ease;" onmouseover="this.style.color='#8e44ad'; this.style.transform='translateY(-2px)';" onmouseout="this.style.color='#9b59b6'; this.style.transform='translateY(0)';">📋 Terms of Service</a>
-            <a href="#getting-started" style="color: #27ae60; text-decoration: none; font-weight: 500; transition: all 0.3s ease;" onmouseover="this.style.color='#229954'; this.style.transform='translateY(-2px)';" onmouseout="this.style.color='#27ae60'; this.style.transform='translateY(0)';">⬆️ Back to Top</a>
-        </div>
-        <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(127, 140, 141, 0.2);">
-            <p style="color: #bdc3c7; font-size: 0.8em; margin: 0;">Keywords: web analytics SDK, JavaScript tracking library, zero-config analytics, custom event tracking, user analytics, performance monitoring, conversion tracking, page view analytics</p>
-        </div>
-    </footer>
-
-    <script>
-        // Accordion functionality
-        document.addEventListener('DOMContentLoaded', function() {
-            const headers = document.querySelectorAll('.accordion-header');
-            headers.forEach(header => {
-                header.addEventListener('click', function() {
-                    const content = this.nextElementSibling;
-                    const isOpen = content.classList.contains('show');
-                    
-                    // Close all accordions first and remove active class
-                    document.querySelectorAll('.accordion-content').forEach(c => c.classList.remove('show'));
-                    document.querySelectorAll('.accordion-header').forEach(h => h.classList.remove('active'));
-                    
-                    // Open clicked accordion if it wasn't already open
-                    if (!isOpen) {
-                        content.classList.add('show');
-                        this.classList.add('active');
-                    }
-                    
-                    // Scroll to the top of this accordion
-                    this.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                });
-            });
-
-            // Copy button functionality
-            document.addEventListener('click', function(e) {
-                if (e.target.classList.contains('copy-btn')) {
-                    const button = e.target;
-                    const pre = button.closest('pre');
-                    const code = pre.querySelector('code');
-                    
-                    if (code) {
-                        navigator.clipboard.writeText(code.textContent).then(function() {
-                            button.textContent = 'Copied!';
-                            button.classList.add('copied');
-                            setTimeout(() => {
-                                button.textContent = 'Copy';
-                                button.classList.remove('copied');
-                            }, 2000);
-                        });
-                    }
-                }
-                
-                // Handle navigation links to accordions
-                const navLinks = ['getting-started', 'configuration', 'automatic-tracking', 'custom-events', 'user-management', 'promo-tracking', 'debugging', 'faq'];
-                if (e.target.tagName === 'A') {
-                    const href = e.target.getAttribute('href');
-                    if (href && href.startsWith('#') && navLinks.includes(href.substring(1))) {
-                        e.preventDefault();
-                        const targetId = href.substring(1);
-                        const targetHeader = document.getElementById(targetId);
-                        if (targetHeader) {
-                            const content = targetHeader.nextElementSibling;
-                            const isOpen = content.classList.contains('show');
-                            
-                            // Close all accordions first and remove active class
-                            document.querySelectorAll('.accordion-content').forEach(c => c.classList.remove('show'));
-                            document.querySelectorAll('.accordion-header').forEach(h => h.classList.remove('active'));
-                            
-                            // Open clicked accordion if it wasn't already open
-                            if (!isOpen) {
-                                content.classList.add('show');
-                                targetHeader.classList.add('active');
-                            }
-                            
-                            // Scroll to the top of the target accordion
-                            targetHeader.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                        }
-                    }
-                }
+            <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(127, 140, 141, 0.2);">
+                <p style="color: #bdc3c7; font-size: 0.8em; margin: 0;">Keywords: web analytics SDK, JavaScript tracking
+                    library, zero-config analytics, custom event tracking, user analytics, performance monitoring,
+                    conversion tracking, page view analytics</p>
+            </div>
+        </footer>
+        <!-- SimpleTrack Analytics SDK -->
+        <script src="stk-analytics.min.js"></script>
+        <script>
+        // Track copy events and what was copied
+        document.addEventListener('copy', function(e) {
+            let copiedText = '';
+            if (window.getSelection) {
+                copiedText = window.getSelection().toString();
+            }
+            // If a copy button was used, track the code block or element
+            if (e.target && e.target.classList && e.target.classList.contains('copy-btn')) {
+                const code = e.target.closest('pre')?.querySelector('code');
+                if (code) copiedText = code.textContent;
+            }
+            window.STKAnalytics.trackEvent('copy', {
+                category: 'interaction',
+                label: 'copy',
+                custom: { copiedText }
             });
         });
-    </script>
-</body>
+        </script>
+        <script>
+        // Accordion functionality (existing)
+        document.addEventListener('DOMContentLoaded', function() {
+            // ...existing code...
+        });
+
+        // --- SimpleTrack Analytics Integration ---
+        // Initialize analytics
+        window.STKAnalytics.init({
+            serviceName: 'simpletrack',
+            debug: true
+        });
+
+        // Track page view (auto)
+        window.STKAnalytics.trackEvent('page_view', {
+            category: 'navigation',
+            label: document.title,
+            custom: { url: window.location.pathname }
+        });
+
+        // Track scroll depth
+        window.addEventListener('scroll', function() {
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            const docHeight = document.body.offsetHeight || document.documentElement.offsetHeight;
+            const winHeight = window.innerHeight;
+            const scrollPercent = Math.round((scrollTop / (docHeight - winHeight)) * 100);
+            window.STKAnalytics.trackEvent('scroll', {
+                category: 'engagement',
+                value: scrollPercent,
+                custom: { maxScroll: scrollPercent }
+            });
+        });
+
+        // Track all button clicks
+        document.addEventListener('click', function(e) {
+            if (e.target.tagName === 'BUTTON') {
+                window.STKAnalytics.trackEvent('button_click', {
+                    category: 'interaction',
+                    label: e.target.textContent || e.target.innerText,
+                    custom: { id: e.target.id, class: e.target.className }
+                });
+            }
+        });
+
+        // Track all link clicks
+        document.addEventListener('click', function(e) {
+            const link = e.target.closest('a');
+            if (link) {
+                window.STKAnalytics.trackEvent('link_click', {
+                    category: 'navigation',
+                    label: link.textContent || link.innerText,
+                    custom: { href: link.href }
+                });
+            }
+        });
+
+        // Track form submissions
+        document.querySelectorAll('form').forEach(function(form) {
+            form.addEventListener('submit', function(e) {
+                window.STKAnalytics.trackEvent('form_submit', {
+                    category: 'engagement',
+                    label: form.id || form.name || 'form',
+                    custom: { action: form.action }
+                });
+                window.STKAnalytics.sendBatch();
+            });
+        });
+
+        // Track promo impressions (example: elements with class 'promo')
+        document.querySelectorAll('.promo').forEach(function(promo) {
+            if (promo) {
+                window.STKAnalytics.trackPromoImpression(promo.id || 'promo_banner', {
+                    position: 'homepage',
+                    bannerText: promo.textContent
+                });
+            }
+        });
+
+        // Display page visit count (using localStorage)
+        function updateVisitCount() {
+            let count = localStorage.getItem('simpletrack_visit_count');
+            count = count ? parseInt(count) + 1 : 1;
+            localStorage.setItem('simpletrack_visit_count', count);
+            // Display in a suitable place (e.g., footer)
+            let visitDiv = document.getElementById('visit-count');
+            if (!visitDiv) {
+                visitDiv = document.createElement('div');
+                visitDiv.id = 'visit-count';
+                visitDiv.style = 'text-align:center;color:#888;margin-top:10px;font-size:0.95em;';
+                document.body.appendChild(visitDiv);
+            }
+            visitDiv.textContent = `Page visits: ${count}`;
+        }
+        updateVisitCount();
+
+        // Track page exit
+        window.addEventListener('beforeunload', function() {
+            window.STKAnalytics.trackEvent('page_exit', {
+                category: 'navigation',
+                label: document.title,
+                custom: { url: window.location.pathname }
+            });
+            window.STKAnalytics.sendBatch();
+        });
+        // --- End Analytics Integration ---
+        // Accordion analytics tracking
+        (function() {
+            let accordionOpenTime = {};
+            let currentAccordionId = null;
+            // Track impression and dwell time
+            document.querySelectorAll('.accordion-header').forEach(function(header) {
+                header.addEventListener('click', function(e) {
+                    const id = header.id || header.textContent.trim();
+                    // Impression: track when opened
+                    window.STKAnalytics.trackEvent('accordion_impression', {
+                        category: 'accordion',
+                        label: id,
+                        custom: { action: 'open' }
+                    });
+                    // Dwell: if switching, track time spent on previous
+                    if (currentAccordionId && accordionOpenTime[currentAccordionId]) {
+                        const dwell = Date.now() - accordionOpenTime[currentAccordionId];
+                        window.STKAnalytics.trackEvent('accordion_dwell', {
+                            category: 'accordion',
+                            label: currentAccordionId,
+                            value: dwell,
+                            custom: { dwellMs: dwell }
+                        });
+                    }
+                    // Start timer for new section
+                    currentAccordionId = id;
+                    accordionOpenTime[id] = Date.now();
+                });
+            });
+            // Track dwell time when leaving page
+            window.addEventListener('beforeunload', function() {
+                if (currentAccordionId && accordionOpenTime[currentAccordionId]) {
+                    const dwell = Date.now() - accordionOpenTime[currentAccordionId];
+                    window.STKAnalytics.trackEvent('accordion_dwell', {
+                        category: 'accordion',
+                        label: currentAccordionId,
+                        value: dwell,
+                        custom: { dwellMs: dwell }
+                    });
+                }
+            });
+        })();
+        </script>
+    </body>
+
 </html>
