@@ -1052,7 +1052,7 @@ STKAnalytics.updateConfig({
                     onmouseover="this.style.color='#8e44ad'; this.style.transform='translateY(-2px)';"
                     onmouseout="this.style.color='#9b59b6'; this.style.transform='translateY(0)';">📋 Terms of
                     Service</a>
-                <a href="#getting-started"
+                <a href="javascript:void(0);" class="back-to-top"
                     style="color: #27ae60; text-decoration: none; font-weight: 500; transition: all 0.3s ease;"
                     onmouseover="this.style.color='#229954'; this.style.transform='translateY(-2px)';"
                     onmouseout="this.style.color='#27ae60'; this.style.transform='translateY(0)';">⬆️ Back to Top</a>
@@ -1067,21 +1067,22 @@ STKAnalytics.updateConfig({
         <script src="stk-analytics.min.js"></script>
         <script>
         // Track copy events and what was copied
-        document.addEventListener('copy', function(e) {
-            let copiedText = '';
-            if (window.getSelection) {
-                copiedText = window.getSelection().toString();
-            }
-            // If a copy button was used, track the code block or element
-            if (e.target && e.target.classList && e.target.classList.contains('copy-btn')) {
+        document.addEventListener('click', function(e) {
+            if (e.target.classList && e.target.classList.contains('copy-btn')) {
                 const code = e.target.closest('pre')?.querySelector('code');
-                if (code) copiedText = code.textContent;
+                let copiedText = code ? code.textContent : '';
+                if (copiedText) {
+                    navigator.clipboard.writeText(copiedText).then(function() {
+                        e.target.textContent = '✅ Copied!';
+                        setTimeout(() => e.target.textContent = '📋 Copy', 2000);
+                    });
+                }
+                window.STKAnalytics.trackEvent('copy', {
+                    category: 'interaction',
+                    label: 'copy',
+                    custom: { copiedText }
+                });
             }
-            window.STKAnalytics.trackEvent('copy', {
-                category: 'interaction',
-                label: 'copy',
-                custom: { copiedText }
-            });
         });
         </script>
         <script>
@@ -1108,6 +1109,15 @@ STKAnalytics.updateConfig({
                     }
                 });
             });
+
+            // Back to Top link fix
+            var backToTop = document.querySelector('a.back-to-top');
+            if (backToTop) {
+                backToTop.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+                });
+            }
         });
 
         // --- SimpleTrack Analytics Integration ---
