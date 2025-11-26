@@ -1103,6 +1103,8 @@ STKAnalytics.updateConfig({
                     var nextContent = header.nextElementSibling;
                     if (nextContent && nextContent.classList.contains('accordion-content')) {
                         nextContent.classList.add('show');
+                        // Smooth scroll to header
+                        header.scrollIntoView({ behavior: 'smooth', block: 'start' });
                     }
                 });
             });
