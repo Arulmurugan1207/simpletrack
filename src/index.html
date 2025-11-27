@@ -27,32 +27,6 @@
 
   <!-- Favicons -->
   <link rel="icon" type="image/x-icon" href="favicon.ico">
-  <script>
-    // Dynamic script loading with cache busting
-    (function() {
-        var script = document.createElement('script');
-
-        // Use local development script for localhost, production for live sites
-        if (window.location.hostname === 'localhost') {
-            script.src = '/stk-analytics.js?t=' + new Date().getTime();
-        } else {
-            script.src = 'https://simpletrack.dev/stk-analytics.min.js?t=' + new Date().getTime();
-        }
-
-        // Set data attributes for auto-configuration
-        script.setAttribute('data-service-name', 'simpletrack');
-        script.setAttribute('data-batch-interval', '5000');
-
-        // Enable debug mode for localhost
-        if (window.location.hostname === 'localhost') {
-            script.setAttribute('data-debug', 'true');
-        }
-
-        // Remove the onload handler - analytics will auto-initialize from data attributes
-        document.head.appendChild(script);
-    })();
-
-  </script>
 
   <!-- Structured Data -->
   <script type="application/ld+json">
@@ -143,5 +117,27 @@
 </head>
 <body>
   <app-root></app-root>
+  <script>
+    // Dynamic script loading with cache busting
+    (function() {
+        var script = document.createElement('script');
+
+        // Use local development script for localhost, production for live sites
+        if (window.location.hostname === 'localhost') {
+            script.src = '/stk-analytics.js?t=' + new Date().getTime();
+        } else {
+            script.src = 'https://simpletrack.dev/stk-analytics.min.js?t=' + new Date().getTime();
+        }
+
+        // Set data attributes for auto-configuration
+        script.setAttribute('data-service-name', 'simpletrack');
+        script.setAttribute('data-batch-interval', '5000');
+        script.setAttribute('data-debug', 'true');
+
+        // Remove the onload handler - analytics will auto-initialize from data attributes
+        document.head.appendChild(script);
+    })();
+
+  </script>
 </body>
 </html>
