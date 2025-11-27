@@ -36,6 +36,14 @@ ng build
 
 This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
 
+## Deployment
+
+To deploy the application to your cPanel hosting:
+
+1. Build the project using `ng build`.
+2. Upload the contents of the `dist/simpletrack/browser` folder to your cPanel's public_html directory (or a subdomain folder) using FTP or the File Manager.
+3. Ensure your domain is pointed to the hosting provider and configure any necessary redirects for SPA routing if needed.
+
 ## Running unit tests
 
 To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
