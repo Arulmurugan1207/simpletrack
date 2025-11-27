@@ -117,6 +117,17 @@
 </head>
 <body>
   <app-root></app-root>
-  <script src="/stk-analytics.min.js" data-service-name="simpletrack" data-batch-interval="5000"></script>
+  <script src="stk-analytics.min.js" data-service-name="simpletrack" data-batch-interval="5000"></script>
+  <script>
+    // Manual init for testing
+    if (window.STKAnalytics) {
+      STKAnalytics.init({
+        serviceName: 'simpletrack',
+      });
+      console.log('Manual analytics init complete');
+    } else {
+      console.error('STKAnalytics not loaded');
+    }
+  </script>
 </body>
 </html>
