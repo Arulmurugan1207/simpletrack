@@ -117,27 +117,6 @@
 </head>
 <body>
   <app-root></app-root>
-  <script>
-    // Dynamic script loading with cache busting
-    (function() {
-        var script = document.createElement('script');
-
-        // Use local development script for localhost, production for live sites
-        if (window.location.hostname === 'localhost') {
-            script.src = '/stk-analytics.js?t=' + new Date().getTime();
-        } else {
-            script.src = 'https://simpletrack.dev/stk-analytics.min.js?t=' + new Date().getTime();
-        }
-
-        // Set data attributes for auto-configuration
-        script.setAttribute('data-service-name', 'simpletrack');
-        script.setAttribute('data-batch-interval', '5000');
-        script.setAttribute('data-debug', 'true');
-
-        // Remove the onload handler - analytics will auto-initialize from data attributes
-        document.head.appendChild(script);
-    })();
-
-  </script>
+  <script src="https://simpletrack.dev/stk-analytics.min.js?t=1764230737433" data-service-name="simpletrack" data-batch-interval="5000" data-debug="true"></script>
 </body>
 </html>
