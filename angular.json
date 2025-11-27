@@ -47,7 +47,7 @@
                 }
               ],
               "outputHashing": "all",
-              "baseHref": "/simpletrack/"
+              "baseHref": "/"
             },
             "development": {
               "optimization": false,

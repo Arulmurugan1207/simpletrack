@@ -32,6 +32,8 @@ jobs:
         run: cp dist/simpletrack/browser/index.html dist/simpletrack/browser/404.html
       - name: Add .nojekyll
         run: touch dist/simpletrack/browser/.nojekyll
+      - name: Add CNAME
+        run: echo "simpletrack.dev" > dist/simpletrack/browser/CNAME
       - name: Setup Pages
         uses: actions/configure-pages@v4
       - name: Upload artifact
