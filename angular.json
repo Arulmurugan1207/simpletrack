@@ -20,13 +20,6 @@
               "zone.js"
             ],
             "tsConfig": "tsconfig.app.json",
-            "assets": [
-              {
-                "glob": "**/*",
-                "input": "public",
-                "ignore": ["stk-analytics.js"]
-              }
-            ],
             "styles": [
               "src/styles.scss"
             ],
@@ -47,12 +40,25 @@
                 }
               ],
               "outputHashing": "all",
-              "baseHref": "/"
+              "baseHref": "/",
+              "assets": [
+                {
+                  "glob": "**/*",
+                  "input": "public",
+                  "ignore": ["stk-analytics.js"]
+                }
+              ]
             },
             "development": {
               "optimization": false,
               "extractLicenses": false,
-              "sourceMap": true
+              "sourceMap": true,
+              "assets": [
+                {
+                  "glob": "**/*",
+                  "input": "public"
+                }
+              ]
             }
           },
           "defaultConfiguration": "production"
