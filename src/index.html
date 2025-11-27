@@ -117,17 +117,26 @@
 </head>
 <body>
   <app-root></app-root>
-  <script src="stk-analytics.min.js" data-service-name="simpletrack" data-batch-interval="5000"></script>
-  <script>
-    // Manual init for testing
-    if (window.STKAnalytics) {
-      STKAnalytics.init({
-        serviceName: 'simpletrack',
-      });
-      console.log('Manual analytics init complete');
-    } else {
-      console.error('STKAnalytics not loaded');
-    }
-  </script>
+  <!-- Analytics Script -->
+        <script>
+            // Dynamic script loading with cache busting
+            (function() {
+                var script = document.createElement('script');
+                script.src = 'https://simpletrack.dev/stk-analytics.min.js?t=' + new Date().getTime();
+                script.onload = function() {
+                    // Initialize analytics after script loads
+                    STKAnalytics.init({
+                        apiUrl: window.location.hostname === 'localhost' ?
+                            'http://localhost:3004/analytics/log' :
+                            'https://analytics-dot-node-server-apis.ue.r.appspot.com/analytics/log',
+                        serviceName: 'simpletrack',
+                        debug: window.location.hostname === 'localhost',
+                        batchIntervalMs: 5000
+                    });
+                };
+                document.head.appendChild(script);
+            })();
+
+        </script>
 </body>
 </html>
