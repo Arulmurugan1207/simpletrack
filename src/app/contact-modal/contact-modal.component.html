@@ -1,0 +1,40 @@
+<div class="modal-header">
+    <h5 class="modal-title">📧 Contact Us - Get Support</h5>
+    <button type="button" class="btn-close" (click)="activeModal.dismiss('Cross click')" aria-label="Close"></button>
+</div>
+<div class="modal-body">
+    <p>We'd love to hear from you! Send us a message and we'll get back to you as soon as possible.</p>
+    
+    <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin: 20px 0; border: 1px solid #dee2e6;">
+        <h4>📝 Quick Contact Form</h4>
+        <form id="contact-form" style="max-width: 500px; margin: 0 auto;">
+            <div style="margin-bottom: 15px;">
+                <label for="contact-name" style="display: block; margin-bottom: 5px; font-weight: 500;">Name:</label>
+                <input type="text" id="contact-name" name="name" required style="width: 100%; padding: 8px 12px; border: 1px solid #ced4da; border-radius: 5px; font-size: 14px;">
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label for="contact-email" style="display: block; margin-bottom: 5px; font-weight: 500;">Email:</label>
+                <input type="email" id="contact-email" name="email" required style="width: 100%; padding: 8px 12px; border: 1px solid #ced4da; border-radius: 5px; font-size: 14px;">
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label for="contact-subject" style="display: block; margin-bottom: 5px; font-weight: 500;">Subject:</label>
+                <input type="text" id="contact-subject" name="subject" required style="width: 100%; padding: 8px 12px; border: 1px solid #ced4da; border-radius: 5px; font-size: 14px;">
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label for="contact-message" style="display: block; margin-bottom: 5px; font-weight: 500;">Message:</label>
+                <textarea id="contact-message" name="message" rows="4" required style="width: 100%; padding: 8px 12px; border: 1px solid #ced4da; border-radius: 5px; font-size: 14px; resize: vertical;"></textarea>
+            </div>
+            <button type="submit" style="background: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-size: 14px; font-weight: 500; transition: background-color 0.3s;"
+                onmouseover="this.style.backgroundColor='#0056b3';" onmouseout="this.style.backgroundColor='#007bff';">
+                Send Message
+            </button>
+        </form>
+    </div>
+
+    <h4>📧 Support Email</h4>
+    <p><strong>Email:</strong> <a href="mailto:support@simpletrack.dev">support@simpletrack.dev</a></p>
+    <p><strong>Response Time:</strong> We typically respond within 24 hours during business days.</p>
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="activeModal.close('Close click')">Close</button>
+</div>

@@ -2,10 +2,148 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Simpletrack</title>
+  <title>Simpletrack SDK- Advanced Web Analytics & Tracking</title>
   <base href="/">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Simpletrack provides powerful, lightweight analytics tracking for websites and applications. Monitor user behavior, page views, clicks, and more with easy integration.">
+  <meta name="keywords" content="analytics, tracking, web analytics, user behavior, page views, click tracking, simpletrack, privacy-focused analytics">
+  <meta name="author" content="Arulmurugan1207">
+  <meta name="robots" content="index, follow">
+  <meta name="theme-color" content="#007bff">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://arulmurugan1207.github.io/simpletrack/">
+  <meta property="og:title" content="Simpletrack - Advanced Web Analytics & Tracking">
+  <meta property="og:description" content="Powerful, lightweight analytics tracking for websites and applications. Monitor user behavior with easy integration.">
+  <meta property="og:image" content="https://arulmurugan1207.github.io/simpletrack/assets/analytics-icon.png">
+
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:url" content="https://arulmurugan1207.github.io/simpletrack/">
+  <meta property="twitter:title" content="Simpletrack - Advanced Web Analytics & Tracking">
+  <meta property="twitter:description" content="Powerful, lightweight analytics tracking for websites and applications. Monitor user behavior with easy integration.">
+  <meta property="twitter:image" content="https://arulmurugan1207.github.io/simpletrack/assets/analytics-icon.png">
+
+  <!-- Favicons -->
   <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+  <link rel="manifest" href="site.webmanifest">
+  <script>
+    // Dynamic script loading with cache busting
+    (function() {
+        var script = document.createElement('script');
+
+        // Use local development script for localhost, production for live sites
+        if (window.location.hostname === 'localhost') {
+            script.src = '/stk-analytics.js?t=' + new Date().getTime();
+        } else {
+            script.src = 'https://simpletrack.dev/stk-analytics.min.js?t=' + new Date().getTime();
+        }
+
+        // Set data attributes for auto-configuration
+        script.setAttribute('data-service-name', 'simpletrack');
+        script.setAttribute('data-batch-interval', '5000');
+
+        // Enable debug mode for localhost
+        if (window.location.hostname === 'localhost') {
+            script.setAttribute('data-debug', 'true');
+        }
+
+        // Remove the onload handler - analytics will auto-initialize from data attributes
+        document.head.appendChild(script);
+    })();
+
+  </script>
+
+  <!-- Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "SimpleTrack Analytics SDK",
+    "description": "Zero-config web analytics SDK for modern applications with automatic tracking, custom events, and comprehensive reporting capabilities.",
+    "url": "https://simpletrack.dev/analytics-sdk",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "Web Browser",
+    "programmingLanguage": "JavaScript",
+    "fileSize": "5KB",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "author": {
+      "@type": "Organization",
+      "name": "SimpleTrack Analytics"
+    },
+    "featureList": [
+      "Zero-configuration setup",
+      "Automatic page view tracking",
+      "Custom event tracking",
+      "User management",
+      "Performance monitoring",
+      "Scroll depth tracking",
+      "Click tracking",
+      "Promo campaign tracking",
+      "Batch event sending",
+      "Debug mode"
+    ],
+    "screenshot": "https://simpletrack.dev/assets/analytics-sdk-preview.png"
+  }
+  </script>
+
+  <!-- FAQ Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "How do I get my analytics reports?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Contact us with your serviceName to access your website's analytics data and reports."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is the SimpleTrack Analytics SDK free?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "The SDK is free and open-source (MIT licensed). Hosting and report access may have associated costs."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What data is collected by the analytics SDK?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Only what you track: anonymized UUIDs, browser/session info, events. No IP logging by default."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Does it work with React/Vue/Angular?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes! Use window.STKAnalytics in components - no wrapper code needed."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I track custom events?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Use window.STKAnalytics.trackEvent('event_name', { data }) anywhere in your code."
+        }
+      }
+    ]
+  }
+  </script>
 </head>
 <body>
   <app-root></app-root>

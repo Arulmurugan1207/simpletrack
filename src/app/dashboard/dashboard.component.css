@@ -1,0 +1,198 @@
+/* Bootstrap Dashboard Styles */
+.sidebar {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 1050;
+  padding: 48px 0 0;
+  box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
+  background-color: #f8f9fa;
+  width: 280px;
+  transform: translateX(-100%);
+  transition: transform 0.3s ease-in-out;
+}
+
+.sidebar.show {
+  transform: translateX(0);
+}
+
+/* Mobile overlay */
+@media (max-width: 767.98px) {
+  .sidebar::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: -1;
+  }
+}
+
+.sidebar-sticky {
+  position: relative;
+  top: 0;
+  height: calc(100vh - 48px);
+  padding-top: .5rem;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.sidebar-title {
+  font-weight: 600;
+  color: #495057;
+  margin-bottom: 1rem;
+  font-size: 1.25rem;
+}
+
+.sidebar .nav-link {
+  font-weight: 500;
+  color: #333;
+  background: none;
+  border: none;
+  padding: .75rem 1rem;
+  text-align: left;
+  width: 100%;
+  cursor: pointer;
+  font-size: 1rem;
+  border-radius: 0;
+  transition: all 0.2s ease;
+}
+
+.sidebar .nav-link:hover {
+  color: #007bff;
+  background-color: rgba(0, 123, 255, 0.1);
+}
+
+.sidebar .nav-link.active {
+  color: #007bff;
+  background-color: rgba(0, 123, 255, 0.1);
+  border-right: 3px solid #007bff;
+}
+
+.sidebar .nav-link .bi {
+  margin-right: 8px;
+  color: #999;
+  font-size: 1.1em;
+}
+
+.sidebar .nav-link:hover .bi,
+.sidebar .nav-link.active .bi {
+  color: inherit;
+}
+
+.sidebar-heading {
+  font-size: .75rem;
+  text-transform: uppercase;
+}
+
+/* Main content responsive adjustments */
+main {
+  transition: margin-left 0.3s ease-in-out;
+}
+
+/* Welcome Section */
+.welcome-section h5 {
+  color: #495057;
+  font-weight: 500;
+  font-size: 1rem;
+  margin-bottom: 0;
+}
+
+@media (max-width: 575.98px) {
+  .welcome-section h5 {
+    font-size: 0.9rem;
+  }
+}
+
+/* Profile Button */
+.profile-btn {
+  border: 1px solid #dee2e6;
+  background: white;
+  padding: .375rem .5rem;
+  border-radius: .375rem;
+  transition: all .15s ease-in-out;
+  font-size: 1rem;
+  line-height: 1;
+  min-width: 40px;
+}
+
+.profile-btn:hover {
+  background-color: #f8f9fa;
+  border-color: #adb5bd;
+}
+
+.profile-btn:focus {
+  box-shadow: 0 0 0 .2rem rgba(108, 117, 125, .25);
+}
+
+.dropdown-header {
+  font-weight: 600;
+  color: #495057;
+  padding: .5rem 1rem;
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #dee2e6;
+  font-size: 0.9rem;
+}
+
+/* Content Area - Make all tab contents fluid */
+.content-area {
+  padding: 20px 0;
+  width: 100%;
+}
+
+/* Responsive date picker */
+@media (max-width: 767.98px) {
+  .btn-toolbar {
+    flex-direction: column;
+    align-items: stretch !important;
+    gap: 0.5rem !important;
+  }
+
+  .btn-group {
+    margin-right: 0 !important;
+    width: 100%;
+  }
+
+  .form-control {
+    width: 100% !important;
+  }
+
+  .welcome-section {
+    order: -1;
+    margin-bottom: 0.5rem;
+  }
+}
+
+/* Mobile menu button */
+@media (min-width: 768px) {
+  .sidebar {
+    transform: translateX(0) !important;
+  }
+}
+
+/* Ensure all child components are fluid */
+.content-area > * {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+/* Responsive table adjustments for any tables in child components */
+.table-responsive {
+  width: 100%;
+  margin: 0;
+}
+
+/* Card layouts should be fluid */
+.card {
+  margin-bottom: 1rem;
+}
+
+@media (max-width: 575.98px) {
+  .card-body {
+    padding: 1rem 0.75rem;
+  }
+}
