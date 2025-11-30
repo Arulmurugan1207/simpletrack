@@ -128,10 +128,11 @@
         <script>
             var isLocal = window.location.hostname === 'localhost';
             var apiKey = isLocal ? 'STK-ICZ6C' : 'STK-1A6S9';
+            var apiUrl = isLocal ? 'http://localhost:3004/analytics/log' : null;
             var script = document.createElement('script');
             script.src = (isLocal ? './stk-analytics.js' : './stk-analytics.min.js') + '?t=' + Date.now();
             script.setAttribute('data-api-key', apiKey);            
-            script.setAttribute('data-api-url', 'http://localhost:3004/analytics/log');
+            script.setAttribute('data-api-url', apiUrl);
             script.setAttribute('data-batch-interval', '5000');
             document.head.appendChild(script);
         </script>
