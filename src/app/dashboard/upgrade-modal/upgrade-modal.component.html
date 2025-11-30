@@ -1,0 +1,108 @@
+<div class="modal-header">
+  <h4 class="modal-title">
+    <i class="bi bi-arrow-up-circle me-2 text-primary"></i>
+    Upgrade Your Plan
+  </h4>
+  <button type="button" class="btn-close" (click)="activeModal.dismiss()"></button>
+</div>
+
+<div class="modal-body">
+  <!-- Current Plan Banner -->
+  <div class="current-plan-banner mb-4">
+    <div class="alert alert-info">
+      <i class="bi bi-info-circle me-2"></i>
+      <strong>Current Plan:</strong> {{ currentPlan.name }} (${{ currentPlan.price }}/month)
+      <span class="badge bg-primary ms-2">{{ currentPlan.apiKeyLimit === 'unlimited' ? '∞' : currentPlan.apiKeyLimit }} API Keys</span>
+    </div>
+  </div>
+
+  <!-- Plans Grid -->
+  <div class="plans-grid">
+    @for (plan of plans; track plan.type) {
+      <div class="plan-card" [class.popular]="plan.popular" [class.current]="isCurrentPlan(plan)">
+        @if (plan.popular) {
+          <div class="popular-badge">
+            <i class="bi bi-star-fill me-1"></i>Most Popular
+          </div>
+        }
+
+        <div class="plan-header">
+          <h3 class="plan-name">{{ plan.name }}</h3>
+          <div class="plan-price">
+            <span class="currency">$</span>
+            <span class="amount">{{ plan.price }}</span>
+            <span class="period">/month</span>
+          </div>
+          <p class="plan-description">{{ plan.description }}</p>
+        </div>
+
+        <div class="plan-limits">
+          <div class="limit-item">
+            <i class="bi bi-key me-2"></i>
+            <strong>{{ getPlanLimitDisplay(plan.apiKeyLimit) }}</strong> API Keys
+          </div>
+          <div class="limit-item">
+            <i class="bi bi-graph-up me-2"></i>
+            <strong>{{ getPlanLimitDisplay(plan.eventLimit) }}</strong> Events/month
+          </div>
+        </div>
+
+        <div class="plan-features">
+          <h4>Features:</h4>
+          <ul class="features-list">
+            @for (feature of plan.features; track feature) {
+              <li>
+                <i class="bi bi-check-circle-fill text-success me-2"></i>
+                {{ feature }}
+              </li>
+            }
+          </ul>
+        </div>
+
+        <div class="plan-actions">
+          @if (isCurrentPlan(plan)) {
+            <button class="btn btn-secondary w-100" disabled>
+              <i class="bi bi-check-circle me-2"></i>
+              Current Plan
+            </button>
+          } @else {
+            <button class="btn w-100" [class]="plan.popular ? 'btn-primary' : 'btn-outline-primary'"
+                    (click)="selectPlan(plan)">
+              @if (plan.price > currentPlan.price) {
+                <i class="bi bi-arrow-up-circle me-2"></i>
+                Upgrade to {{ plan.name }}
+              } @else {
+                <i class="bi bi-arrow-down-circle me-2"></i>
+                Downgrade to {{ plan.name }}
+              }
+            </button>
+            @if (getSavingsText(plan)) {
+              <small class="text-success mt-1 d-block">{{ getSavingsText(plan) }}</small>
+            }
+          }
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- Help Text -->
+  <div class="upgrade-help mt-4">
+    <div class="alert alert-light">
+      <i class="bi bi-question-circle me-2"></i>
+      <strong>Need help choosing?</strong>
+      <ul class="mb-0 mt-2">
+        <li><strong>Free:</strong> Perfect for testing and small personal projects</li>
+        <li><strong>Starter:</strong> Great for small businesses and blogs</li>
+        <li><strong>Professional:</strong> For growing companies needing advanced analytics</li>
+        <li><strong>Enterprise:</strong> For large organizations with custom needs</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="modal-footer">
+  <button type="button" class="btn btn-secondary" (click)="activeModal.dismiss()">
+    <i class="bi bi-x-circle me-2"></i>
+    Cancel
+  </button>
+</div>

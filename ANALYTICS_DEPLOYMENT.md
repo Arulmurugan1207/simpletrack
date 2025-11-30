@@ -41,13 +41,13 @@ Other websites can integrate your analytics by adding this script to their HTML:
 ```html
 <script
   src="https://simpletrack.dev/stk-analytics.min.js"
-  data-service-name="YourWebsiteName"
+  data-api-key="YourWebsiteName"
   data-batch-interval="5000">
 </script>
 ```
 
 ### Configuration Options
-- `data-service-name`: Your website/app name (required)
+- `data-api-key`: Your website/app name (required)
 - `data-batch-interval`: Batch sending interval in ms (optional, default 5000)
 - `data-debug`: Enable debug logging (optional, default false)
 - `data-disable-page-views`: Disable automatic page view tracking

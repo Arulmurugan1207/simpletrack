@@ -41,8 +41,8 @@
           </div>
           <div class="col-md-6 col-lg-3">
             <div class="usage-stat">
-              <small class="text-muted d-block">Archived</small>
-              <strong>{{ archivedKeysCount }}</strong>
+              <small class="text-muted d-block">Deleted</small>
+              <strong>{{ deletedKeysCount }}</strong>
               <small class="text-muted">(total)</small>
             </div>
           </div>
@@ -62,7 +62,7 @@
       <p class="text-muted">Manage your API keys for analytics tracking</p>
     </div>
     <div class="d-flex gap-2">
-      @if (archivedKeysCount > 0) {
+      @if (services.length > 0) {
         <button class="btn btn-outline-secondary" (click)="toggleArchivedKeys()">
           <i class="bi" [class]="showArchivedKeys ? 'bi-eye-slash' : 'bi-eye'"></i>
           {{ showArchivedKeys ? 'Hide' : 'Show' }} Archived Keys
@@ -93,12 +93,12 @@
       <div class="spinner-border text-primary" role="status">
         <span class="visually-hidden">Loading...</span>
       </div>
-      <p class="mt-2">Loading API keys...</p>
+      <p class="mt-2">Loading services...</p>
     </div>
   }
 
   <!-- API Keys Table -->
-  @if (!isLoading && getDisplayedKeys().length > 0) {
+  @if (!isLoading && services.length > 0) {
     <div class="table-responsive">
       <table class="table table-hover">
         <thead class="table-dark">
@@ -124,22 +124,22 @@
           </tr>
         </thead>
         <tbody>
-          @for (key of getDisplayedKeys(); track key.apiKey) {
+          @for (service of services; track service.apiKey) {
             <tr>
               <td>
                 <div class="d-flex align-items-center">
                   <div>
-                    <strong class="text-primary">{{ key.name }}</strong>
+                    <strong class="text-primary">{{ service.name }}</strong>
                   </div>
                 </div>
               </td>
               <td>
                 <div class="d-flex align-items-center">
-                  <code class="me-2 text-truncate" style="max-width: 200px;">{{ key.apiKey || 'API Key not available' }}</code>
-                  <button class="btn btn-sm" [class]="copiedApiKey === key.apiKey ? 'btn-success' : 'btn-outline-primary'"
-                          type="button" (click)="copyApiKey(key.apiKey)" [disabled]="!key.apiKey"
-                          [title]="copiedApiKey === key.apiKey ? 'Copied!' : 'Copy to clipboard'">
-                    @if (copiedApiKey === key.apiKey) {
+                  <code class="me-2 text-truncate" style="max-width: 200px;">{{ service.apiKey || 'API Key not available' }}</code>
+                  <button class="btn btn-sm" [class]="copiedApiKey === service.apiKey ? 'btn-success' : 'btn-outline-primary'"
+                          type="button" (click)="copyApiKey(service.apiKey)" [disabled]="!service.apiKey"
+                          [title]="copiedApiKey === service.apiKey ? 'Copied!' : 'Copy to clipboard'">
+                    @if (copiedApiKey === service.apiKey) {
                       <i class="bi bi-check-lg"></i>
                     } @else {
                       <i class="bi bi-clipboard"></i>
@@ -148,44 +148,31 @@
                 </div>
               </td>
               <td>
-                @if (key.description) {
-                  <span class="text-muted">{{ key.description }}</span>
+                @if (service.description) {
+                  <span class="text-muted">{{ service.description }}</span>
                 } @else {
                   <span class="text-muted fst-italic">No description</span>
                 }
               </td>
               <td>
-                <span class="badge" [class]="key.isActive ? 'bg-success' : 'bg-secondary'">
-                  <i class="bi" [class]="key.isActive ? 'bi-check-circle-fill' : 'bi-x-circle-fill'"></i>
-                  {{ key.isActive ? 'Active' : 'Archived' }}
+                <span class="badge" [class]="service.isActive ? 'bg-success' : 'bg-secondary'">
+                  <i class="bi" [class]="service.isActive ? 'bi-check-circle-fill' : 'bi-x-circle-fill'"></i>
+                  {{ service.isActive ? 'Active' : 'Inactive' }}
                 </span>
               </td>
               <td>
-                <small class="text-muted">{{ key.createdAt | date:'short' }}</small>
+                <small class="text-muted">{{ service.createdDate | date:'short' }}</small>
               </td>
               <td class="text-center">
                 <div class="btn-group" role="group">
-                  <button class="btn btn-sm btn-outline-info" (click)="viewUsage(key.apiKey)"
-                          title="View Usage">
-                    <i class="bi bi-graph-up"></i>
+                  <button class="btn btn-sm btn-outline-primary" (click)="openEditModal(editModal, service)"
+                          title="Edit API Key">
+                    <i class="bi bi-pencil"></i>
                   </button>
-                  @if (key.isActive) {
-                    <button class="btn btn-sm btn-outline-primary" (click)="openEditModal(editModal, key)"
-                            title="Edit API Key">
-                      <i class="bi bi-pencil"></i>
-                    </button>
-                  }
-                  @if (key.isActive) {
-                    <button class="btn btn-sm btn-outline-danger" (click)="archiveApiKey(key.apiKey)"
-                            title="Archive API Key">
-                      <i class="bi bi-archive"></i>
-                    </button>
-                  } @else {
-                    <button class="btn btn-sm btn-outline-success" (click)="restoreKey(key)"
-                            title="Restore API Key">
-                      <i class="bi bi-arrow-counterclockwise"></i>
-                    </button>
-                  }
+                  <button class="btn btn-sm btn-outline-danger" (click)="openDeleteModal(deleteModal, service)"
+                          title="Delete API Key">
+                    <i class="bi bi-trash"></i>
+                  </button>
                 </div>
               </td>
             </tr>
@@ -197,18 +184,18 @@
     <div class="alert alert-info mt-4">
       <i class="bi bi-info-circle me-2"></i>
       <strong>Integration:</strong> Use these API keys in your analytics script configuration.
-      Add <code>data-api-key="{{ getActiveKeys()[0]?.apiKey || 'YOUR_API_KEY' }}"</code> to your script tag.
+      Add <code>data-api-key="{{ getActiveServices()[0]?.apiKey || 'YOUR_API_KEY' }}"</code> to your script tag.
     </div>
   }
 
   <!-- Archived API Keys Section -->
-  @if (showArchivedKeys && archivedKeys.length > 0) {
+  @if (showArchivedKeys && archivedServices.length > 0) {
     <div class="mt-5">
       <h3 class="mb-3">
         <i class="bi bi-archive me-2 text-warning"></i>
         Archived API Keys
       </h3>
-      <p class="text-muted">Archived API keys are kept for data access and potential restoration.</p>
+      <p class="text-muted">Deleted API keys are kept for 30 days for data access and potential restoration.</p>
 
       <div class="table-responsive">
         <table class="table table-hover">
@@ -221,7 +208,10 @@
                 <i class="bi bi-key me-2"></i>API Key
               </th>
               <th scope="col">
-                <i class="bi bi-calendar-x me-2"></i>Archived
+                <i class="bi bi-calendar-x me-2"></i>Deleted
+              </th>
+              <th scope="col">
+                <i class="bi bi-clock me-2"></i>Retention
               </th>
               <th scope="col" class="text-center">
                 <i class="bi bi-gear me-2"></i>Actions
@@ -229,37 +219,55 @@
             </tr>
           </thead>
           <tbody>
-            @for (key of archivedKeys; track key.apiKey) {
-              <tr>
+            @for (service of archivedServices; track service.apiKey) {
+              <tr [class.table-secondary]="isRetentionExpired(service)">
                 <td>
                   <div class="d-flex align-items-center">
                     <div>
-                      <strong class="text-muted">{{ key.name }}</strong>
+                      <strong class="text-muted">{{ service.name }}</strong>
+                      @if (isRetentionExpired(service)) {
+                        <small class="text-danger d-block">Expired</small>
+                      }
                     </div>
                   </div>
                 </td>
                 <td>
                   <div class="d-flex align-items-center">
-                    <code class="me-2 text-truncate text-muted" style="max-width: 200px;">{{ key.apiKey || 'API Key not available' }}</code>
+                    <code class="me-2 text-truncate text-muted" style="max-width: 200px;">{{ service.apiKey || 'API Key not available' }}</code>
                     <button class="btn btn-sm btn-outline-secondary"
-                            type="button" (click)="copyApiKey(key.apiKey)" [disabled]="!key.apiKey"
+                            type="button" (click)="copyApiKey(service.apiKey)" [disabled]="!service.apiKey"
                             title="Copy to clipboard">
                       <i class="bi bi-clipboard"></i>
                     </button>
                   </div>
                 </td>
                 <td>
-                  <small class="text-muted">{{ key.createdAt | date:'short' }}</small>
+                  <small class="text-muted">{{ service.deletedAt | date:'short' }}</small>
+                </td>
+                <td>
+                  @if (isRetentionExpired(service)) {
+                    <span class="badge bg-danger">
+                      <i class="bi bi-exclamation-triangle me-1"></i>Expired
+                    </span>
+                  } @else {
+                    <span class="badge bg-warning text-dark">
+                      <i class="bi bi-clock me-1"></i>{{ getRetentionDaysLeft(service) }} days left
+                    </span>
+                  }
                 </td>
                 <td class="text-center">
                   <div class="btn-group" role="group">
-                    <button class="btn btn-sm btn-outline-info" (click)="viewUsage(key.apiKey)"
-                            title="View Usage">
+                    <button class="btn btn-sm btn-outline-info" (click)="viewReports(service)"
+                            title="View Reports" [disabled]="isRetentionExpired(service)">
                       <i class="bi bi-graph-up"></i>
                     </button>
-                    <button class="btn btn-sm btn-outline-success" (click)="restoreKey(key)"
-                            title="Restore API Key" [disabled]="!canCreateMoreKeys()">
+                    <button class="btn btn-sm btn-outline-success" (click)="restoreService(service)"
+                            title="Restore API Key" [disabled]="!canCreateMoreKeys() || isRetentionExpired(service)">
                       <i class="bi bi-arrow-counterclockwise"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-danger" (click)="permanentlyDeleteService(service)"
+                            title="Permanently Delete">
+                      <i class="bi bi-trash"></i>
                     </button>
                   </div>
                 </td>
@@ -268,11 +276,18 @@
           </tbody>
         </table>
       </div>
+
+      <div class="alert alert-warning mt-3">
+        <i class="bi bi-info-circle me-2"></i>
+        <strong>Retention Policy:</strong> Archived API keys and their data are kept for 30 days.
+        After this period, they are permanently deleted and cannot be restored.
+        Use the "View Reports" button to access historical analytics data before expiration.
+      </div>
     </div>
   }
 
   <!-- Empty State -->
-  @if (!isLoading && apiKeys.length === 0) {
+  @if (!isLoading && services.length === 0) {
     <div class="text-center py-5">
       <i class="bi bi-key display-1 text-muted mb-3"></i>
       <h4>No API Keys Yet</h4>
@@ -306,20 +321,20 @@
   }
 </div>
 
-<!-- Create API Key Modal -->
+<!-- Create Service Modal -->
 <ng-template #createModal let-modal>
   <div class="modal-header">
     <h5 class="modal-title">Create New API Key</h5>
     <button type="button" class="btn-close" (click)="modal.close()"></button>
   </div>
   <div class="modal-body">
-    <form [formGroup]="apiKeyForm" (ngSubmit)="createApiKey()">
+    <form [formGroup]="serviceForm" (ngSubmit)="createService()">
       <div class="mb-3">
-        <label for="apiKeyName" class="form-label">Name *</label>
+        <label for="serviceName" class="form-label">Name *</label>
         <input
           type="text"
           class="form-control"
-          id="apiKeyName"
+          id="serviceName"
           formControlName="name"
           placeholder="Enter name"
           [class.is-invalid]="getFormFieldError('name')">
@@ -334,37 +349,65 @@
           id="description"
           formControlName="description"
           rows="3"
-          placeholder="Enter description (optional)"></textarea>
+          placeholder="Optional description of your service"
+          [class.is-invalid]="getFormFieldError('description')"></textarea>
+        @if (getFormFieldError('description')) {
+          <div class="invalid-feedback">{{ getFormFieldError('description') }}</div>
+        }
+      </div>
+      <div class="alert alert-info">
+        <i class="bi bi-info-circle me-2"></i>
+        A unique API Key will be automatically generated for your service.
+        @if (!isPlanUnlimited()) {
+          <br><small class="text-muted">Active keys: {{ currentUsage }} / {{ userPlan.apiKeyLimit }}</small>
+        }
+        @if (getMonthlyRemainingCreations() !== 'unlimited') {
+          <br><small class="text-muted">Monthly creations: {{ keysCreatedThisMonth }} / {{ getMonthlyLimitForDisplay() }}</small>
+        }
+        @if (getTotalRemainingCreations() !== 'unlimited') {
+          <br><small class="text-muted">Total lifetime: {{ totalKeysCreated }} / {{ getTotalLimitForDisplay() }}</small>
+        }
       </div>
     </form>
   </div>
   <div class="modal-footer">
     <button type="button" class="btn btn-secondary" (click)="modal.close()">Cancel</button>
-    <button type="button" class="btn btn-primary" (click)="createApiKey()" [disabled]="!apiKeyForm.valid">
-      <i class="bi bi-plus-circle me-2"></i>Create API Key
+    <button
+      type="button"
+      class="btn btn-primary"
+      (click)="createService()"
+      [disabled]="isSubmitting || serviceForm.invalid || !canCreateMoreKeys()">
+      @if (isSubmitting) {
+        <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+        Creating...
+      } @else if (!canCreateMoreKeys()) {
+        <i class="bi bi-lock me-2"></i>Plan Limit Reached
+      } @else {
+        Create Service
+      }
     </button>
   </div>
 </ng-template>
 
-<!-- Edit API Key Modal -->
+<!-- Edit Service Modal -->
 <ng-template #editModal let-modal>
   <div class="modal-header">
     <h5 class="modal-title">Edit API Key</h5>
     <button type="button" class="btn-close" (click)="modal.close()"></button>
   </div>
   <div class="modal-body">
-    <form [formGroup]="editForm" (ngSubmit)="updateApiKey()">
+    <form [formGroup]="serviceForm" (ngSubmit)="updateService()">
       <div class="mb-3">
-        <label for="editApiKeyName" class="form-label">Name *</label>
+        <label for="editServiceName" class="form-label">Name *</label>
         <input
           type="text"
           class="form-control"
-          id="editApiKeyName"
+          id="editServiceName"
           formControlName="name"
           placeholder="Enter name"
-          [class.is-invalid]="getEditFormFieldError('name')">
-        @if (getEditFormFieldError('name')) {
-          <div class="invalid-feedback">{{ getEditFormFieldError('name') }}</div>
+          [class.is-invalid]="getFormFieldError('name')">
+        @if (getFormFieldError('name')) {
+          <div class="invalid-feedback">{{ getFormFieldError('name') }}</div>
         }
       </div>
       <div class="mb-3">
@@ -374,32 +417,72 @@
           id="editDescription"
           formControlName="description"
           rows="3"
-          placeholder="Enter description (optional)"></textarea>
+          placeholder="Optional description of your service"
+          [class.is-invalid]="getFormFieldError('description')"></textarea>
+        @if (getFormFieldError('description')) {
+          <div class="invalid-feedback">{{ getFormFieldError('description') }}</div>
+        }
       </div>
-      <div class="mb-3">
-        <label class="form-label">Usage Limits (Plan-based)</label>
-        <div class="row">
-          <div class="col-md-6">
-            <div class="form-control-plaintext">
-              <small class="text-muted d-block">Daily Limit</small>
-              <strong>{{ selectedKey?.limits?.daily || 0 }}</strong> calls/day
-            </div>
-          </div>
-          <div class="col-md-6">
-            <div class="form-control-plaintext">
-              <small class="text-muted d-block">Monthly Limit</small>
-              <strong>{{ selectedKey?.limits?.monthly || 0 }}</strong> calls/month
-            </div>
-          </div>
+      @if (selectedService) {
+        <div class="mb-3">
+          <label class="form-label fw-bold">API Key</label>
+          <input type="text" class="form-control font-monospace" [value]="selectedService.apiKey" readonly>
+          <small class="form-text text-muted">API Key cannot be changed</small>
         </div>
-        <small class="text-muted">Limits are automatically set based on your {{ userPlan.type.toUpperCase() || 'FREE' }} plan</small>
-      </div>
+      }
     </form>
   </div>
   <div class="modal-footer">
     <button type="button" class="btn btn-secondary" (click)="modal.close()">Cancel</button>
-    <button type="button" class="btn btn-primary" (click)="updateApiKey()" [disabled]="!editForm.valid">
-      <i class="bi bi-check-circle me-2"></i>Update API Key
+    <button
+      type="button"
+      class="btn btn-primary"
+      (click)="updateService()"
+      [disabled]="isSubmitting || serviceForm.invalid">
+      @if (isSubmitting) {
+        <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+        Updating...
+      } @else {
+        Update Service
+      }
+    </button>
+  </div>
+</ng-template>
+
+<!-- Delete Service Modal -->
+<ng-template #deleteModal let-modal>
+  <div class="modal-header">
+    <h5 class="modal-title">Delete API Key</h5>
+    <button type="button" class="btn-close" (click)="modal.close()"></button>
+  </div>
+  <div class="modal-body">
+    @if (selectedService) {
+      <p>Are you sure you want to archive the API key <strong>{{ selectedService.name }}</strong>?</p>
+      <div class="alert alert-warning">
+        <i class="bi bi-exclamation-triangle me-2"></i>
+        <strong>Important:</strong> This will deactivate the API key and stop collecting new analytics data.
+      </div>
+      <div class="alert alert-info">
+        <i class="bi bi-info-circle me-2"></i>
+        <strong>Data Retention:</strong> The API key and all associated analytics data will be kept for 30 days.
+        You can restore the key or view historical reports during this period.
+        After 30 days, the data will be permanently deleted.
+      </div>
+    }
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="modal.close()">Cancel</button>
+    <button
+      type="button"
+      class="btn btn-warning"
+      (click)="deleteService()"
+      [disabled]="isSubmitting">
+      @if (isSubmitting) {
+        <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+        Archiving...
+      } @else {
+        <i class="bi bi-archive me-2"></i>Archive API Key
+      }
     </button>
   </div>
 </ng-template>

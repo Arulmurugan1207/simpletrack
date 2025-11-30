@@ -3,12 +3,12 @@
  * Standalone analytics library for any HTML/JavaScript application
  *
  * Usage:
- * <script src="https://cdn.tabletennistube.com/analytics.js"></script>
- * <script>
- *   STKAnalytics.init({
- *     apiUrl: 'https://your-analytics-endpoint.com/log',
- *     serviceName: 'your-app-name'
- *   });
+ * <script
+ *   src="https://simpletrack.dev/stk-analytics.min.js"
+ *   data-api-key="YOUR_API_KEY"
+ *   data-api-url="https://your-api-endpoint.com/analytics/log"
+ *   data-batch-interval="5000"
+ *   data-debug="false">
  * </script>
  */
 
@@ -18,7 +18,7 @@
   // Configuration
   let config = {
     apiUrl: '',
-    serviceName: 'unknown',
+    apiKey: 'unknown', // Changed from serviceName to apiKey
     batchIntervalMs: 5000,
     debug: false,
     autoTrackPageViews: true,
@@ -214,7 +214,7 @@
       user_id: userId,
       user_email: userEmail || undefined,
       data: eventData,
-      service: config.serviceName
+      service: config.apiKey
     };
 
     eventQueue.push(event);
@@ -226,7 +226,15 @@
 
   // Send batch
   async function sendBatch() {
-    if (eventQueue.length === 0 || !config.apiUrl) return;
+    if (eventQueue.length === 0 || !config.apiUrl || !config.apiKey) {
+      if (!config.apiKey) {
+        console.log('[Analytics] No API key configured - not sending logs');
+      }
+      if (!config.apiUrl) {
+        console.log('[Analytics] No API URL configured - not sending logs');
+      }
+      return;
+    }
 
     // In debug mode, don't send to backend - only log to console
     if (config.debug) {
@@ -389,16 +397,29 @@
       // Merge configuration
       config = { ...config, ...options };
 
-      // Auto-set API URL if not provided, or append service name if provided (allows override for testing)
-      if (!config.apiUrl) {
-        config.apiUrl = `https://analytics-dot-node-server-apis.ue.r.appspot.com/analytics/log?service=${config.serviceName}`;
-      } else {
-        // If custom API URL provided, append service name as query parameter
-        const url = new URL(config.apiUrl);
-        if (!url.searchParams.has('service')) {
-          url.searchParams.set('service', config.serviceName);
-          config.apiUrl = url.toString();
-        }
+      // Check if API key is provided
+      if (!config.apiKey || config.apiKey.trim() === '') {
+        console.error('[Analytics] API key is required and cannot be empty - not initializing');
+        return;
+      }
+
+      // Check if API URL is provided
+      if (!config.apiUrl || config.apiUrl.trim() === '') {
+        console.error('[Analytics] API URL is required and cannot be empty - not initializing');
+        return;
+      }
+
+      // Check if API URL is provided
+      if (!config.apiUrl || config.apiUrl.trim() === '') {
+        console.error('[Analytics] API URL is required and cannot be empty - not initializing');
+        return;
+      }
+
+      // If custom API URL provided, append service name as query parameter
+      const url = new URL(config.apiUrl);
+      if (!url.searchParams.has('service') && !url.searchParams.has('apiKey')) {
+        url.searchParams.set('apiKey', config.apiKey);
+        config.apiUrl = url.toString();
       }
 
       // Initialize session
@@ -539,7 +560,7 @@
     let analyticsScript = null;
 
     for (let script of scripts) {
-      if (script.src && script.src.includes('stk-analytics')) {
+      if (script.src && script.src.includes('stk-analytics') && script.getAttribute('data-api-key')) {
         analyticsScript = script;
         break;
       }
@@ -550,12 +571,19 @@
     // Read data attributes and convert to config
     const config = {};
 
-    // data-service-name -> serviceName (required - stop if not provided or empty)
-    const serviceName = analyticsScript.getAttribute('data-service-name');
-    if (!serviceName || serviceName.trim() === '') {
-      return null; // Stop all initialization if service name not provided or empty
+    // data-api-key -> apiKey (required - stop if not provided or empty)
+    const apiKey = analyticsScript.getAttribute('data-api-key');
+    if (!apiKey || apiKey.trim() === '') {
+      console.error('STK Analytics: data-api-key attribute is required and cannot be empty');
+      return null; // Stop all initialization if API key not provided or empty
     }
-    config.serviceName = serviceName;
+    config.apiKey = apiKey;
+
+    // data-api-url -> apiUrl
+    const apiUrl = analyticsScript.getAttribute('data-api-url');
+    if (apiUrl) {
+      config.apiUrl = apiUrl;
+    }
 
     // data-batch-interval -> batchIntervalMs
     if (analyticsScript.getAttribute('data-batch-interval')) {

@@ -1,22 +1,28 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, of } from 'rxjs';
-import { map, catchError } from 'rxjs/operators';
+import { Observable, of, throwError } from 'rxjs';
+import { map, catchError, switchMap } from 'rxjs/operators';
+import { APIKeyManagementService } from './api-key-management.service';
+import { UserAPIKeysResponse, APIKey } from './api-key.model';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AnalyticsAPIService {
-  private apiUrl = 'https://analytics-dot-node-server-apis.ue.r.appspot.com';
+  private apiUrl = environment.apiUrl;
 
-  constructor(private http: HttpClient) { }
+  constructor(
+    private http: HttpClient,
+    private apiKeyManagement: APIKeyManagementService
+  ) { }
 
   /**
    * Fetch real analytics data from your backend
    * Replace these endpoints with your actual API endpoints
    */
   getRealtimeMetrics(): Observable<any> {
-    return this.http.get(`${this.apiUrl}/analytics/live-events`).pipe(
+    return this.http.get(`${this.apiUrl}/analytics/metrics`).pipe(
       catchError(() => {
         console.warn('Using mock data - API endpoint not available');
         return of(this.getMockRealtimeData());
@@ -60,16 +66,54 @@ export class AnalyticsAPIService {
     );
   }
 
-  /**
-   * Send analytics event to backend
-   */
-  sendAnalyticsEvent(eventData: any): Observable<any> {
-    return this.http.post(`${this.apiUrl}/analytics/log`, eventData).pipe(
-      catchError((error) => {
-        console.warn('Failed to send analytics event:', error);
-        return of({ success: false, error: error.message });
+  getDeviceBreakdown(): Observable<any> {
+    return this.http.get(`${this.apiUrl}/analytics/device-breakdown`).pipe(
+      catchError(() => {
+        console.warn('Using mock data - API endpoint not available');
+        return of(this.getMockDeviceBreakdown());
       })
     );
+  }
+
+  /**
+   * Validate if user has access to the specified API key
+   */
+  validateAPIKeyAccess(apiKey: string): Observable<boolean> {
+    return this.apiKeyManagement.getUserAPIKeys().pipe(
+      map((response: UserAPIKeysResponse) => response.apiKeys.some((apiKeyObj: APIKey) => apiKeyObj.apiKey === apiKey)),
+      catchError(() => of(false))
+    );
+  }
+
+  /**
+   * Send analytics event to backend with API key validation
+   */
+  sendAnalyticsEvent(eventData: any, apiKey?: string): Observable<any> {
+    // If apiKey is provided, validate access first
+    if (apiKey) {
+      return this.validateAPIKeyAccess(apiKey).pipe(
+        switchMap(hasAccess => {
+          if (!hasAccess) {
+            return throwError(() => new Error('Access denied: Invalid API key or key not owned by user'));
+          }
+          // Add apiKey to event data
+          const eventWithApiKey = { ...eventData, apiKey };
+          return this.http.post(`${this.apiUrl}/analytics/events`, eventWithApiKey);
+        }),
+        catchError((error) => {
+          console.warn('Failed to send analytics event:', error);
+          return of({ success: false, error: error.message });
+        })
+      );
+    } else {
+      // No API key validation needed
+      return this.http.post(`${this.apiUrl}/analytics/events`, eventData).pipe(
+        catchError((error) => {
+          console.warn('Failed to send analytics event:', error);
+          return of({ success: false, error: error.message });
+        })
+      );
+    }
   }
 
   // Mock data methods (fallback when API is not available)
@@ -145,5 +189,20 @@ export class AnalyticsAPIService {
       { country: 'Canada', visitors: 2100, percentage: 10.6, flag: '🇨🇦' },
       { country: 'Australia', visitors: 1200, percentage: 6.1, flag: '🇦🇺' }
     ];
+  }
+
+  private getMockDeviceBreakdown() {
+    const desktop = Math.floor(Math.random() * 60) + 30; // 30-90%
+    const mobile = Math.floor(Math.random() * 40) + 20; // 20-60%
+    const tablet = 100 - desktop - mobile; // Remaining percentage
+
+    return {
+      desktop: desktop,
+      mobile: mobile,
+      tablet: tablet,
+      desktopPercentage: desktop,
+      mobilePercentage: mobile,
+      tabletPercentage: tablet
+    };
   }
 }

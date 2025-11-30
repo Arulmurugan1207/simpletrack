@@ -6,8 +6,10 @@ import { NgbAccordionDirective, NgbAccordionItem, NgbAccordionHeader, NgbAccordi
 import { LoginModalComponent } from '../login-modal/login-modal.component';
 import { SignupModalComponent } from '../signup-modal/signup-modal.component';
 import { DashboardModalComponent } from '../dashboard-modal/dashboard-modal.component';
+import { SuccessModalComponent } from '../success-modal/success-modal.component';
 import { Router } from '@angular/router';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'app-home',
@@ -41,11 +43,11 @@ export class HomeComponent implements OnInit {
 
   // Code snippet mapping for `<pre><code [innerText]>` rendering
   codeBlocks: { [key: string]: string } = {
-    'script-tag': `<script src="https://simpletrack.dev/stk-analytics.min.js" data-service-name="your-website-name"></script>`,
-    'complete-html': `<!DOCTYPE html>\n<html>\n<head>\n  <title>My Website</title>\n  <script src="https://simpletrack.dev/stk-analytics.min.js" data-service-name="my-website-name"></script>\n</head>\n<body>\n  <!-- Your website content -->\n</body>\n</html>`,
+    'script-tag': `<script src="https://simpletrack.dev/stk-analytics.min.js" data-api-key="YOUR_API_KEY"></script>`,
+    'complete-html': `<!DOCTYPE html>\n<html>\n<head>\n  <title>My Website</title>\n  <script src="https://simpletrack.dev/stk-analytics.min.js" data-api-key="YOUR_API_KEY"></script>\n</head>\n<body>\n  <!-- Your website content -->\n</body>\n</html>`,
     'component-integration': `// In any component - no wrapper code needed!\nwindow.STKAnalytics.trackEvent('button_click', { button: 'signup' });\nwindow.STKAnalytics.trackPromoImpression('promo_123');\nwindow.STKAnalytics.trackPromoClick('promo_123', 'learn_more');\nwindow.STKAnalytics.trackError('API Error', { code: 500 });`,
     'vanilla-js-events': `// After script loads and initializes\ndocument.getElementById('signup-btn').addEventListener('click', function() {\n    window.STKAnalytics.trackEvent('signup_click', {\n        source: 'hero_section',\n        plan: 'free'\n    });\n});\n\n// Track form submissions\ndocument.getElementById('contact-form').addEventListener('submit', function(e) {\n    window.STKAnalytics.trackEvent('form_submit', {\n        form: 'contact',\n        category: 'engagement'\n    });\n});\n\n// Track custom interactions\nfunction trackCustomAction(action, data) {\n    window.STKAnalytics.trackEvent(action, data);\n}`,
-    'config-options-example': `<script src="https://simpletrack.dev/stk-analytics.min.js" data-service-name="my-ecommerce-site" data-batch-interval="10000" data-debug="true" data-disable-scroll></script>`,
+    'config-options-example': `<script src="https://simpletrack.dev/stk-analytics.min.js" data-api-key="my-ecommerce-site" data-batch-interval="10000" data-debug="true" data-disable-scroll></script>`,
     'data-click-attributes': `<!-- Examples -->\n<button data-click="signup">Sign Up</button>\n<a href="/pricing" data-click="pricing_link">View Pricing</a>\n<div data-click="promo_banner" class="promo">Special Offer!</div>`,
     'spa-navigation-tracking': `// Angular example\nimport { Router, NavigationEnd } from '@angular/router';\n\nconstructor(private router: Router) {\n    this.router.events.subscribe(event => {\n        if (event instanceof NavigationEnd) {\n            window.STKAnalytics.trackNavigation(event.url, {\n                previousUrl: this.router.url\n            });\n        }\n    });\n};`,
     'custom-event-example': `STKAnalytics.trackEvent('signup_complete', {\n  category: 'conversion',\n  label: 'email-signup',\n  value: 1,\n  custom: { plan: 'premium' }\n});`,
@@ -56,10 +58,10 @@ export class HomeComponent implements OnInit {
     'promo-impression-basic': `// Impression (e.g., banner view)\nSTKAnalytics.trackPromoImpression('promo_2024_black_friday', {\n    position: 'homepage_top'\n});\n\n// Click\nSTKAnalytics.trackPromoClick('promo_2024_black_friday', 'view_details');`,
     'intersection-observer': `// Banner component with intersection observer\nclass PromoBanner extends Component {\n    componentDidMount() {\n        const observer = new IntersectionObserver((entries) => {\n            entries.forEach((entry) => {\n                if (entry.isIntersecting) {\n                    window.STKAnalytics.trackPromoImpression('summer_sale_2024', {\n                        position: 'sidebar',\n                        bannerSize: '300x250'\n                    });\n                    observer.disconnect(); // Track only once\n                }\n            });\n        });\n        observer.observe(this.bannerRef.current);\n    }\n\n    handleClick = () => {\n        window.STKAnalytics.trackPromoClick('summer_sale_2024', 'shop_now');\n        // Navigate to product page\n    };\n\n    render() {\n        return (\n            <div ref={this.bannerRef} onClick={this.handleClick}>\n                Summer Sale - 50% Off!\n            </div>\n        );\n    }\n}`,
     'email-utm-tracking': `// Track email opens (UTM parameters)\nSTKAnalytics.trackPromoImpression('newsletter_dec_2024', {\n  campaign: 'monthly_newsletter',\n  source: 'email',\n  medium: 'newsletter',\n  term: 'holiday_specials'\n});\n\n// Track email link clicks\nSTKAnalytics.trackPromoClick('newsletter_dec_2024', 'read_more', {\n  campaign: 'monthly_newsletter',\n  source: 'email',\n  medium: 'newsletter'\n});`,
-    'debug-configuration': `// Enable debug for development\nSTKAnalytics.init({\n  serviceName: 'my-app',\n  debug: window.location.hostname === 'localhost'  // Auto-enable on localhost\n});\n\n// Or via data attribute\n<script src="https://simpletrack.dev/stk-analytics.min.js" data-service-name="my-app" data-debug="true"></script>`
+    'debug-configuration': `// Enable debug for development\nSTKAnalytics.init({\n  serviceName: 'my-app',\n  debug: window.location.hostname === 'localhost'  // Auto-enable on localhost\n});\n\n// Or via data attribute\n<script src="https://simpletrack.dev/stk-analytics.min.js" data-api-key="my-app" data-debug="true"></script>`
   };
 
-  constructor(private modalService: NgbModal, private router: Router, private sanitizer: DomSanitizer) {}
+  constructor(private modalService: NgbModal, private router: Router, private sanitizer: DomSanitizer, private authService: AuthService) {}
 
 
 
@@ -68,7 +70,7 @@ export class HomeComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.user = JSON.parse(sessionStorage.getItem('user') || 'null');
+    this.user = this.authService.getUserData();
    // this.initAnalytics();
     this.initCopyButtons();
     this.initBackToTopButton();
@@ -426,12 +428,56 @@ export class HomeComponent implements OnInit {
 
   openLogin() {
     (window as any).STKAnalytics?.trackEvent('modal_open', { modal: 'login' });
-    this.modalService.open(LoginModalComponent);
+    const modalRef = this.modalService.open(LoginModalComponent);
+    modalRef.result.then(
+      (result) => {
+        // Modal closed successfully (login completed)
+        this.refreshUserState();
+
+        // Show success modal after login
+        if (this.user) {
+          const successModal = this.modalService.open(SuccessModalComponent, {
+            centered: true,
+            backdrop: 'static',
+            size: 'sm'
+          });
+          const successComponent = successModal.componentInstance as SuccessModalComponent;
+          successComponent.title = 'Login Successful!';
+          successComponent.message = `Welcome back, ${this.user.firstname}! You have been successfully logged in.`;
+        }
+      },
+      (reason) => {
+        // Modal dismissed
+        // No need to refresh user state
+      }
+    );
   }
 
   openSignup() {
     (window as any).STKAnalytics?.trackEvent('modal_open', { modal: 'signup' });
-    this.modalService.open(SignupModalComponent);
+    const modalRef = this.modalService.open(SignupModalComponent);
+    modalRef.result.then(
+      (result) => {
+        // Modal closed successfully (signup completed)
+        this.refreshUserState();
+
+        // Show success modal after signup
+        if (this.user) {
+          const successModal = this.modalService.open(SuccessModalComponent, {
+            centered: true,
+            backdrop: 'static',
+            size: 'sm'
+          });
+          const successComponent = successModal.componentInstance as SuccessModalComponent;
+          successComponent.title = 'Account Created!';
+          successComponent.message = `Welcome to SimpleTrack, ${this.user.firstname}! Your account has been created successfully.`;
+        }
+      },
+      (reason) => {
+        // Modal dismissed
+        // No need to refresh user state
+      }
+    );
   }
 
   openDashboardModal() {
@@ -446,8 +492,12 @@ export class HomeComponent implements OnInit {
 
   logout() {
     (window as any).STKAnalytics?.trackEvent('user_logout');
-    sessionStorage.removeItem('user');
+    this.authService.signout();
     this.user = null;
+  }
+
+  refreshUserState() {
+    this.user = this.authService.getUserData();
   }
 
   trackDownload() {

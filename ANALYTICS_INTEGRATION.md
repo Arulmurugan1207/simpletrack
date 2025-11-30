@@ -235,7 +235,35 @@ WHERE created_at > NOW() - INTERVAL '5 minutes';
 
 ## 📊 Analytics Script Integration
 
-The analytics script (`STKAnalytics`) automatically sends data to your API. Make sure your backend can handle the data format:
+The analytics script (`STKAnalytics`) automatically sends data to your API using API keys for authentication. Make sure your backend can handle the data format:
+
+### Basic Setup
+
+Add the script to your HTML and configure with your API key:
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="https://cdn.tabletennistube.com/analytics.js" data-api-key="STK-ABC123DEF456"></script>
+</head>
+<body>
+  <!-- Your content -->
+</body>
+</html>
+```
+
+### Programmatic Initialization
+
+```javascript
+// Initialize with API key
+STKAnalytics.init({
+  apiKey: 'STK-ABC123DEF456',
+  apiUrl: 'https://your-analytics-endpoint.com/log'
+});
+```
+
+### Data Format Sent by Analytics Script
 
 ```javascript
 // Data sent by analytics script
@@ -249,6 +277,7 @@ The analytics script (`STKAnalytics`) automatically sends data to your API. Make
     attribution: { utm_source: "google", ... },
     time_on_page: 0,
     scroll_depth: 0,
+    service: "STK-ABC123DEF456", // API key used for authentication
     // ... more data
   }
 }

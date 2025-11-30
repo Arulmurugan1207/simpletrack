@@ -1,25 +1,14 @@
 /**
- * STK Analytics SDK
+ * TableTennisTube Analytics SDK
  * Standalone analytics library for any HTML/JavaScript application
  *
  * Usage:
  * <script
  *   src="https://simpletrack.dev/stk-analytics.min.js"
- *   data-service-name="your-website-name"
- *   data-api-url="https://your-api-endpoint.com/log"
+ *   data-api-key="YOUR_API_KEY"
+ *   data-api-url="https://your-api-endpoint.com/analytics/log"
  *   data-batch-interval="5000"
  *   data-debug="false">
- * </script>
- *
- * Or programmatically:
- * <script src="https://simpletrack.dev/stk-analytics.min.js"></script>
- * <script>
- *   STKAnalytics.init({
- *     serviceName: 'your-website-name',
- *     apiUrl: 'https://your-api-endpoint.com/log',
- *     batchIntervalMs: 5000,
- *     debug: false
- *   });
  * </script>
  */
 
@@ -29,7 +18,7 @@
   // Configuration
   let config = {
     apiUrl: '',
-    serviceName: 'unknown',
+    apiKey: 'unknown', // Changed from serviceName to apiKey
     batchIntervalMs: 5000,
     debug: false,
     autoTrackPageViews: true,
@@ -48,6 +37,7 @@
   let userId = '';
   let userEmail = null;
   let isInitialized = false;
+  let isApiKeyInvalid = false;
 
   // Utility functions
   function generateUUID() {
@@ -188,6 +178,14 @@
 
   // Queue event
   function queueEvent(eventName, data = {}) {
+    // Stop logging if no API key is configured or API key is invalid
+    if (!config.apiKey || config.apiKey.trim() === '' || config.apiKey === 'unknown' || isApiKeyInvalid) {
+      if (config.debug) {
+        console.log('[Analytics] No valid API key configured - stopping log for event:', eventName);
+      }
+      return;
+    }
+
     const attribution = getAttributionData();
     const browserInfo = getBrowserInfo();
 
@@ -225,7 +223,7 @@
       user_id: userId,
       user_email: userEmail || undefined,
       data: eventData,
-      service: config.serviceName
+      service: config.apiKey
     };
 
     eventQueue.push(event);
@@ -237,7 +235,18 @@
 
   // Send batch
   async function sendBatch() {
-    if (eventQueue.length === 0 || !config.apiUrl) return;
+    if (eventQueue.length === 0 || !config.apiUrl || !config.apiKey || isApiKeyInvalid) {
+      if (!config.apiKey) {
+        console.log('[Analytics] No API key configured - not sending logs');
+      }
+      if (!config.apiUrl) {
+        console.log('[Analytics] No API URL configured - not sending logs');
+      }
+      if (isApiKeyInvalid) {
+        console.log('[Analytics] API key is invalid - not sending logs');
+      }
+      return;
+    }
 
     // In debug mode, don't send to backend - only log to console
     if (config.debug) {
@@ -269,14 +278,29 @@
           console.log('[Analytics] Batch sent successfully');
         }
       } else {
+        // Handle 401 Unauthorized - API key is invalid
+        if (response.status === 401) {
+          isApiKeyInvalid = true;
+          console.error('[Analytics] API key is invalid (401 Unauthorized) - stopping all logging');
+          // Clear the batch timer to stop sending requests
+          if (batchTimer) {
+            clearInterval(batchTimer);
+            batchTimer = null;
+          }
+          // Clear any queued events since API key is invalid
+          eventQueue = [];
+          return;
+        }
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
     } catch (error) {
       if (config.debug) {
         console.error('[Analytics] Batch send failed:', error);
       }
-      // Re-queue events on failure
-      eventQueue.unshift(...eventsToSend);
+      // Re-queue events on failure (but not for 401 which is handled above)
+      if (!isApiKeyInvalid) {
+        eventQueue.unshift(...eventsToSend);
+      }
     }
   }
 
@@ -353,6 +377,9 @@
       document.addEventListener('click', (event) => {
         const target = event.target.closest('[data-click]');
         if (target) {
+          // Stop propagation for tracked clicks to prevent double-tracking
+          event.stopPropagation();
+
           const clickType = target.getAttribute('data-click') || 'click';
           queueEvent('click', {
             category: 'interaction',
@@ -397,16 +424,29 @@
       // Merge configuration
       config = { ...config, ...options };
 
-      // Auto-set API URL if not provided, or append service name if provided (allows override for testing)
-      if (!config.apiUrl) {
-        config.apiUrl = `https://analytics-dot-node-server-apis.ue.r.appspot.com/analytics/log?service=${config.serviceName}`;
-      } else {
-        // If custom API URL provided, append service name as query parameter
-        const url = new URL(config.apiUrl);
-        if (!url.searchParams.has('service')) {
-          url.searchParams.set('service', config.serviceName);
-          config.apiUrl = url.toString();
-        }
+      // Check if API key is provided
+      if (!config.apiKey || config.apiKey.trim() === '') {
+        console.error('[Analytics] API key is required and cannot be empty - not initializing');
+        return;
+      }
+
+      // Check if API URL is provided
+      if (!config.apiUrl || config.apiUrl.trim() === '') {
+        console.error('[Analytics] API URL is required and cannot be empty - not initializing');
+        return;
+      }
+
+      // Check if API URL is provided
+      if (!config.apiUrl || config.apiUrl.trim() === '') {
+        console.error('[Analytics] API URL is required and cannot be empty - not initializing');
+        return;
+      }
+
+      // If custom API URL provided, append service name as query parameter
+      const url = new URL(config.apiUrl);
+      if (!url.searchParams.has('service') && !url.searchParams.has('apiKey')) {
+        url.searchParams.set('apiKey', config.apiKey);
+        config.apiUrl = url.toString();
       }
 
       // Initialize session
@@ -537,17 +577,17 @@
     }
   };
 
-  // Read configuration from script tag data attributes
-  function getConfigFromScriptTag() {
-    if (typeof document === 'undefined') return null;
+  // Make it available globally
+  window.STKAnalytics = Analytics;
 
-    // Find the script tag that loaded this analytics script
+  // Get configuration from script tag data attributes
+  function getConfigFromScriptTag() {
+    // Find the script tag that loaded this file
     const scripts = document.getElementsByTagName('script');
     let analyticsScript = null;
 
-    for (let i = 0; i < scripts.length; i++) {
-      const script = scripts[i];
-      if (script.src && script.src.includes('stk-analytics')) {
+    for (let script of scripts) {
+      if (script.src && script.src.includes('stk-analytics') && script.getAttribute('data-api-key')) {
         analyticsScript = script;
         break;
       }
@@ -558,12 +598,19 @@
     // Read data attributes and convert to config
     const config = {};
 
-    // data-service-name -> serviceName (required - stop if not provided or empty)
-    const serviceName = analyticsScript.getAttribute('data-service-name');
-    if (!serviceName || serviceName.trim() === '') {
-      return null; // Stop all initialization if service name not provided or empty
+    // data-api-key -> apiKey (required - stop if not provided or empty)
+    const apiKey = analyticsScript.getAttribute('data-api-key');
+    if (!apiKey || apiKey.trim() === '') {
+      console.error('STK Analytics: data-api-key attribute is required and cannot be empty');
+      return null; // Stop all initialization if API key not provided or empty
     }
-    config.serviceName = serviceName;
+    config.apiKey = apiKey;
+
+    // data-api-url -> apiUrl
+    const apiUrl = analyticsScript.getAttribute('data-api-url');
+    if (apiUrl) {
+      config.apiUrl = apiUrl;
+    }
 
     // data-batch-interval -> batchIntervalMs
     if (analyticsScript.getAttribute('data-batch-interval')) {
@@ -592,9 +639,6 @@
 
     return Object.keys(config).length > 0 ? config : null;
   }
-
-  // Make it available globally
-  window.STKAnalytics = Analytics;
 
   // Auto-initialize from script tag data attributes or window config
   const scriptConfig = getConfigFromScriptTag();

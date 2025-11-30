@@ -3,15 +3,17 @@ import { CommonModule } from '@angular/common';
 import { OverviewComponent } from './overview/overview.component';
 import { AccountSettingsComponent } from './account-settings/account-settings.component';
 import { ReportsComponent } from './reports/reports.component';
-import { ApiKeysComponent } from './api-keys/api-keys.component';
 import { BillingUsageComponent } from './billing-usage/billing-usage.component';
 import { HelpSupportComponent } from './help-support/help-support.component';
+import { PlansComponent } from './plans/plans.component';
+import { ApiKeysComponent } from './api-keys/api-keys.component';
 import { NgbDropdownModule } from '@ng-bootstrap/ng-bootstrap';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { NgxDaterangepickerBootstrapModule } from 'ngx-daterangepicker-bootstrap';
 import { FormsModule } from '@angular/forms';
 import { BehaviorSubject } from 'rxjs';
 import { DateRange } from '../services/analytics-data.service';
+import { AuthService } from '../services/auth.service';
 
 const DATERANGEPICKER_CONFIG = new InjectionToken('daterangepicker.config');
 
@@ -24,9 +26,10 @@ const DATERANGEPICKER_CONFIG = new InjectionToken('daterangepicker.config');
     OverviewComponent,
     AccountSettingsComponent,
     ReportsComponent,
-    ApiKeysComponent,
     BillingUsageComponent,
     HelpSupportComponent,
+    PlansComponent,
+    ApiKeysComponent,
     NgbDropdownModule
   ],
   templateUrl: './dashboard.component.html',
@@ -52,16 +55,25 @@ export class DashboardComponent implements OnInit {
   private dateRangeSubject = new BehaviorSubject<DateRange | null>(null);
   public dateRange$ = this.dateRangeSubject.asObservable();
 
-  constructor(private router: Router) {}
+  constructor(private router: Router, private route: ActivatedRoute, private authService: AuthService) {}
 
   ngOnInit() {
-    this.user = JSON.parse(sessionStorage.getItem('user') || 'null');
-
-    // Temporary: Set a default user for testing if none exists
-    if (!this.user) {
-      this.user = { email: 'test@example.com' };
-      sessionStorage.setItem('user', JSON.stringify(this.user));
+    // Check if user is authenticated
+    if (!this.authService.isAuthenticated()) {
+      console.log('User not authenticated, redirecting to home');
+      this.router.navigate(['/']);
+      return;
     }
+
+    // Get user data from AuthService
+    this.user = this.authService.getUserData();
+
+    // Check for tab query parameter
+    this.route.queryParams.subscribe(params => {
+      if (params['tab']) {
+        this.activeTab = params['tab'];
+      }
+    });
 
     // Set default date range to last 7 days
     const defaultRange: DateRange = {
@@ -79,6 +91,10 @@ export class DashboardComponent implements OnInit {
     if (window.innerWidth < 768) {
       this.sidebarOpen = false;
     }
+  }
+
+  goHome() {
+    this.router.navigate(['/']);
   }
 
   toggleSidebar() {
@@ -100,7 +116,17 @@ export class DashboardComponent implements OnInit {
   }
 
   logout() {
+    // Use AuthService signout method to properly clear authentication data
+    this.authService.signout();
+
+    // Clear session storage user data
     sessionStorage.removeItem('user');
+
+    // Clear analytics user email
+    if ((window as any).STKAnalytics) {
+      (window as any).STKAnalytics.clearUserEmail();
+    }
+
     this.router.navigate(['/']);
   }
 

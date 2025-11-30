@@ -259,7 +259,7 @@ export class OverviewComponent implements OnInit, OnDestroy {
     // Load top pages with date filter
     this.subscriptions.add(
       this.analyticsDataService.getTopPages(this.currentDateRange || undefined).subscribe(data => {
-        this.topPages = data;
+        this.topPages = Array.isArray(data) ? data : [];
         this.updatePagination();
       })
     );
@@ -267,15 +267,15 @@ export class OverviewComponent implements OnInit, OnDestroy {
     // Load geographic data with date filter
     this.subscriptions.add(
       this.analyticsDataService.getGeographicData(this.currentDateRange || undefined).subscribe(data => {
-        this.geoData = data;
+        this.geoData = Array.isArray(data) ? data : [];
       })
     );
 
     // Load conversion funnel with date filter
     this.subscriptions.add(
       this.analyticsDataService.getConversionFunnel(this.currentDateRange || undefined).subscribe(data => {
-        this.funnelLabels = data.labels;
-        this.funnelSteps = data.values;
+        this.funnelLabels = data.labels || [];
+        this.funnelSteps = data.values || [];
       })
     );
   }
@@ -307,9 +307,11 @@ export class OverviewComponent implements OnInit, OnDestroy {
           });
         }
         // Keep only the latest 15 events for better visibility
-        if (events.length > 0) {
+        if (Array.isArray(events) && events.length > 0) {
           this.realtimeEvents = [...events].slice(0, 15);
           console.log('💾 Component: Updated realtimeEvents array with', this.realtimeEvents.length, 'events');
+        } else {
+          this.realtimeEvents = [];
         }
       })
     );
@@ -349,9 +351,9 @@ export class OverviewComponent implements OnInit, OnDestroy {
       datasets: [{
         ...this.doughnutChartData.datasets[0],
         data: [
-          this.deviceBreakdown.desktopPercentage,
-          this.deviceBreakdown.mobilePercentage,
-          this.deviceBreakdown.tabletPercentage
+          this.deviceBreakdown.desktopPercentage || 0,
+          this.deviceBreakdown.mobilePercentage || 0,
+          this.deviceBreakdown.tabletPercentage || 0
         ]
       }]
     };

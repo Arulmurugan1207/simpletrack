@@ -129,7 +129,8 @@
             var isLocal = window.location.hostname === 'localhost';
             var script = document.createElement('script');
             script.src = (isLocal ? './stk-analytics.js' : './stk-analytics.min.js') + '?t=' + Date.now();
-            script.setAttribute('data-service-name', 'simpletrack');            
+            script.setAttribute('data-api-key', 'simpletrack');            
+            script.setAttribute('data-api-url', 'http://localhost:3004/analytics/log');
             script.setAttribute('data-batch-interval', '5000');
             document.head.appendChild(script);
 

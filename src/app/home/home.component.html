@@ -15,7 +15,7 @@
     <!-- User Dropdown -->
     <div *ngIf="user" ngbDropdown class="dropdown" style="position: absolute; top: 20px; right: 20px; z-index: 2;">
         <button class="btn btn-light dropdown-toggle" type="button" ngbDropdownToggle id="userDropdown" style="background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(10px); color: white; border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 25px; padding: 10px 20px; font-weight: 600; box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 15px;">
-            {{ user.email }}
+            {{ user.firstname }}
         </button>
         <div ngbDropdownMenu class="dropdown-menu" aria-labelledby="userDropdown">
             <button ngbDropdownItem (click)="navigateToDashboard()">Dashboard</button>
@@ -45,9 +45,9 @@
                     <code
                         style="color: white; font-size: 0.85em; font-family: 'SF Mono', 'Monaco', monospace; background: transparent; border: none; padding: 0;">&lt;script
                         src="https://simpletrack.dev/stk-analytics.min.js"
-                        data-service-name="your-website-name"&gt;&lt;/script&gt;</code>
+                        data-api-key="YOUR_API_KEY"&gt;&lt;/script&gt;</code>
                     <button
-                        onclick="navigator.clipboard.writeText('&lt;script src=&quot;https://simpletrack.dev/stk-analytics.min.js&quot; data-service-name=&quot;your-website-name&quot;&gt;&lt;/script&gt;').then(() => { const btn = this; const origText = btn.innerHTML; btn.innerHTML = '✅ Copied!'; btn.style.background = '#007bff'; setTimeout(() => { btn.innerHTML = origText; btn.style.background = 'rgba(255, 255, 255, 0.2)'; }, 2000); });"
+                        onclick="navigator.clipboard.writeText('&lt;script src=&quot;https://simpletrack.dev/stk-analytics.min.js&quot; data-api-key=&quot;YOUR_API_KEY&quot;&gt;&lt;/script&gt;').then(() => { const btn = this; const origText = btn.innerHTML; btn.innerHTML = '✅ Copied!'; btn.style.background = '#007bff'; setTimeout(() => { btn.innerHTML = origText; btn.style.background = 'rgba(255, 255, 255, 0.2)'; }, 2000); });"
                         style="background: rgba(255, 255, 255, 0.2); color: white; border: none; padding: 4px 8px; border-radius: 10px; cursor: pointer; font-size: 0.75em; transition: all 0.3s ease;"
                         onmouseover="this.style.background='rgba(255, 255, 255, 0.3)';"
                         onmouseout="this.style.background='rgba(255, 255, 255, 0.2)';">📋 Copy</button>
@@ -174,7 +174,7 @@
                     <button class="btn btn-success btn-sm copy-btn position-absolute" style="top: 5px; right: 5px; z-index: 10;" onclick="window.copyCodeBlock(this)">📋 Copy</button>
                 </div>
             </div>
-            <p><strong>Note:</strong> Each website should use a unique <code>data-service-name</code> to separate their analytics data and reports. Contact us to get your reports.</p>
+            <p><strong>Note:</strong> Each website should use a unique <code>data-api-key</code> to separate their analytics data and reports. Contact us to get your reports.</p>
 
             <h3>Using in Angular/React/Vue Components</h3>
             <p>The script automatically creates a global <code>STKAnalytics</code> object for easy component access:</p>
@@ -186,7 +186,7 @@
             </div>
 
             <h3>Using in Regular JavaScript Apps</h3>
-            <p>For vanilla JavaScript applications without frameworks, use the same global <code>analytics</code> object:</p>
+            <p>For vanilla JavaScript applications without frameworks, use the same global <code>STKAnalytics</code> object:</p>
             <div class="example">
                 <div class="code-block-container position-relative" data-code-block="vanilla-js-events">
                                         <pre><code [innerText]="codeBlocks['vanilla-js-events']"></code></pre>
@@ -233,7 +233,7 @@
                     </thead>
                     <tbody>
                         <tr style="background: #f8f9fa; border-bottom: 1px solid #e9ecef;">
-                            <td style="padding: 12px 15px; font-weight: 600; color: #2196F3;"><code>data-service-name</code></td>
+                            <td style="padding: 12px 15px; font-weight: 600; color: #2196F3;"><code>data-api-key</code></td>
                             <td style="padding: 12px 15px; color: #6c757d;">string</td>
                             <td style="padding: 12px 15px; color: #6c757d;">(required)</td>
                             <td style="padding: 12px 15px;"><strong style="color: #dc3545;">Required:</strong> Your unique website/app identifier for reports.</td>

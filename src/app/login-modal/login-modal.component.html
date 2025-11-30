@@ -1,12 +1,97 @@
-<div class="modal-header">
-	<h5 class="modal-title">Login</h5>
+<div class="modal-header border-0 pb-0">
 	<button type="button" class="btn-close" aria-label="Close" (click)="activeModal.close()"></button>
 </div>
-<div class="modal-body text-center">
-	<div class="mb-4">
-		<i class="fas fa-clock fa-3x text-primary mb-3"></i>
-		<h4>Coming Soon!</h4>
-		<p class="text-muted">We're working hard to bring you the best analytics experience. Sign in functionality will be available soon.</p>
+<div class="modal-body px-4 pb-4">
+	<!-- Header Section -->
+	<div class="text-center mb-4">
+		<div class="login-icon mb-3">
+			<i class="fas fa-user-circle fa-4x text-primary"></i>
+		</div>
+		<h2 class="fw-bold text-dark mb-2">Welcome Back</h2>
+		<p class="text-muted mb-0">Sign in to your SimpleTrack account</p>
 	</div>
-	<button type="button" class="btn btn-secondary" (click)="activeModal.close()">Close</button>
+
+	<!-- Success/Error Messages -->
+	<div *ngIf="message" class="alert mb-4 border-0 shadow-sm" [ngClass]="{
+		'alert-success bg-success-subtle text-success-emphasis border-success-subtle': message.type === 'success',
+		'alert-danger bg-danger-subtle text-danger-emphasis border-danger-subtle': message.type === 'error'
+	}" role="alert">
+		<i class="fas me-2" [ngClass]="{
+			'fa-check-circle': message.type === 'success',
+			'fa-exclamation-triangle': message.type === 'error'
+		}"></i>
+		{{ message.text }}
+	</div>
+
+	<form [formGroup]="loginForm" (ngSubmit)="onSubmit()" novalidate>
+		<!-- Email Field -->
+		<div class="mb-3">
+			<label for="loginEmail" class="form-label fw-semibold text-dark">
+				<i class="fas fa-envelope me-2 text-muted"></i>Email Address
+			</label>
+			<div class="input-group">
+				<span class="input-group-text bg-light border-end-0">
+					<i class="fas fa-envelope text-muted"></i>
+				</span>
+				<input type="email" class="form-control border-start-0 ps-0" id="loginEmail"
+					   formControlName="email" placeholder="Enter your email"
+					   [class.is-invalid]="loginForm.get('email')?.invalid && loginForm.get('email')?.touched">
+			</div>
+			<div class="invalid-feedback d-block" *ngIf="loginForm.get('email')?.invalid && loginForm.get('email')?.touched">
+				<i class="fas fa-exclamation-circle me-1"></i>
+				Please enter a valid email address.
+			</div>
+		</div>
+
+		<!-- Password Field -->
+		<div class="mb-3">
+			<label for="loginPassword" class="form-label fw-semibold text-dark">
+				<i class="fas fa-lock me-2 text-muted"></i>Password
+			</label>
+			<div class="input-group">
+				<span class="input-group-text bg-light border-end-0">
+					<i class="fas fa-lock text-muted"></i>
+				</span>
+				<input [type]="showPassword ? 'text' : 'password'" class="form-control border-start-0 ps-0"
+					   id="loginPassword" formControlName="password" placeholder="Enter your password"
+					   [class.is-invalid]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched">
+				<button type="button" class="btn btn-outline-secondary border-start-0" (click)="togglePasswordVisibility()">
+					<i class="fas" [ngClass]="showPassword ? 'fa-eye-slash' : 'fa-eye'"></i>
+				</button>
+			</div>
+			<div class="invalid-feedback d-block" *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched">
+				<i class="fas fa-exclamation-circle me-1"></i>
+				Password is required.
+			</div>
+		</div>
+
+		<!-- Remember Me & Forgot Password -->
+		<div class="d-flex justify-content-between align-items-center mb-4">
+			<div class="form-check">
+				<input class="form-check-input" type="checkbox" id="rememberMe" formControlName="rememberMe">
+				<label class="form-check-label text-muted" for="rememberMe">
+					Remember me
+				</label>
+			</div>
+			<a href="#" class="text-decoration-none text-primary fw-semibold" (click)="forgotPassword()">
+				Forgot password?
+			</a>
+		</div>
+
+		<!-- Submit Button -->
+		<button type="submit" class="btn btn-primary w-100 py-3 fw-semibold mb-3"
+				[disabled]="loginForm.invalid || isLoading" [ngClass]="{'btn-loading': isLoading}">
+			<span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2" role="status"></span>
+			<i class="fas fa-sign-in-alt me-2" *ngIf="!isLoading"></i>
+			{{ isLoading ? 'Signing In...' : 'Sign In' }}
+		</button>
+	</form>
+
+	<!-- Sign Up Link -->
+	<div class="text-center">
+		<span class="text-muted">Don't have an account? </span>
+		<a href="#" class="text-decoration-none fw-semibold text-primary" (click)="openSignup()">
+			Sign up here
+		</a>
+	</div>
 </div>
