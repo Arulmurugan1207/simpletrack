@@ -68,6 +68,25 @@
           {{ showArchivedKeys ? 'Hide' : 'Show' }} Archived Keys
         </button>
       }
+      <!-- Environment Toggle -->
+      <div class="d-flex flex-column align-items-end">
+        <div class="btn-group" role="group">
+          <button type="button" class="btn" 
+                  [class]="selectedEnvironment === 'development' ? 'btn-warning' : 'btn-outline-warning'"
+                  (click)="toggleEnvironment()"
+                  [disabled]="selectedEnvironment === 'development'">
+            <i class="bi bi-code-slash me-1"></i>Development
+          </button>
+          <button type="button" class="btn" 
+                  [class]="selectedEnvironment === 'production' ? 'btn-success' : 'btn-outline-success'"
+                  (click)="toggleEnvironment()"
+                  [disabled]="selectedEnvironment === 'production'">
+            <i class="bi bi-rocket me-1"></i>Production
+          </button>
+        </div>
+        
+      </div>
+      
       <button class="btn btn-primary" (click)="openCreateModal(createModal)" [disabled]="!canCreateMoreKeys()">
         <i class="bi bi-plus-circle me-2"></i>
         @if (canCreateMoreKeys()) {
@@ -85,6 +104,11 @@
         }
       </button>
     </div>
+  </div>
+
+  <!-- Environment Instructions -->
+  <div class="alert alert-info mt-2">
+    <strong>Environment Info:</strong> Use <strong>Development</strong> for testing and debugging your analytics integration. Switch to <strong>Production</strong> when you're ready to track live data. API keys are environment-specific and data is isolated between environments.
   </div>
 
   <!-- Loading State -->
@@ -111,6 +135,9 @@
             </th>
             <th scope="col">
               <i class="bi bi-card-text me-2"></i>Description
+            </th>
+            <th scope="col">
+              <i class="bi bi-globe me-2"></i>Allowed Domains
             </th>
             <th scope="col">
               <i class="bi bi-toggle-on me-2"></i>Status
@@ -155,6 +182,21 @@
                 }
               </td>
               <td>
+                @if (key.allowedDomains && key.allowedDomains.length > 0) {
+                  <div class="d-flex flex-wrap gap-1">
+                    @for (domain of key.allowedDomains; track domain) {
+                      <span class="badge bg-light text-dark border">
+                        <i class="bi bi-globe me-1"></i>{{ domain }}
+                      </span>
+                    }
+                  </div>
+                } @else {
+                  <span class="text-muted fst-italic">
+                    <i class="bi bi-unlock me-1"></i>All domains
+                  </span>
+                }
+              </td>
+              <td>
                 <span class="badge" [class]="key.isActive ? 'bg-success' : 'bg-secondary'">
                   <i class="bi" [class]="key.isActive ? 'bi-check-circle-fill' : 'bi-x-circle-fill'"></i>
                   {{ key.isActive ? 'Active' : 'Archived' }}
@@ -174,8 +216,6 @@
                             title="Edit API Key">
                       <i class="bi bi-pencil"></i>
                     </button>
-                  }
-                  @if (key.isActive) {
                     <button class="btn btn-sm btn-outline-danger" (click)="archiveApiKey(key.apiKey)"
                             title="Archive API Key">
                       <i class="bi bi-archive"></i>
@@ -336,6 +376,25 @@
           rows="3"
           placeholder="Enter description (optional)"></textarea>
       </div>
+      <div class="mb-3">
+        <label for="allowedDomains" class="form-label">
+          Allowed Domains
+          <small class="text-muted">(Optional - Security Feature)</small>
+        </label>
+        <input
+          type="text"
+          class="form-control"
+          id="allowedDomains"
+          formControlName="allowedDomains"
+          placeholder="example.com, app.example.com (comma-separated)">
+        <div class="form-text">
+          <i class="bi bi-shield-check me-1"></i>
+          Restrict this API key to specific domains. Leave empty to allow all domains.
+          @if (selectedEnvironment === 'development') {
+            <strong class="text-info">Development mode: Domain restrictions are bypassed.</strong>
+          }
+        </div>
+      </div>
     </form>
   </div>
   <div class="modal-footer">
@@ -377,6 +436,25 @@
           placeholder="Enter description (optional)"></textarea>
       </div>
       <div class="mb-3">
+        <label for="editAllowedDomains" class="form-label">
+          Allowed Domains
+          <small class="text-muted">(Optional - Security Feature)</small>
+        </label>
+        <input
+          type="text"
+          class="form-control"
+          id="editAllowedDomains"
+          formControlName="allowedDomains"
+          placeholder="example.com, app.example.com (comma-separated)">
+        <div class="form-text">
+          <i class="bi bi-shield-check me-1"></i>
+          Restrict this API key to specific domains. Leave empty to allow all domains.
+          @if (selectedEnvironment === 'development') {
+            <strong class="text-info">Development mode: Domain restrictions are bypassed.</strong>
+          }
+        </div>
+      </div>
+      <div class="mb-3">
         <label class="form-label">Usage Limits (Plan-based)</label>
         <div class="row">
           <div class="col-md-6">
@@ -401,5 +479,160 @@
     <button type="button" class="btn btn-primary" (click)="updateApiKey()" [disabled]="!editForm.valid">
       <i class="bi bi-check-circle me-2"></i>Update API Key
     </button>
+  </div>
+</ng-template>
+
+<!-- View Usage Modal -->
+<ng-template #usageModal let-modal>
+  <div class="modal-header">
+    <h5 class="modal-title">
+      <i class="bi bi-graph-up me-2"></i>API Key Usage Details
+    </h5>
+    <button type="button" class="btn-close" (click)="modal.close()"></button>
+  </div>
+  <div class="modal-body">
+    @if (usage) {
+      <div class="row g-4">
+        <!-- Usage Limits -->
+        <div class="col-12">
+          <h6 class="text-muted mb-3">
+            <i class="bi bi-shield-check me-1"></i>Usage Limits
+          </h6>
+          <div class="row g-3">
+            <div class="col-md-6">
+              <div class="card border-info">
+                <div class="card-body text-center">
+                  <div class="display-6 text-info">{{ usage.limits.daily }}</div>
+                  <small class="text-muted">Daily Limit</small>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="card border-info">
+                <div class="card-body text-center">
+                  <div class="display-6 text-info">{{ usage.limits.monthly }}</div>
+                  <small class="text-muted">Monthly Limit</small>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Current Usage -->
+        <div class="col-12">
+          <h6 class="text-muted mb-3">
+            <i class="bi bi-bar-chart-line me-1"></i>Current Usage
+          </h6>
+          <div class="row g-3">
+            <div class="col-md-6 col-lg-3">
+              <div class="card">
+                <div class="card-body text-center">
+                  <div class="h4 text-primary">{{ usage.usage.daily }}</div>
+                  <small class="text-muted">Today</small>
+                  @if (usage.limits.daily > 0) {
+                    <div class="progress mt-2" style="height: 4px;">
+                      <div class="progress-bar" [class]="getUsageProgressClass(usage.usage.daily, usage.limits.daily)"
+                           [style.width.%]="(usage.usage.daily / usage.limits.daily) * 100"></div>
+                    </div>
+                  }
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+              <div class="card">
+                <div class="card-body text-center">
+                  <div class="h4 text-success">{{ usage.usage.weekly }}</div>
+                  <small class="text-muted">This Week</small>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+              <div class="card">
+                <div class="card-body text-center">
+                  <div class="h4 text-warning">{{ usage.usage.monthly }}</div>
+                  <small class="text-muted">This Month</small>
+                  @if (usage.limits.monthly > 0) {
+                    <div class="progress mt-2" style="height: 4px;">
+                      <div class="progress-bar" [class]="getUsageProgressClass(usage.usage.monthly, usage.limits.monthly)"
+                           [style.width.%]="(usage.usage.monthly / usage.limits.monthly) * 100"></div>
+                    </div>
+                  }
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+              <div class="card">
+                <div class="card-body text-center">
+                  <div class="h4 text-secondary">{{ usage.usage.total }}</div>
+                  <small class="text-muted">Total</small>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Last Used -->
+        @if (usage.lastUsed) {
+          <div class="col-12">
+            <div class="alert alert-light">
+              <i class="bi bi-clock-history me-2"></i>
+              <strong>Last Used:</strong> {{ usage.lastUsed | date:'medium' }}
+            </div>
+          </div>
+        }
+
+        <!-- Domain Restrictions -->
+        <div class="col-12">
+          <div class="alert" [class]="usage.allowedDomains && usage.allowedDomains.length > 0 ? 'alert-warning' : 'alert-success'">
+            <i class="bi" [class]="usage.allowedDomains && usage.allowedDomains.length > 0 ? 'bi-shield-check' : 'bi-unlock'"></i>
+            <strong>Domain Restrictions:</strong>
+            @if (usage.allowedDomains && usage.allowedDomains.length > 0) {
+              <span>Restricted to {{ usage.allowedDomains.length }} domain(s)</span>
+              <div class="mt-2">
+                @for (domain of usage.allowedDomains; track domain) {
+                  <span class="badge bg-light text-dark me-1">{{ domain }}</span>
+                }
+              </div>
+            } @else {
+              <span>All domains allowed</span>
+            }
+          </div>
+        </div>
+
+        <!-- API Key Display -->
+        <div class="col-12">
+          <div class="input-group">
+            <input type="text" class="form-control" [value]="usage.apiKey" readonly>
+            <button class="btn btn-outline-secondary" type="button" (click)="copyApiKey(usage.apiKey)">
+              <i class="bi bi-clipboard"></i>
+            </button>
+          </div>
+          @if (copiedApiKey === usage.apiKey) {
+            <small class="text-success mt-1 d-block">
+              <i class="bi bi-check-circle me-1"></i>Copied to clipboard!
+            </small>
+          }
+        </div>
+
+        <!-- Security Notice -->
+        <div class="col-12">
+          <div class="alert alert-warning">
+            <i class="bi bi-shield-exclamation me-2"></i>
+            <strong>Security:</strong> If you suspect this key has been compromised,
+            use the Archive button to immediately disable it and create a new key.
+          </div>
+        </div>
+      </div>
+    } @else {
+      <div class="text-center py-4">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="mt-2 text-muted">Loading usage data...</p>
+      </div>
+    }
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="modal.close()">Close</button>
   </div>
 </ng-template>

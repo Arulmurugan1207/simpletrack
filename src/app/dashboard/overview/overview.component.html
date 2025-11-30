@@ -2,10 +2,31 @@
 <main class="dashboard-main">
   <!-- Key Metrics Section -->
   <section class="metrics-section">
-    <h2 class="section-title">📊 Analytics Overview</h2>
+    <div class="section-header">
+      <h2 class="section-title">📊 Analytics Overview</h2>
+      
+      <!-- API Key Selector -->
+      <div class="api-key-selector" *ngIf="availableApiKeys.length > 0">
+        <label for="apiKeySelect">Select API Key:</label>
+        <select 
+          id="apiKeySelect" 
+          [(ngModel)]="selectedApiKey" 
+          (ngModelChange)="onApiKeyChange()"
+          class="api-key-dropdown">
+          <option value="">-- Select API Key --</option>
+          <option *ngFor="let apiKey of availableApiKeys" [value]="apiKey.apiKey">
+            {{ apiKey.name }} ({{ apiKey.apiKey }})
+          </option>
+        </select>
+      </div>
+      
+      <div class="no-api-keys" *ngIf="availableApiKeys.length === 0">
+        <p class="no-data-message">🔑 No API keys found. Please create an API key first to view analytics data.</p>
+      </div>
+    </div>
 
     <!-- Top Stats Cards -->
-    <div class="stats-grid">
+    <div class="stats-grid" *ngIf="selectedApiKey">
       <div class="stat-card primary">
         <div class="stat-icon">👥</div>
         <div class="stat-content">
@@ -56,7 +77,7 @@
     </div>
 
     <!-- Charts Row -->
-    <div class="charts-row">
+    <div class="charts-row" *ngIf="selectedApiKey">
       <!-- Page Views Chart -->
       <div class="chart-card">
         <div class="chart-header">
@@ -105,7 +126,7 @@
     </div>
 
     <!-- Bottom Row -->
-    <div class="bottom-row">
+    <div class="bottom-row" *ngIf="selectedApiKey">
       <!-- Geographic Data -->
       <div class="data-card">
         <h3>🌍 Top Countries</h3>
@@ -126,9 +147,9 @@
         <h3>🎯 Conversion Funnel</h3>
         <div class="funnel-steps">
           @for (step of funnelSteps; track $index) {
-            <div class="funnel-step">
+            <div class="funnel-step" (click)="onFunnelStepClick(funnelLabels[$index], $index)" style="cursor: pointer;">
               <span class="step-label">{{ funnelLabels[$index] }}</span>
-              <span class="step-value">{{ step }}</span>
+              <span class="step-value">{{ (step * 100) | number:'1.1-1' }}%</span>
             </div>
           }
         </div>
@@ -136,7 +157,7 @@
     </div>
 
     <!-- Full Width Top Pages -->
-    <div id="top-pages-section" class="full-width-section">
+    <div id="top-pages-section" class="full-width-section" *ngIf="selectedApiKey">
       <div class="data-card full-width">
         <h3>🔥 Top Pages</h3>
         <div class="pages-list">
@@ -181,7 +202,7 @@
     </div>
 
     <!-- Realtime Events Section -->
-    <div class="realtime-section">
+    <div class="realtime-section" *ngIf="selectedApiKey">
       <div class="data-card realtime-card">
         <h3>⚡ Live Events</h3>
         <div class="realtime-events">

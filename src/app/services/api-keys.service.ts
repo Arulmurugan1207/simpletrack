@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 export interface ApiKey {
   _id?: string;
@@ -13,6 +14,7 @@ export interface ApiKey {
     daily: number;
     monthly: number;
   };
+  allowedDomains?: string[];
   userId?: string;
 }
 
@@ -37,15 +39,22 @@ export interface ApiKeyUsage {
     total: number;
   };
   lastUsed?: Date;
+  allowedDomains?: string[];
 }
 
 @Injectable({
   providedIn: 'root'
 })
 export class ApiKeysService {
-  private baseUrl = 'http://localhost:2000/analytics/api-keys'; // Adjust if needed
+  private baseUrl = `${environment.apiUrl}/api-keys`; // Use environment variable
+  private selectedEnvironment: 'development' | 'production' = 'production';
+  private selectedApiKey: string | null = null;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) {
+    // Load selected API key from localStorage on init
+    const stored = localStorage.getItem('selectedApiKey');
+    this.selectedApiKey = stored || null;
+  }
 
   private getHeaders(): HttpHeaders {
     const token = localStorage.getItem('authToken');
@@ -59,10 +68,13 @@ export class ApiKeysService {
     });
   }
 
-  createApiKey(name: string, description: string, limits?: { daily: number; monthly: number }): Observable<ApiKey> {
+  createApiKey(name: string, description: string, limits?: { daily: number; monthly: number }, allowedDomains?: string[]): Observable<ApiKey> {
     const body: any = { name, description };
     if (limits) {
       body.limits = limits;
+    }
+    if (allowedDomains && allowedDomains.length > 0) {
+      body.allowedDomains = allowedDomains;
     }
     return this.http.post<ApiKey>(this.baseUrl, body, { headers: this.getHeaders() });
   }
@@ -81,5 +93,28 @@ export class ApiKeysService {
 
   getApiKeyUsage(apiKey: string): Observable<ApiKeyUsage> {
     return this.http.get<ApiKeyUsage>(`${this.baseUrl}/${apiKey}/usage`, { headers: this.getHeaders() });
+  }
+
+  // Environment management methods
+  setSelectedEnvironment(environment: 'development' | 'production'): void {
+    this.selectedEnvironment = environment;
+  }
+
+  getSelectedEnvironment(): 'development' | 'production' {
+    return this.selectedEnvironment;
+  }
+
+  // API Key selection methods
+  setSelectedApiKey(apiKey: string | null): void {
+    this.selectedApiKey = apiKey;
+    if (apiKey) {
+      localStorage.setItem('selectedApiKey', apiKey);
+    } else {
+      localStorage.removeItem('selectedApiKey');
+    }
+  }
+
+  getSelectedApiKey(): string | null {
+    return this.selectedApiKey;
   }
 }

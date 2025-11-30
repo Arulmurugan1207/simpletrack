@@ -17,7 +17,7 @@
 
   // Configuration
   let config = {
-    apiUrl: '',
+    apiUrl: 'https://analytics-dot-node-server-apis.ue.r.appspot.com/analytics/log',
     apiKey: 'unknown', // Changed from serviceName to apiKey
     batchIntervalMs: 5000,
     debug: false,

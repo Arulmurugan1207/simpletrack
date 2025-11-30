@@ -44,6 +44,11 @@ export interface GeographicData {
   flag: string;
 }
 
+export interface PageViewsTrendData {
+  date: string;
+  pageViews: number;
+}
+
 export interface ConversionFunnel {
   steps: {
     name: string;
@@ -91,7 +96,7 @@ export class AnalyticsDataService {
   /**
    * Get analytics metrics
    */
-  getMetrics(dateRange?: DateRange): Observable<AnalyticsMetrics> {
+  getMetrics(dateRange?: DateRange, apiKey?: string): Observable<AnalyticsMetrics> {
     return this.analyticsAPI.getRealtimeMetrics().pipe(
       map((data: any) => ({
         liveVisitors: data.liveVisitors || 0,
@@ -115,15 +120,54 @@ export class AnalyticsDataService {
   /**
    * Get device breakdown data
    */
-  getDeviceBreakdown(dateRange?: DateRange): Observable<DeviceBreakdown> {
+  getDeviceBreakdown(dateRange?: DateRange, apiKey?: string): Observable<DeviceBreakdown> {
     return this.analyticsAPI.getDeviceBreakdown().pipe(
-      map((data: any) => data || {
-        desktop: 0,
-        mobile: 0,
-        tablet: 0,
-        desktopPercentage: 0,
-        mobilePercentage: 0,
-        tabletPercentage: 0
+      map((data: any) => {
+        // Handle new API format: {"devices":[{"device":"Desktop","count":174,"percentage":100}]}
+        if (data && data.devices && Array.isArray(data.devices)) {
+          const deviceBreakdown: DeviceBreakdown = {
+            desktop: 0,
+            mobile: 0,
+            tablet: 0,
+            desktopPercentage: 0,
+            mobilePercentage: 0,
+            tabletPercentage: 0
+          };
+
+          // Transform array format to object format
+          data.devices.forEach((deviceData: any) => {
+            const deviceName = deviceData.device?.toLowerCase();
+            const count = deviceData.count || 0;
+            const percentage = deviceData.percentage || 0;
+
+            switch (deviceName) {
+              case 'desktop':
+                deviceBreakdown.desktop = count;
+                deviceBreakdown.desktopPercentage = percentage;
+                break;
+              case 'mobile':
+                deviceBreakdown.mobile = count;
+                deviceBreakdown.mobilePercentage = percentage;
+                break;
+              case 'tablet':
+                deviceBreakdown.tablet = count;
+                deviceBreakdown.tabletPercentage = percentage;
+                break;
+            }
+          });
+
+          return deviceBreakdown;
+        }
+
+        // Fallback for old format or empty data
+        return data || {
+          desktop: 0,
+          mobile: 0,
+          tablet: 0,
+          desktopPercentage: 0,
+          mobilePercentage: 0,
+          tabletPercentage: 0
+        };
       }),
       catchError(() => of({
         desktop: 0,
@@ -139,16 +183,60 @@ export class AnalyticsDataService {
   /**
    * Get top pages data
    */
-  getTopPages(dateRange?: DateRange): Observable<PageData[]> {
+  getTopPages(dateRange?: DateRange, apiKey?: string): Observable<PageData[]> {
     return of([]);
   }
 
   /**
    * Get geographic data
    */
-  getGeographicData(dateRange?: DateRange): Observable<GeographicData[]> {
+  getGeographicData(dateRange?: DateRange, apiKey?: string): Observable<GeographicData[]> {
     return this.analyticsAPI.getGeographicData().pipe(
-      map((data: any) => Array.isArray(data) ? data : []),
+      map((data: any) => {
+        // Handle new API format: {"geographic": [{"country": "Unknown", "visitors": 172, "percentage": 98.85, "flag": "🏳️"}, ...]}
+        if (data && data.geographic && Array.isArray(data.geographic)) {
+          return data.geographic;
+        }
+
+        // Fallback for old format or empty data
+        return Array.isArray(data) ? data : [];
+      }),
+      catchError(() => of([]))
+    );
+  }
+
+  /**
+   * Get page views trend data
+   */
+  getPageViewsTrend(dateRange?: DateRange, apiKey?: string): Observable<PageViewsTrendData[]> {
+    return this.analyticsAPI.getPageViewsTrend().pipe(
+      map((data: any) => {
+        // Handle API format: {"trend":[{"date":"2025-11-30","pageViews":37}],"period":"daily"}
+        if (data && data.trend && Array.isArray(data.trend)) {
+          return data.trend;
+        }
+
+        // Fallback for old format or empty data
+        return Array.isArray(data) ? data : [];
+      }),
+      catchError(() => of([]))
+    );
+  }
+
+  /**
+   * Get funnel events for a specific step
+   */
+  getFunnelEvents(stepEvent: string, limit: number = 20): Observable<RealtimeEvent[]> {
+    return this.analyticsAPI.getFunnelEvents(stepEvent, limit).pipe(
+      map((data: any) => {
+        // Handle API format: {"step": "page_view", "eventName": "page_view", "events": [...], "pagination": {...}}
+        if (data && data.events && Array.isArray(data.events)) {
+          return data.events;
+        }
+
+        // Fallback for old format or empty data
+        return Array.isArray(data) ? data : [];
+      }),
       catchError(() => of([]))
     );
   }
@@ -156,12 +244,30 @@ export class AnalyticsDataService {
   /**
    * Get conversion funnel data
    */
-  getConversionFunnel(dateRange?: DateRange): Observable<ConversionFunnel> {
+  getConversionFunnel(dateRange?: DateRange, apiKey?: string): Observable<ConversionFunnel> {
     return this.analyticsAPI.getConversionFunnel().pipe(
-      map((data: any) => data || {
-        steps: [],
-        labels: [],
-        values: []
+      map((data: any) => {
+        // Handle new API format: {"funnel": [{"step": "Page View", "visitors": 34, "conversionRate": 100}, ...]}
+        if (data && data.funnel && Array.isArray(data.funnel)) {
+          const steps: { name: string; visitors: number; conversion: number }[] = data.funnel.map((stepData: any) => ({
+            name: stepData.step || '',
+            visitors: stepData.visitors || 0,
+            conversion: stepData.conversionRate || 0
+          }));
+
+          return {
+            steps,
+            labels: steps.map(step => step.name),
+            values: steps.map(step => step.visitors)
+          };
+        }
+
+        // Fallback for old format or empty data
+        return data || {
+          steps: [],
+          labels: [],
+          values: []
+        };
       }),
       catchError(() => of({
         steps: [],

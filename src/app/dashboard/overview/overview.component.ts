@@ -1,17 +1,22 @@
 import { Component, OnInit, OnDestroy, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { AnalyticsDataService, AnalyticsMetrics, DeviceBreakdown, PageData, GeographicData, ConversionFunnel, RealtimeEvent, DateRange } from '../../services/analytics-data.service';
+import { FormsModule } from '@angular/forms';
+import { AnalyticsDataService, AnalyticsMetrics, DeviceBreakdown, PageData, GeographicData, ConversionFunnel, RealtimeEvent, DateRange, PageViewsTrendData } from '../../services/analytics-data.service';
+import { APIKeyManagementService } from '../../services/api-key-management.service';
+import { APIKey } from '../../services/api-key.model';
 import { Subscription, interval, Observable } from 'rxjs';
 import { ViewportScroller } from '@angular/common';
 import { Chart, registerables, ChartConfiguration, ChartData, ChartType } from 'chart.js';
 import { BaseChartDirective } from 'ng2-charts';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { FunnelEventsModalComponent } from '../../funnel-events-modal/funnel-events-modal.component';
 
 // Register Chart.js components
 Chart.register(...registerables);
 
 @Component({
   selector: 'app-overview',
-  imports: [CommonModule, BaseChartDirective],
+  imports: [CommonModule, FormsModule, BaseChartDirective],
   templateUrl: './overview.component.html',
   styleUrl: './overview.component.css'
 })
@@ -192,21 +197,38 @@ export class OverviewComponent implements OnInit, OnDestroy {
   // Geographic data
   geoData: GeographicData[] = [];
 
+  // Page views trend data
+  pageViewsTrend: PageViewsTrendData[] = [];
+
   // Realtime events
   realtimeEvents: RealtimeEvent[] = [];
+
+  // API Key management
+  availableApiKeys: APIKey[] = [];
+  selectedApiKey: string = '';
 
   private subscriptions: Subscription = new Subscription();
   private updateInterval: any;
   private currentDateRange: DateRange | null = null;
 
-  constructor(private analyticsDataService: AnalyticsDataService, private viewportScroller: ViewportScroller) { }
+  constructor(
+    private analyticsDataService: AnalyticsDataService,
+    private apiKeyManagement: APIKeyManagementService,
+    private viewportScroller: ViewportScroller,
+    private modalService: NgbModal
+  ) { }
 
   ngOnInit(): void {
+    // Load available API keys first
+    this.loadApiKeys();
+
     // Subscribe to date range changes
     this.subscriptions.add(
       this.dateRange$.subscribe(dateRange => {
         this.currentDateRange = dateRange;
-        this.loadDataWithDateFilter();
+        if (this.selectedApiKey) {
+          this.loadDataWithDateFilter();
+        }
       })
     );
 
@@ -221,6 +243,10 @@ export class OverviewComponent implements OnInit, OnDestroy {
   }
 
   private loadDataWithDateFilter(): void {
+    if (!this.selectedApiKey) {
+      return; // Don't load data if no API key is selected
+    }
+
     // Clear existing subscriptions
     this.subscriptions.unsubscribe();
     this.subscriptions = new Subscription();
@@ -238,53 +264,116 @@ export class OverviewComponent implements OnInit, OnDestroy {
     this.startRealtimeEvents();
   }
 
-  private loadInitialData(): void {
-    // Load metrics with date filter
+  private loadApiKeys(): void {
     this.subscriptions.add(
-      this.analyticsDataService.getMetrics(this.currentDateRange || undefined).subscribe(data => {
+      this.apiKeyManagement.getUserAPIKeys().subscribe({
+        next: (response) => {
+          this.availableApiKeys = response.apiKeys || [];
+          // Auto-select first API key if available
+          if (this.availableApiKeys.length > 0 && !this.selectedApiKey) {
+            this.selectedApiKey = this.availableApiKeys[0].apiKey;
+            this.loadDataWithDateFilter();
+          }
+        },
+        error: (error) => {
+          console.error('Failed to load API keys:', error);
+          this.availableApiKeys = [];
+        }
+      })
+    );
+  }
+
+  onApiKeyChange(): void {
+    if (this.selectedApiKey) {
+      this.loadDataWithDateFilter();
+    } else {
+      // Clear all data if no API key selected
+      this.clearAllData();
+    }
+  }
+
+  private clearAllData(): void {
+    this.metrics = {
+      liveVisitors: 0,
+      totalPageViews: 0,
+      conversionRate: 0,
+      bounceRate: 0,
+      avgSessionDuration: 0,
+      newVsReturning: { new: 0, returning: 0 }
+    };
+    this.deviceBreakdown = {
+      desktop: 0,
+      mobile: 0,
+      tablet: 0,
+      desktopPercentage: 0,
+      mobilePercentage: 0,
+      tabletPercentage: 0
+    };
+    this.topPages = [];
+    this.geoData = [];
+    this.funnelLabels = [];
+    this.funnelSteps = [];
+    this.realtimeEvents = [];
+    this.updateDoughnutChartData();
+    this.updateBarChartData();
+    this.updateTrendChartData();
+  }
+
+  private loadInitialData(): void {
+    // Load metrics with date filter and API key
+    this.subscriptions.add(
+      this.analyticsDataService.getMetrics(this.currentDateRange || undefined, this.selectedApiKey).subscribe(data => {
         this.metrics = data;
         this.updateTrendChartData();
         this.updateBarChartData();
       })
     );
 
-    // Load device breakdown with date filter
+    // Load device breakdown with date filter and API key
     this.subscriptions.add(
-      this.analyticsDataService.getDeviceBreakdown(this.currentDateRange || undefined).subscribe(data => {
+      this.analyticsDataService.getDeviceBreakdown(this.currentDateRange || undefined, this.selectedApiKey).subscribe(data => {
         this.deviceBreakdown = data;
         this.updateDoughnutChartData();
       })
     );
 
-    // Load top pages with date filter
+    // Load top pages with date filter and API key
     this.subscriptions.add(
-      this.analyticsDataService.getTopPages(this.currentDateRange || undefined).subscribe(data => {
+      this.analyticsDataService.getTopPages(this.currentDateRange || undefined, this.selectedApiKey).subscribe(data => {
         this.topPages = Array.isArray(data) ? data : [];
         this.updatePagination();
       })
     );
 
-    // Load geographic data with date filter
+    // Load geographic data with date filter and API key
     this.subscriptions.add(
-      this.analyticsDataService.getGeographicData(this.currentDateRange || undefined).subscribe(data => {
+      this.analyticsDataService.getGeographicData(this.currentDateRange || undefined, this.selectedApiKey).subscribe(data => {
         this.geoData = Array.isArray(data) ? data : [];
       })
     );
 
-    // Load conversion funnel with date filter
+    // Load conversion funnel with date filter and API key
     this.subscriptions.add(
-      this.analyticsDataService.getConversionFunnel(this.currentDateRange || undefined).subscribe(data => {
+      this.analyticsDataService.getConversionFunnel(this.currentDateRange || undefined, this.selectedApiKey).subscribe(data => {
         this.funnelLabels = data.labels || [];
-        this.funnelSteps = data.values || [];
+        this.funnelSteps = data.steps?.map(step => step.conversion) || [];
+      })
+    );
+
+    // Load page views trend with date filter and API key
+    this.subscriptions.add(
+      this.analyticsDataService.getPageViewsTrend(this.currentDateRange || undefined, this.selectedApiKey).subscribe(data => {
+        this.pageViewsTrend = Array.isArray(data) ? data : [];
+        this.updateTrendChartData();
       })
     );
   }
 
   private startRealtimeUpdates(): void {
-    // Update metrics every 30 seconds with current date filter
+    // Update metrics every 30 seconds with current date filter and API key
     this.updateInterval = setInterval(() => {
       this.subscriptions.add(
-        this.analyticsDataService.getMetrics(this.currentDateRange || undefined).subscribe(data => {
+        this.analyticsDataService.getMetrics(this.currentDateRange || undefined, this.selectedApiKey).subscribe(data => {
           this.metrics = data;
         })
       );
@@ -344,6 +433,30 @@ export class OverviewComponent implements OnInit, OnDestroy {
     return `${Math.floor(diffInSeconds / 86400)}d ago`;
   }
 
+  // Handle funnel step click to show events modal
+  onFunnelStepClick(stepName: string, stepIndex: number): void {
+    // Map step names to event identifiers (you may need to adjust this based on your API)
+    const stepEventMap: { [key: string]: string } = {
+      'Page View': 'page_view',
+      'Product View': 'product_view',
+      'Add to Cart': 'add_to_cart',
+      'Checkout': 'checkout',
+      'Purchase': 'purchase'
+    };
+
+    const stepEvent = stepEventMap[stepName] || stepName.toLowerCase().replace(' ', '_');
+
+    this.analyticsDataService.getFunnelEvents(stepEvent, 20).subscribe(events => {
+      const modalRef = this.modalService.open(FunnelEventsModalComponent, {
+        size: 'xl',
+        centered: true
+      });
+
+      modalRef.componentInstance.stepName = stepName;
+      modalRef.componentInstance.events = events;
+    });
+  }
+
   // Update doughnut chart data when device breakdown changes
   private updateDoughnutChartData(): void {
     this.doughnutChartData = {
@@ -361,60 +474,58 @@ export class OverviewComponent implements OnInit, OnDestroy {
 
   // Update bar chart data for page views trend
   private updateBarChartData(): void {
-    const labels: string[] = [];
-    const data: number[] = [];
-
-    // Generate last 7 days
-    for (let i = 6; i >= 0; i--) {
-      const date = new Date();
-      date.setDate(date.getDate() - i);
-      labels.push(date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
-
-      // Generate realistic trend data based on current metrics
-      const baseViews = this.metrics.totalPageViews || 100;
-      const dailyVariation = 0.7 + Math.random() * 0.6; // 70-130% variation
-      const trendMultiplier = 1 + (i * 0.05); // Slight upward trend
-      const views = Math.round(baseViews * dailyVariation * trendMultiplier / 7);
-      data.push(views);
+    if (this.pageViewsTrend.length > 0) {
+      this.barChartData = {
+        ...this.barChartData,
+        labels: this.pageViewsTrend.map(item => {
+          // Format date for display (assuming ISO date string)
+          const date = new Date(item.date);
+          return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        }),
+        datasets: [{
+          ...this.barChartData.datasets[0],
+          data: this.pageViewsTrend.map(item => item.pageViews)
+        }]
+      };
+    } else {
+      // Fallback: clear the chart if no data
+      this.barChartData = {
+        ...this.barChartData,
+        labels: [],
+        datasets: [{
+          ...this.barChartData.datasets[0],
+          data: []
+        }]
+      };
     }
-
-    this.barChartData = {
-      ...this.barChartData,
-      labels,
-      datasets: [{
-        ...this.barChartData.datasets[0],
-        data
-      }]
-    };
   }
 
   // Generate page views trend data for the last 7 days
   private updateTrendChartData(): void {
-    const labels: string[] = [];
-    const data: number[] = [];
-
-    // Generate last 7 days
-    for (let i = 6; i >= 0; i--) {
-      const date = new Date();
-      date.setDate(date.getDate() - i);
-      labels.push(date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
-
-      // Generate realistic trend data based on current metrics
-      const baseViews = this.metrics.totalPageViews || 100;
-      const dailyVariation = 0.7 + Math.random() * 0.6; // 70-130% variation
-      const trendMultiplier = 1 + (i * 0.05); // Slight upward trend
-      const views = Math.round(baseViews * dailyVariation * trendMultiplier / 7);
-      data.push(views);
+    if (this.pageViewsTrend.length > 0) {
+      this.trendChartData = {
+        ...this.trendChartData,
+        labels: this.pageViewsTrend.map(item => {
+          // Format date for display (assuming ISO date string)
+          const date = new Date(item.date);
+          return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        }),
+        datasets: [{
+          ...this.trendChartData.datasets[0],
+          data: this.pageViewsTrend.map(item => item.pageViews)
+        }]
+      };
+    } else {
+      // Fallback: clear the chart if no data
+      this.trendChartData = {
+        ...this.trendChartData,
+        labels: [],
+        datasets: [{
+          ...this.trendChartData.datasets[0],
+          data: []
+        }]
+      };
     }
-
-    this.trendChartData = {
-      ...this.trendChartData,
-      labels,
-      datasets: [{
-        ...this.trendChartData.datasets[0],
-        data
-      }]
-    };
   }
 
   // Pagination methods

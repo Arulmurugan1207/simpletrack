@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
@@ -31,8 +31,13 @@ export class ApiKeysComponent implements OnInit {
   copiedApiKey: string | null = null;
   usage: ApiKeyUsage | null = null;
 
+  @ViewChild('usageModal') usageModal: any;
+
   // Show archived keys toggle
   showArchivedKeys = false;
+
+  // Environment toggle (dev/prod)
+  selectedEnvironment: 'development' | 'production' = 'production';
 
   // Plan-related properties
   userPlan: UserPlan = {
@@ -63,12 +68,14 @@ export class ApiKeysComponent implements OnInit {
   ) {
     this.apiKeyForm = this.fb.group({
       name: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(50)]],
-      description: ['', [Validators.maxLength(200)]]
+      description: ['', [Validators.maxLength(200)]],
+      allowedDomains: ['']
     });
 
     this.editForm = this.fb.group({
       name: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(50)]],
-      description: ['', [Validators.maxLength(200)]]
+      description: ['', [Validators.maxLength(200)]],
+      allowedDomains: ['']
     });
   }
 
@@ -79,6 +86,11 @@ export class ApiKeysComponent implements OnInit {
       this.router.navigate(['/']);
       return;
     }
+
+    // Load selected environment from localStorage
+    const storedEnv = localStorage.getItem('selectedEnvironment') as 'development' | 'production';
+    this.selectedEnvironment = storedEnv || 'production';
+    this.apiKeysService.setSelectedEnvironment(this.selectedEnvironment);
 
     this.loadUserPlan();
     this.loadApiKeys();
@@ -117,6 +129,14 @@ export class ApiKeysComponent implements OnInit {
   toggleArchivedKeys(): void {
     this.showArchivedKeys = !this.showArchivedKeys;
     // Archived keys are already loaded in loadApiKeys
+  }
+
+  toggleEnvironment(): void {
+    this.selectedEnvironment = this.selectedEnvironment === 'development' ? 'production' : 'development';
+    // Store the selected environment in localStorage
+    localStorage.setItem('selectedEnvironment', this.selectedEnvironment);
+    // Emit environment change event to notify other components
+    this.apiKeysService.setSelectedEnvironment(this.selectedEnvironment);
   }
 
   // Plan-related methods
@@ -231,7 +251,8 @@ export class ApiKeysComponent implements OnInit {
     this.selectedKey = key;
     this.editForm.patchValue({
       name: key.name,
-      description: key.description
+      description: key.description,
+      allowedDomains: key.allowedDomains ? key.allowedDomains.join(', ') : ''
     });
     this.modalRef = this.modalService.open(content, { centered: true });
   }
@@ -239,15 +260,22 @@ export class ApiKeysComponent implements OnInit {
   createApiKey(): void {
     if (this.apiKeyForm.valid) {
       this.isSubmitting = true;
-      const { name, description } = this.apiKeyForm.value;
+      const { name, description, allowedDomains } = this.apiKeyForm.value;
+
+      // Parse domains (comma-separated, trim whitespace)
+      let domainsArray: string[] | undefined;
+      if (allowedDomains && allowedDomains.trim()) {
+        domainsArray = allowedDomains.split(',')
+          .map((domain: string) => domain.trim())
+          .filter((domain: string) => domain.length > 0);
+      }
 
       // Get limits based on user's plan
       const planLimits = this.planUsageLimits[this.userPlan.type] || this.planUsageLimits['free'];
 
-      this.apiKeysService.createApiKey(name, description, planLimits).subscribe({
+      this.apiKeysService.createApiKey(name, description, planLimits, domainsArray).subscribe({
         next: (key) => {
-          this.apiKeys.push(key);
-          // Statistics will be updated when loadApiKeys is called
+          this.loadApiKeys();
           this.modalRef?.close();
           this.apiKeyForm.reset();
           this.isSubmitting = false;
@@ -263,11 +291,20 @@ export class ApiKeysComponent implements OnInit {
   updateApiKey(): void {
     if (this.editForm.valid && this.selectedKey) {
       this.isSubmitting = true;
-      const { name, description } = this.editForm.value;
+      const { name, description, allowedDomains } = this.editForm.value;
+
+      // Parse domains (comma-separated, trim whitespace)
+      let domainsArray: string[] | undefined;
+      if (allowedDomains && allowedDomains.trim()) {
+        domainsArray = allowedDomains.split(',')
+          .map((domain: string) => domain.trim())
+          .filter((domain: string) => domain.length > 0);
+      }
 
       this.apiKeysService.updateApiKey(this.selectedKey.apiKey, {
         name,
-        description
+        description,
+        allowedDomains: domainsArray
       }).subscribe({
         next: () => {
           this.loadApiKeys();
@@ -283,10 +320,11 @@ export class ApiKeysComponent implements OnInit {
   }
 
   archiveApiKey(apiKey: string): void {
-    if (confirm('Are you sure you want to archive this API key?')) {
+    if (confirm('⚠️ SECURITY WARNING: Are you sure you want to immediately disable this API key? This will stop all requests using this key.')) {
       this.apiKeysService.archiveApiKey(apiKey).subscribe({
         next: () => {
           this.loadApiKeys();
+          // Could add notification: "API key has been disabled. All requests using this key will now be rejected."
         },
         error: (err) => console.error('Error archiving API key', err)
       });
@@ -299,8 +337,13 @@ export class ApiKeysComponent implements OnInit {
   }
 
   viewUsage(apiKey: string): void {
+    this.usage = null; // Reset usage data
     this.apiKeysService.getApiKeyUsage(apiKey).subscribe({
-      next: (usage) => this.usage = usage,
+      next: (usage) => {
+        this.usage = usage;
+        // Open the usage modal
+        this.modalRef = this.modalService.open(this.usageModal, { centered: true, size: 'lg' });
+      },
       error: (err) => console.error('Error fetching usage', err)
     });
   }
@@ -342,5 +385,22 @@ export class ApiKeysComponent implements OnInit {
       if (field.errors['maxlength']) return `Maximum length is ${field.errors['maxlength'].requiredLength} characters`;
     }
     return '';
+  }
+
+  getUsageProgressClass(used: number, limit: number): string {
+    if (limit === 0) return 'bg-secondary';
+    const percentage = (used / limit) * 100;
+    if (percentage >= 90) return 'bg-danger';
+    if (percentage >= 75) return 'bg-warning';
+    return 'bg-success';
+  }
+
+  onApiKeySelectionChange(event: any): void {
+    const selectedApiKey = event.target.value;
+    this.apiKeysService.setSelectedApiKey(selectedApiKey || null);
+  }
+
+  getSelectedApiKey(): string | null {
+    return this.apiKeysService.getSelectedApiKey();
   }
 }

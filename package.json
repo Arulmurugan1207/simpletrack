@@ -7,7 +7,7 @@
     "build": "ng build && npm run minify-analytics",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "minify-analytics": "npx terser src/stk-analytics.js -o public/stk-analytics.min.js --compress --mangle"
+    "minify-analytics": "npx terser public/stk-analytics.js -o public/stk-analytics.min.js --compress --mangle"
   },
   "private": true,
   "dependencies": {
