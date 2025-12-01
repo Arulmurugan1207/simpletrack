@@ -340,7 +340,7 @@ export class OverviewComponent implements OnInit, OnDestroy {
       // For page views trend, use real API
       this.subscriptions.add(
         this.analyticsAPIService.getPageViewsData('7d').subscribe(data => {
-          this.pageViewsTrend = Array.isArray(data) ? data : [];
+          this.pageViewsTrend = data?.trend || [];
           this.updateTrendChartData();
           this.updateBarChartData();
         })
