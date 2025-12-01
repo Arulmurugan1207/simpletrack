@@ -2,7 +2,9 @@ import { Component, OnInit, OnDestroy, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AnalyticsDataService, AnalyticsMetrics, DeviceBreakdown, PageData, GeographicData, ConversionFunnel, RealtimeEvent, DateRange, PageViewsTrendData } from '../../services/analytics-data.service';
+import { AnalyticsAPIService } from '../../services/analytics-api.service';
 import { APIKeyManagementService } from '../../services/api-key-management.service';
+import { ApiKeysService } from '../../services/api-keys.service';
 import { APIKey } from '../../services/api-key.model';
 import { Subscription, interval, Observable } from 'rxjs';
 import { ViewportScroller } from '@angular/common';
@@ -213,7 +215,9 @@ export class OverviewComponent implements OnInit, OnDestroy {
 
   constructor(
     private analyticsDataService: AnalyticsDataService,
+    private analyticsAPIService: AnalyticsAPIService,
     private apiKeyManagement: APIKeyManagementService,
+    private apiKeysService: ApiKeysService,
     private viewportScroller: ViewportScroller,
     private modalService: NgbModal
   ) { }
@@ -272,6 +276,7 @@ export class OverviewComponent implements OnInit, OnDestroy {
           // Auto-select first API key if available
           if (this.availableApiKeys.length > 0 && !this.selectedApiKey) {
             this.selectedApiKey = this.availableApiKeys[0].apiKey;
+            this.apiKeysService.setSelectedApiKey(this.selectedApiKey);
             this.loadDataWithDateFilter();
           }
         },
@@ -285,6 +290,8 @@ export class OverviewComponent implements OnInit, OnDestroy {
 
   onApiKeyChange(): void {
     if (this.selectedApiKey) {
+      // Set the selected API key in the service
+      this.apiKeysService.setSelectedApiKey(this.selectedApiKey);
       this.loadDataWithDateFilter();
     } else {
       // Clear all data if no API key selected
@@ -320,64 +327,116 @@ export class OverviewComponent implements OnInit, OnDestroy {
   }
 
   private loadInitialData(): void {
-    // Load metrics with date filter and API key
-    this.subscriptions.add(
-      this.analyticsDataService.getMetrics(this.currentDateRange || undefined, this.selectedApiKey).subscribe(data => {
-        this.metrics = data;
-        this.updateTrendChartData();
-        this.updateBarChartData();
-      })
-    );
+    if (this.selectedApiKey) {
+      // Use real API data
+      this.subscriptions.add(
+        this.analyticsAPIService.getRealtimeMetrics().subscribe(data => {
+          this.metrics = data || this.metrics;
+          this.updateTrendChartData();
+          this.updateBarChartData();
+        })
+      );
 
-    // Load device breakdown with date filter and API key
-    this.subscriptions.add(
-      this.analyticsDataService.getDeviceBreakdown(this.currentDateRange || undefined, this.selectedApiKey).subscribe(data => {
-        this.deviceBreakdown = data;
-        this.updateDoughnutChartData();
-      })
-    );
+      // For page views trend, use real API
+      this.subscriptions.add(
+        this.analyticsAPIService.getPageViewsData('7d').subscribe(data => {
+          this.pageViewsTrend = Array.isArray(data) ? data : [];
+          this.updateTrendChartData();
+          this.updateBarChartData();
+        })
+      );
 
-    // Load top pages with date filter and API key
-    this.subscriptions.add(
-      this.analyticsDataService.getTopPages(this.currentDateRange || undefined, this.selectedApiKey).subscribe(data => {
-        this.topPages = Array.isArray(data) ? data : [];
-        this.updatePagination();
-      })
-    );
+      // For other data, still use mock for now
+      this.subscriptions.add(
+        this.analyticsDataService.getDeviceBreakdown(this.currentDateRange || undefined, this.selectedApiKey).subscribe(data => {
+          this.deviceBreakdown = data;
+          this.updateDoughnutChartData();
+        })
+      );
 
-    // Load geographic data with date filter and API key
-    this.subscriptions.add(
-      this.analyticsDataService.getGeographicData(this.currentDateRange || undefined, this.selectedApiKey).subscribe(data => {
-        this.geoData = Array.isArray(data) ? data : [];
-      })
-    );
+      this.subscriptions.add(
+        this.analyticsDataService.getTopPages(this.currentDateRange || undefined, this.selectedApiKey).subscribe(data => {
+          this.topPages = Array.isArray(data) ? data : [];
+          this.updatePagination();
+        })
+      );
 
-    // Load conversion funnel with date filter and API key
-    this.subscriptions.add(
-      this.analyticsDataService.getConversionFunnel(this.currentDateRange || undefined, this.selectedApiKey).subscribe(data => {
-        this.funnelLabels = data.labels || [];
-        this.funnelSteps = data.steps?.map(step => step.conversion) || [];
-      })
-    );
+      this.subscriptions.add(
+        this.analyticsDataService.getGeographicData(this.currentDateRange || undefined, this.selectedApiKey).subscribe(data => {
+          this.geoData = Array.isArray(data) ? data : [];
+        })
+      );
 
-    // Load page views trend with date filter and API key
-    this.subscriptions.add(
-      this.analyticsDataService.getPageViewsTrend(this.currentDateRange || undefined, this.selectedApiKey).subscribe(data => {
-        this.pageViewsTrend = Array.isArray(data) ? data : [];
-        this.updateTrendChartData();
-      })
-    );
-  }
-
-  private startRealtimeUpdates(): void {
-    // Update metrics every 30 seconds with current date filter and API key
-    this.updateInterval = setInterval(() => {
+      this.subscriptions.add(
+        this.analyticsDataService.getConversionFunnel(this.currentDateRange || undefined, this.selectedApiKey).subscribe(data => {
+          this.funnelLabels = data.labels || [];
+          this.funnelSteps = data.steps?.map(step => step.conversion) || [];
+        })
+      );
+    } else {
+      // Use mock data
       this.subscriptions.add(
         this.analyticsDataService.getMetrics(this.currentDateRange || undefined, this.selectedApiKey).subscribe(data => {
           this.metrics = data;
+          this.updateTrendChartData();
+          this.updateBarChartData();
         })
       );
-    }, 30000);
+
+      this.subscriptions.add(
+        this.analyticsDataService.getDeviceBreakdown(this.currentDateRange || undefined, this.selectedApiKey).subscribe(data => {
+          this.deviceBreakdown = data;
+          this.updateDoughnutChartData();
+        })
+      );
+
+      this.subscriptions.add(
+        this.analyticsDataService.getTopPages(this.currentDateRange || undefined, this.selectedApiKey).subscribe(data => {
+          this.topPages = Array.isArray(data) ? data : [];
+          this.updatePagination();
+        })
+      );
+
+      this.subscriptions.add(
+        this.analyticsDataService.getGeographicData(this.currentDateRange || undefined, this.selectedApiKey).subscribe(data => {
+          this.geoData = Array.isArray(data) ? data : [];
+        })
+      );
+
+      this.subscriptions.add(
+        this.analyticsDataService.getConversionFunnel(this.currentDateRange || undefined, this.selectedApiKey).subscribe(data => {
+          this.funnelLabels = data.labels || [];
+          this.funnelSteps = data.steps?.map(step => step.conversion) || [];
+        })
+      );
+
+      this.subscriptions.add(
+        this.analyticsDataService.getPageViewsTrend(this.currentDateRange || undefined, this.selectedApiKey).subscribe(data => {
+          this.pageViewsTrend = Array.isArray(data) ? data : [];
+          this.updateTrendChartData();
+        })
+      );
+    }
+  }  private startRealtimeUpdates(): void {
+    if (this.selectedApiKey) {
+      // Update metrics every 30 seconds with real API
+      this.updateInterval = setInterval(() => {
+        this.subscriptions.add(
+          this.analyticsAPIService.getRealtimeMetrics().subscribe(data => {
+            this.metrics = data || this.metrics;
+          })
+        );
+      }, 30000);
+    } else {
+      // Update metrics every 30 seconds with mock data
+      this.updateInterval = setInterval(() => {
+        this.subscriptions.add(
+          this.analyticsDataService.getMetrics(this.currentDateRange || undefined, this.selectedApiKey).subscribe(data => {
+            this.metrics = data;
+          })
+        );
+      }, 30000);
+    }
   }
 
   private startRealtimeEvents(): void {
