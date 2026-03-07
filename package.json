@@ -4,7 +4,7 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "build": "ng build && npm run minify-analytics",
+    "build": "ng build && npm run minify:analytics",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "minify:analytics": "terser public/stk-analytics.js -o public/stk-analytics.min.js --compress --mangle"
