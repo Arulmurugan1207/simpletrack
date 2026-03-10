@@ -242,11 +242,11 @@ PulzioAnalytics.init({
   excludeOwner: true
 });`,
     'owner-localstorage': `// Set the flag manually in your browser console once:
-localStorage.setItem('plz_is_owner', 'true');
+localStorage.setItem('pulz_is_owner', 'true');
 // Reload — the SDK reads this automatically on every page load.
 
 // Remove to re-enable tracking:
-localStorage.removeItem('plz_is_owner');`,
+localStorage.removeItem('pulz_is_owner');`,
     'owner-env': `// Automatically suppress tracking on localhost / staging:
 const isLocalDev = location.hostname === 'localhost'
                || location.hostname === '127.0.0.1'

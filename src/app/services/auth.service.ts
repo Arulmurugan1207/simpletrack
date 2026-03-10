@@ -117,7 +117,7 @@ export class AuthService {
     // Clear legacy keys from old auth system
     localStorage.removeItem('currentUser');
     localStorage.removeItem('userEmail');
-    // NOTE: plz_is_owner is intentionally NOT cleared here.
+    // NOTE: pulz_is_owner is intentionally NOT cleared here.
     // It is a browser-level "do not track this device" flag.
     // Only PulzioAnalytics.enableTracking() should remove it.
 
@@ -129,14 +129,14 @@ export class AuthService {
 
   /**
    * Tells the analytics SDK whether the current browser user is the site owner.
-   * Only activates (sets plz_is_owner) when role is 'owner' — never clears it.
+   * Only activates (sets pulz_is_owner) when role is 'owner' — never clears it.
    * Clearing is done exclusively via PulzioAnalytics.enableTracking() in the browser.
    */
   applyOwnerTracking(role: string | undefined): void {
     if (role !== 'owner') return;
     const win = window as any;
     if (win.PulzioAnalytics?.setOwner) {
-      // persist=true writes plz_is_owner to localStorage so it survives page refreshes
+      // persist=true writes pulz_is_owner to localStorage so it survives page refreshes
       win.PulzioAnalytics.setOwner(true, true);
     }
   }

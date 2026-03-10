@@ -57,15 +57,15 @@
   let lastRateLimitTime = 0;
 
   // Owner exclusion flag — set via init({ excludeOwner: true }), PulzioAnalytics.setOwner(true),
-  // or by setting localStorage key 'plz_is_owner' = 'true' in the browser.
+  // or by setting localStorage key 'pulz_is_owner' = 'true' in the browser.
   let isOwner = (function() {
-    try { return localStorage.getItem('plz_is_owner') === 'true'; } catch(e) { return false; }
+    try { return localStorage.getItem('pulz_is_owner') === 'true'; } catch(e) { return false; }
   })();
   let ownerOverride = null;
 
   function readOwnerFlagFromStorage() {
     try {
-      return localStorage.getItem('plz_is_owner') === 'true';
+      return localStorage.getItem('pulz_is_owner') === 'true';
     } catch (e) {
       return false;
     }
@@ -1091,8 +1091,8 @@
       isOwner = ownerOverride;
       if (persist) {
         try {
-          if (isOwner) localStorage.setItem('plz_is_owner', 'true');
-          else localStorage.removeItem('plz_is_owner');
+          if (isOwner) localStorage.setItem('pulz_is_owner', 'true');
+          else localStorage.removeItem('pulz_is_owner');
         } catch(e) {}
       }
       if (isOwner) {
@@ -1104,7 +1104,7 @@
     // Permanently disable tracking for this browser (survives page refreshes).
     // Useful for devs/admins: run PulzioAnalytics.disableTracking() once in the console.
     disableTracking: function() {
-      try { localStorage.setItem('plz_is_owner', 'true'); } catch(e) {}
+      try { localStorage.setItem('pulz_is_owner', 'true'); } catch(e) {}
       ownerOverride = true;
       isOwner = true;
       clearQueuedEvents('disableTracking()');
@@ -1113,7 +1113,7 @@
 
     // Re-enable tracking for this browser after disableTracking() was called.
     enableTracking: function() {
-      try { localStorage.removeItem('plz_is_owner'); } catch(e) {}
+      try { localStorage.removeItem('pulz_is_owner'); } catch(e) {}
       ownerOverride = false;
       isOwner = false;
       if (config.debug) console.log('[Analytics] Tracking re-enabled for this browser.');
