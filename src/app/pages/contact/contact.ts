@@ -38,8 +38,8 @@ export class Contact {
     {
       icon: 'pi-envelope',
       title: 'Email',
-      value: 'support@Pulzivo',
-      link: 'mailto:support@Pulzivo'
+      value: 'support@pulzivo.com',
+      link: 'mailto:support@pulzivo.com'
     },
     {
       icon: 'pi-clock',
