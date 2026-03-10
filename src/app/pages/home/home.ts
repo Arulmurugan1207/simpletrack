@@ -42,13 +42,13 @@ PulzivoAnalytics.sendBatch();`;
   private highlighted = false;
 
   constructor(private meta: Meta, private titleService: Title) {
-    this.meta.updateTag({ name: 'description', content: 'The Pulse of Modern Product Analytics. Track page views, clicks, custom events, and user journeys — privacy-first, cookieless, no banners required.' });
+    this.meta.updateTag({ name: 'description', content: 'The Pulse of Modern Web & Product Analytics. Track page views, clicks, custom events, and user journeys — privacy-first, cookieless, no banners required.' });
     this.meta.updateTag({ property: 'og:url', content: 'https://pulzivo.com/' });
     this.meta.updateTag({ property: 'og:title', content: 'Pulzivo Analytics — The Pulse of Modern Product Analytics' });
-    this.meta.updateTag({ property: 'og:description', content: 'The Pulse of Modern Product Analytics. Privacy-first, cookieless analytics for websites and applications.' });
+    this.meta.updateTag({ property: 'og:description', content: 'The Pulse of Modern Web & Product Analytics. Privacy-first, cookieless analytics for websites and applications.' });
     this.meta.updateTag({ property: 'twitter:url', content: 'https://pulzivo.com/' });
     this.meta.updateTag({ property: 'twitter:title', content: 'Pulzivo Analytics — The Pulse of Modern Product Analytics' });
-    this.meta.updateTag({ property: 'twitter:description', content: 'The Pulse of Modern Product Analytics. Privacy-first, cookieless analytics for websites and applications.' });
+    this.meta.updateTag({ property: 'twitter:description', content: 'The Pulse of Modern Web & Product Analytics. Privacy-first, cookieless analytics for websites and applications.' });
   }
 
   features = [
