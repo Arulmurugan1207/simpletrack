@@ -43,6 +43,16 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/contact/contact').then(m => m.Contact)
   },
   {
+    path: 'privacy',
+    title: 'Privacy Policy',
+    loadComponent: () => import('./pages/privacy/privacy').then(m => m.Privacy)
+  },
+  {
+    path: 'terms',
+    title: 'Terms of Service',
+    loadComponent: () => import('./pages/terms/terms').then(m => m.Terms)
+  },
+  {
     path: 'dashboard',
     loadComponent: () => import('./pages/dashboard/dashboard').then(m => m.Dashboard),
     canActivate: [AuthGuard],
