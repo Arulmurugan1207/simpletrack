@@ -18,7 +18,7 @@ hljs.registerLanguage('javascript', javascript);
 hljs.registerLanguage('xml', xml);
 hljs.registerLanguage('bash', bash);
 
-declare const PulzioAnalytics: ((cmd: string, ...args: any[]) => void) | undefined;
+declare const PulzivoAnalytics: ((cmd: string, ...args: any[]) => void) | undefined;
 
 interface NavItem {
   id: string;
@@ -111,7 +111,7 @@ export class Docs implements OnInit, OnDestroy, AfterViewChecked {
     },
     {
       question: 'Can I track custom events?',
-      answer: 'Yes! Custom event tracking is available on Pro and Enterprise plans. Use PulzioAnalytics() or PulzioAnalytics.trackEvent() to track any custom event.'
+      answer: 'Yes! Custom event tracking is available on Pro and Enterprise plans. Use PulzivoAnalytics() or PulzivoAnalytics.trackEvent() to track any custom event.'
     },
     {
       question: 'How do I view my data?',
@@ -165,14 +165,14 @@ export class Docs implements OnInit, OnDestroy, AfterViewChecked {
 </html>`,
     'component-integration': `// Angular/React/Vue component
 handleButtonClick() {
-  window.PulzioAnalytics.trackEvent('button_click', {
+  window.PulzivoAnalytics.trackEvent('button_click', {
     button: 'signup',
     page: 'home'
   });
 }`,
     'vanilla-js-events': `// Vanilla JavaScript
 document.querySelector('#myButton').addEventListener('click', () => {
-  window.PulzioAnalytics.trackEvent('button_click', {
+  window.PulzivoAnalytics.trackEvent('button_click', {
     button: 'signup'
   });
 });`,
@@ -187,57 +187,57 @@ document.querySelector('#myButton').addEventListener('click', () => {
     'data-click-attributes': `<button data-click="signup-button">Sign Up</button>
 <a href="/pricing" data-click="pricing-link">View Pricing</a>
 <div data-click="hero-banner" class="banner">...</div>`,
-    'custom-event-example': `window.PulzioAnalytics.trackEvent('video_play', {
+    'custom-event-example': `window.PulzivoAnalytics.trackEvent('video_play', {
   video_id: 'intro-tutorial',
   duration: 120
 })`,
-    'stk-api-simple': `// Simple PulzioAnalytics() API (recommended)
-PulzioAnalytics('event', 'button_clicked', { button_id: 'signup' });
-PulzioAnalytics('event', 'video_play', { video_id: 'intro' });
-PulzioAnalytics('event', 'download', { file: 'whitepaper.pdf' });`,
+    'stk-api-simple': `// Simple PulzivoAnalytics() API (recommended)
+PulzivoAnalytics('event', 'button_clicked', { button_id: 'signup' });
+PulzivoAnalytics('event', 'video_play', { video_id: 'intro' });
+PulzivoAnalytics('event', 'download', { file: 'whitepaper.pdf' });`,
     'stk-api-identify': `// User identification
-PulzioAnalytics('identify', 'user@example.com');
+PulzivoAnalytics('identify', 'user@example.com');
 
 // Track page view
-PulzioAnalytics('page', '/custom-page');
+PulzivoAnalytics('page', '/custom-page');
 
 // Execute when ready
-PulzioAnalytics(() => {
+PulzivoAnalytics(() => {
   console.log('Analytics ready!');
 });`,
     'ecommerce-tracking': `// Product view
-window.PulzioAnalytics.trackEvent('product_view', {
+window.PulzivoAnalytics.trackEvent('product_view', {
   product_id: 'SKU-123',
   name: 'Widget Pro',
   price: 49.99
 });
 
 // Add to cart
-window.PulzioAnalytics.trackEvent('add_to_cart', {
+window.PulzivoAnalytics.trackEvent('add_to_cart', {
   product_id: 'SKU-123',
   quantity: 2,
   value: 99.98
 });`,
     'immediate-send': `async function handleFormSubmit(e) {
   e.preventDefault();
-  window.PulzioAnalytics.trackEvent('form_submit', { form: 'contact' });
-  await window.PulzioAnalytics.sendBatch();
+  window.PulzivoAnalytics.trackEvent('form_submit', { form: 'contact' });
+  await window.PulzivoAnalytics.sendBatch();
   // Now safe to navigate away
 }`,
     'owner-console': `// Run once in your browser console to permanently
 // disable tracking for yourself on this device:
-PulzioAnalytics.disableTracking();
+PulzivoAnalytics.disableTracking();
 
 // Undo it anytime:
-PulzioAnalytics.enableTracking();`,
+PulzivoAnalytics.enableTracking();`,
     'owner-login': `// Call after your own login resolves:
 const user = await getCurrentUser();
-PulzioAnalytics.setOwner(user.role === 'owner' || user.role === 'admin');
+PulzivoAnalytics.setOwner(user.role === 'owner' || user.role === 'admin');
 
 // With persistence across page refreshes (saves to localStorage):
-PulzioAnalytics.setOwner(true, true); // second arg = persist`,
+PulzivoAnalytics.setOwner(true, true); // second arg = persist`,
     'owner-init': `// Suppress tracking from the very first event:
-PulzioAnalytics.init({
+PulzivoAnalytics.init({
   apiKey: 'your-key',
   excludeOwner: true
 });`,
@@ -252,23 +252,23 @@ const isLocalDev = location.hostname === 'localhost'
                || location.hostname === '127.0.0.1'
                || location.hostname.endsWith('.staging.example.com');
 
-PulzioAnalytics.init({
+PulzivoAnalytics.init({
   apiKey: 'your-key',
   excludeOwner: isLocalDev
 });`,
     'user-email-basic': `// On login
-window.PulzioAnalytics.setUserEmail('user@example.com');
+window.PulzivoAnalytics.setUserEmail('user@example.com');
 
 // On logout
-window.PulzioAnalytics.clearUserEmail();`,
+window.PulzivoAnalytics.clearUserEmail();`,
     'react-login-integration': `function LoginForm() {
   const handleLogin = async (email) => {
     await loginUser(email);
-    window.PulzioAnalytics.setUserEmail(email);
+    window.PulzivoAnalytics.setUserEmail(email);
   };
   
   const handleLogout = () => {
-    window.PulzioAnalytics.clearUserEmail();
+    window.PulzivoAnalytics.clearUserEmail();
     logoutUser();
   };
 }`,
@@ -286,7 +286,7 @@ window.PulzioAnalytics.clearUserEmail();`,
 <!-- Click: tracked when user clicks anywhere inside banner -->`,
     'promo-manual-events': `// Manual tracking (if needed)
 // Track impression
-PulzioAnalytics('event', 'impression', {
+PulzivoAnalytics('event', 'impression', {
   impression_id: 'custom-banner',
   impression_name: 'Custom Banner',
   category: 'promo',
@@ -294,7 +294,7 @@ PulzioAnalytics('event', 'impression', {
 });
 
 // Track click
-PulzioAnalytics('event', 'impression_click', {
+PulzivoAnalytics('event', 'impression_click', {
   impression_id: 'custom-banner',
   impression_name: 'Custom Banner',
   category: 'promo'
@@ -346,8 +346,8 @@ PulzioAnalytics('event', 'impression_click', {
 
   private trackCodeCopy(section: string) {
     try {
-      if (typeof PulzioAnalytics !== 'undefined') {
-        PulzioAnalytics('event', 'code_copy', { section });
+      if (typeof PulzivoAnalytics !== 'undefined') {
+        PulzivoAnalytics('event', 'code_copy', { section });
       }
     } catch (_) {}
   }

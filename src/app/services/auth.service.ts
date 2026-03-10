@@ -119,7 +119,7 @@ export class AuthService {
     localStorage.removeItem('userEmail');
     // NOTE: pulz_is_owner is intentionally NOT cleared here.
     // It is a browser-level "do not track this device" flag.
-    // Only PulzioAnalytics.enableTracking() should remove it.
+    // Only PulzivoAnalytics.enableTracking() should remove it.
 
     // Redirect to home page after logout (unless explicitly prevented)
     if (redirect) {
@@ -130,14 +130,14 @@ export class AuthService {
   /**
    * Tells the analytics SDK whether the current browser user is the site owner.
    * Only activates (sets pulz_is_owner) when role is 'owner' — never clears it.
-   * Clearing is done exclusively via PulzioAnalytics.enableTracking() in the browser.
+   * Clearing is done exclusively via PulzivoAnalytics.enableTracking() in the browser.
    */
   applyOwnerTracking(role: string | undefined): void {
     if (role !== 'owner') return;
     const win = window as any;
-    if (win.PulzioAnalytics?.setOwner) {
+    if (win.PulzivoAnalytics?.setOwner) {
       // persist=true writes pulz_is_owner to localStorage so it survives page refreshes
-      win.PulzioAnalytics.setOwner(true, true);
+      win.PulzivoAnalytics.setOwner(true, true);
     }
   }
 

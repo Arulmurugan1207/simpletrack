@@ -56,7 +56,7 @@
   let rateLimitBackoff = 0;
   let lastRateLimitTime = 0;
 
-  // Owner exclusion flag — set via init({ excludeOwner: true }), PulzioAnalytics.setOwner(true),
+  // Owner exclusion flag — set via init({ excludeOwner: true }), PulzivoAnalytics.setOwner(true),
   // or by setting localStorage key 'pulz_is_owner' = 'true' in the browser.
   let isOwner = (function() {
     try { return localStorage.getItem('pulz_is_owner') === 'true'; } catch(e) { return false; }
@@ -1083,7 +1083,7 @@
     },
 
     // Mark the current user as the site owner — all tracking is suppressed.
-    // Call after login: PulzioAnalytics.setOwner(user.role === 'owner')
+    // Call after login: PulzivoAnalytics.setOwner(user.role === 'owner')
     // Or pass init({ excludeOwner: true }) to suppress immediately.
     // Pass persist=true to save to localStorage so it survives page refreshes.
     setOwner: function(flag, persist = false) {
@@ -1102,7 +1102,7 @@
     },
 
     // Permanently disable tracking for this browser (survives page refreshes).
-    // Useful for devs/admins: run PulzioAnalytics.disableTracking() once in the console.
+    // Useful for devs/admins: run PulzivoAnalytics.disableTracking() once in the console.
     disableTracking: function() {
       try { localStorage.setItem('pulz_is_owner', 'true'); } catch(e) {}
       ownerOverride = true;
@@ -1281,43 +1281,43 @@
   };
 
   // Make it available globally as object
-  window.PulzioAnalytics = Analytics;
+  window.PulzivoAnalytics = Analytics;
   
-  // Make PulzioAnalytics callable as a function for easier API
-  // PulzioAnalytics('event', 'name', data) or PulzioAnalytics.trackEvent('name', data)
-  const originalAnalytics = window.PulzioAnalytics;
-  window.PulzioAnalytics = function(command, ...args) {
+  // Make PulzivoAnalytics callable as a function for easier API
+  // PulzivoAnalytics('event', 'name', data) or PulzivoAnalytics.trackEvent('name', data)
+  const originalAnalytics = window.PulzivoAnalytics;
+  window.PulzivoAnalytics = function(command, ...args) {
     if (typeof command === 'string') {
       switch (command) {
         case 'event':
-          // PulzioAnalytics('event', 'button_clicked', { button_id: 'signup' })
+          // PulzivoAnalytics('event', 'button_clicked', { button_id: 'signup' })
           const [eventName, eventData] = args;
           return originalAnalytics.trackEvent(eventName, eventData || {});
         case 'identify':
-          // PulzioAnalytics('identify', 'user@example.com')
+          // PulzivoAnalytics('identify', 'user@example.com')
           return originalAnalytics.setUserEmail(args[0]);
         case 'page_view':
-          // PulzioAnalytics('page_view', 'Page Title', '/path')
+          // PulzivoAnalytics('page_view', 'Page Title', '/path')
           return originalAnalytics.trackPageView(args[0], args[1]);
         case 'page':
-          // PulzioAnalytics('page', '/custom-page')
+          // PulzivoAnalytics('page', '/custom-page')
           return originalAnalytics.trackNavigation(args[0], args[1] || {});
         default:
-          console.warn('[PulzioAnalytics] Unknown command:', command);
+          console.warn('[PulzivoAnalytics] Unknown command:', command);
       }
     } else if (typeof command === 'function') {
-      // PulzioAnalytics(() => { ... }) - Execute when ready
+      // PulzivoAnalytics(() => { ... }) - Execute when ready
       if (isInitialized) {
         command();
       } else {
-        setTimeout(() => window.PulzioAnalytics(command), 100);
+        setTimeout(() => window.PulzivoAnalytics(command), 100);
       }
     }
   };
   
   // Copy all methods to the function so it works as both function and object
   Object.keys(originalAnalytics).forEach(key => {
-    window.PulzioAnalytics[key] = originalAnalytics[key];
+    window.PulzivoAnalytics[key] = originalAnalytics[key];
   });
 
   // Get configuration from script tag data attributes

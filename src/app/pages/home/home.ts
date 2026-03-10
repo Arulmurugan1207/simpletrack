@@ -23,19 +23,19 @@ export class Home implements AfterViewChecked {
   script = `<script src="https://pulzivo.com/pulzivo-analytics.min.js" data-api-key="YOUR_API_KEY"></script>`;
 
   jsSnippet = `// Track a custom event
-PulzioAnalytics('event', 'button_click', { label: 'signup-cta' });
+PulzivoAnalytics('event', 'button_click', { label: 'signup-cta' });
 
 // Identify a user
-PulzioAnalytics('identify', 'user@example.com');
+PulzivoAnalytics('identify', 'user@example.com');
 
 // Track a page view manually
-PulzioAnalytics('page', '/checkout');
+PulzivoAnalytics('page', '/checkout');
 
 // Exclude yourself (owner) from stats
-PulzioAnalytics.setOwner(true);
+PulzivoAnalytics.setOwner(true);
 
 // Send queued events immediately
-PulzioAnalytics.sendBatch();`;
+PulzivoAnalytics.sendBatch();`;
 
   copied = signal(false);
   activeTab = signal<'html' | 'js'>('html');

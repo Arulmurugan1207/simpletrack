@@ -601,9 +601,9 @@ export class DashboardSettings implements OnInit {
       // Update the signal
       this.enabledFeatures.set(enabledFeatures);
       
-      // Notify analytics SDK if it exists (use PulzioAnalytics global)
-      if ((window as any).PulzioAnalytics && (window as any).PulzioAnalytics.updatePreferences) {
-        (window as any).PulzioAnalytics.updatePreferences(formValue);
+      // Notify analytics SDK if it exists (use PulzivoAnalytics global)
+      if ((window as any).PulzivoAnalytics && (window as any).PulzivoAnalytics.updatePreferences) {
+        (window as any).PulzivoAnalytics.updatePreferences(formValue);
       }
       
       this.loading.set(false);

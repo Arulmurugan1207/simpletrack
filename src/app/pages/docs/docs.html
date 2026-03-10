@@ -86,13 +86,13 @@
           <ng-template pTemplate="header">
             <h4><i class="pi pi-code"></i> Framework Integration</h4>
           </ng-template>
-          <p>Use the global <code>PulzioAnalytics</code> object in your components:</p>
+          <p>Use the global <code>PulzivoAnalytics</code> object in your components:</p>
           <div class="code-block-wrapper">
             <button pButton type="button" icon="pi pi-copy" (click)="copyCode(codeBlocks['component-integration'])" class="copy-btn" size="small"></button>
             <pre class="code-block"><code>{{ codeBlocks['component-integration'] }}</code></pre>
           </div>
           <p-message severity="info" styleClass="mt-3">
-            <span><strong>TypeScript users:</strong> <code>PulzioAnalytics</code> is a runtime global — add <code>declare const PulzioAnalytics: ((cmd: string, ...args: any[]) => void) | undefined;</code> at the top of any <code>.ts</code> file that calls it. This tells TypeScript the variable exists at runtime without importing anything.</span>
+            <span><strong>TypeScript users:</strong> <code>PulzivoAnalytics</code> is a runtime global — add <code>declare const PulzivoAnalytics: ((cmd: string, ...args: any[]) => void) | undefined;</code> at the top of any <code>.ts</code> file that calls it. This tells TypeScript the variable exists at runtime without importing anything.</span>
           </p-message>
         </p-card>
       </section>
@@ -170,14 +170,14 @@
         </div>
         <p class="lead">Track custom user actions and business events.</p>
 
-        <h3>Simple PulzioAnalytics() API</h3>
+        <h3>Simple PulzivoAnalytics() API</h3>
         <p>Use the convenient functional API for cleaner code:</p>
         <div class="code-block-wrapper">
           <button pButton type="button" icon="pi pi-copy" (click)="copyCode(codeBlocks['stk-api-simple'])" class="copy-btn" size="small"></button>
           <pre class="code-block"><code>{{ codeBlocks['stk-api-simple'] }}</code></pre>
         </div>
 
-        <h3>PulzioAnalytics() Advanced Usage</h3>
+        <h3>PulzivoAnalytics() Advanced Usage</h3>
         <div class="code-block-wrapper">
           <button pButton type="button" icon="pi pi-copy" (click)="copyCode(codeBlocks['stk-api-identify'])" class="copy-btn" size="small"></button>
           <pre class="code-block"><code>{{ codeBlocks['stk-api-identify'] }}</code></pre>
