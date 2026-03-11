@@ -15,7 +15,7 @@
   </ng-template>
 
   <div class="sign-in-content">
-    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" id="sign-in-form">
       <div class="input-group">
         <label for="email">Email</label>
         <input 

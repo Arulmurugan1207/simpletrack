@@ -12,6 +12,7 @@ import { PopoverModule, Popover } from 'primeng/popover';
 import { ButtonModule } from 'primeng/button';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { SkeletonModule } from 'primeng/skeleton';
+import { TooltipModule } from 'primeng/tooltip';
 import {
   AnalyticsDataService,
   AnalyticsMetrics,
@@ -52,10 +53,19 @@ export interface EventData {
   lastSeen?: string;
 }
 
+export interface FormInteractionData {
+  formId: string;
+  submissions: number;
+  abandons: number;
+  avgTimeToComplete: number;
+  conversionRate: number;
+  fieldInteractions: number;
+}
+
 @Component({
   selector: 'app-dashboard-overview',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, ChartModule, SelectModule, TableModule, TagModule, DatePickerModule, PopoverModule, ButtonModule, ProgressSpinnerModule, SkeletonModule],
+  imports: [CommonModule, FormsModule, RouterLink, ChartModule, SelectModule, TableModule, TagModule, DatePickerModule, PopoverModule, ButtonModule, ProgressSpinnerModule, SkeletonModule, TooltipModule],
 
   templateUrl: './overview.html',
   styleUrl: './overview.scss',
@@ -83,6 +93,8 @@ export class DashboardOverview implements OnInit, OnDestroy {
   topPagesTotal = 0;
   topPagesPage = 1;
   topPagesRows = 10;
+  entryPages: PageData[] = [];
+  exitPages: PageData[] = [];
   geoData: GeographicData[] = [];
   pageViewsTrend: PageViewsTrendData[] = [];
   realtimeEvents: RealtimeEvent[] = [];
@@ -103,8 +115,17 @@ export class DashboardOverview implements OnInit, OnDestroy {
   customEventsTotal = 0;
   customEventsPage = 1;
   customEventsRows = 10;
+  formInteractions: FormInteractionData[] = [];
+  formInteractionsTotal = 0;
+  formInteractionsPage = 1;
+  formInteractionsRows = 10;
+  tooltipInsights: any[] = [];
+  tooltipInsightsTotal = 0;
+  tooltipInsightsPage = 1;
+  tooltipInsightsRows = 10;
   isLiveEventsActive = true;
   showLiveEvents = true;
+  isRefreshing = false;
   private liveEventsSubscription?: Subscription;
 
   // Overview tabs management (reduced to 2 tabs)
@@ -121,6 +142,7 @@ export class DashboardOverview implements OnInit, OnDestroy {
     devices: false,
     geography: false,
     topPages: false,
+    entryExit: false,
     conversion: false,
     features: false,
     liveEvents: false,
@@ -128,7 +150,9 @@ export class DashboardOverview implements OnInit, OnDestroy {
     browsers: false,
     webVitals: false,
     clicks: false,
-    customEvents: false
+    customEvents: false,
+    formInteractions: false,
+    tooltipInsights: false
   };
   
   funnelLabels: string[] = [];
@@ -470,6 +494,25 @@ export class DashboardOverview implements OnInit, OnDestroy {
     }, 30000);
   }
 
+  manualRefresh(): void {
+    if (this.isRefreshing || !this.selectedApiKey) return;
+    
+    this.isRefreshing = true;
+    this.cdr.markForCheck();
+
+    // Reload all data
+    this.loadAllData();
+
+    // Reset the auto-refresh timer (restart the 30s countdown)
+    this.startRealtimeUpdates();
+
+    // Stop the loading spinner after a brief delay
+    setTimeout(() => {
+      this.isRefreshing = false;
+      this.cdr.markForCheck();
+    }, 1000);
+  }
+
   private startRealtimeEvents(): void {
     if (!this.isLiveEventsActive) return;
     
@@ -566,12 +609,14 @@ export class DashboardOverview implements OnInit, OnDestroy {
     this.loadingStates.devices = true;
     this.loadingStates.geography = true;
     this.loadingStates.topPages = true;
+    this.loadingStates.entryExit = true;
     this.loadingStates.conversion = true;
     this.loadingStates.trafficSources = true;
     this.loadingStates.browsers = true;
     this.loadingStates.webVitals = true;
     this.loadingStates.clicks = true;
     this.loadingStates.customEvents = true;
+    this.loadingStates.formInteractions = true;
     this.cdr.markForCheck();
     
     try {
@@ -582,12 +627,15 @@ export class DashboardOverview implements OnInit, OnDestroy {
         this.loadDevicesWithDelay(),
         this.loadGeographyWithDelay(),
         this.loadTopPagesWithDelay(),
+        this.loadEntryExitPagesWithDelay(),
         this.loadConversionWithDelay(),
         this.loadTrafficSourcesWithDelay(),
         this.loadBrowsersWithDelay(),
         this.loadWebVitalsWithDelay(),
         this.loadClicksWithDelay(),
-        this.loadCustomEventsWithDelay()
+        this.loadCustomEventsWithDelay(),
+        this.loadFormInteractionsWithDelay(),
+        this.loadTooltipInsightsWithDelay()
       ]);
     } catch (error) {
       console.error('Error loading analytics data:', error);
@@ -695,6 +743,31 @@ export class DashboardOverview implements OnInit, OnDestroy {
           }
         });
       }, 400 + Math.random() * 600);
+    });
+  }
+
+  private async loadEntryExitPagesWithDelay(): Promise<void> {
+    return new Promise(resolve => {
+      setTimeout(() => {
+        // Load real entry and exit pages from API
+        Promise.all([
+          this.analyticsAPIService.getEntryPages(this.currentDateRange ?? undefined, 5).toPromise(),
+          this.analyticsAPIService.getExitPages(this.currentDateRange ?? undefined, 5).toPromise()
+        ]).then(([entryData, exitData]) => {
+          this.entryPages = entryData?.pages || [];
+          this.exitPages = exitData?.pages || [];
+          this.loadingStates.entryExit = false;
+          this.cdr.markForCheck();
+          resolve();
+        }).catch(() => {
+          // Fallback to empty arrays on error
+          this.entryPages = [];
+          this.exitPages = [];
+          this.loadingStates.entryExit = false;
+          this.cdr.markForCheck();
+          resolve();
+        });
+      }, 500 + Math.random() * 700);
     });
   }
 
@@ -897,6 +970,119 @@ export class DashboardOverview implements OnInit, OnDestroy {
     });
   }
 
+  private async loadFormInteractionsWithDelay(): Promise<void> {
+    return new Promise(resolve => {
+      setTimeout(() => {
+        this.loadingStates.formInteractions = true;
+        
+        // Use real API call instead of mock data
+        this.analyticsAPIService.getFormInteractions(
+          this.currentDateRange || undefined,
+          this.formInteractionsPage,
+          this.formInteractionsRows
+        ).subscribe({
+          next: (response) => {
+            this.formInteractions = response.forms || [];
+            this.formInteractionsTotal = response.total || 0;
+            this.loadingStates.formInteractions = false;
+            this.cdr.markForCheck();
+            resolve();
+          },
+          error: (error) => {
+            console.error('Error loading form interactions:', error);
+            this.formInteractions = [];
+            this.formInteractionsTotal = 0;
+            this.loadingStates.formInteractions = false;
+            this.cdr.markForCheck();
+            resolve();
+          }
+        });
+      }, 850 + Math.random() * 750);
+    });
+  }
+
+  private async loadTooltipInsightsWithDelay(): Promise<void> {
+    return new Promise(resolve => {
+      setTimeout(() => {
+        this.loadingStates.tooltipInsights = true;
+        this.analyticsAPIService.getTooltipInsights(
+          this.currentDateRange || undefined,
+          this.tooltipInsightsPage,
+          this.tooltipInsightsRows
+        ).subscribe({
+          next: (response) => {
+            this.tooltipInsights = response.tooltips || [];
+            this.tooltipInsightsTotal = response.total || 0;
+            this.loadingStates.tooltipInsights = false;
+            this.cdr.markForCheck();
+            resolve();
+          },
+          error: () => {
+            this.tooltipInsights = [];
+            this.tooltipInsightsTotal = 0;
+            this.loadingStates.tooltipInsights = false;
+            this.cdr.markForCheck();
+            resolve();
+          }
+        });
+      }, 900 + Math.random() * 500);
+    });
+  }
+
+  onTooltipInsightsChange(event: any): void {
+    const page = Math.floor(event.first / event.rows) + 1;
+    this.tooltipInsightsPage = page;
+    this.tooltipInsightsRows = event.rows;
+    this.loadingStates.tooltipInsights = true;
+    this.cdr.markForCheck();
+
+    this.analyticsAPIService.getTooltipInsights(
+      this.currentDateRange || undefined,
+      page,
+      event.rows
+    ).subscribe({
+      next: (response) => {
+        this.tooltipInsights = response.tooltips || [];
+        this.tooltipInsightsTotal = response.total || 0;
+        this.loadingStates.tooltipInsights = false;
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.tooltipInsights = [];
+        this.tooltipInsightsTotal = 0;
+        this.loadingStates.tooltipInsights = false;
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
+  onFormInteractionsChange(event: any): void {
+    const page = Math.floor(event.first / event.rows) + 1;
+    this.formInteractionsPage = page;
+    this.formInteractionsRows = event.rows;
+    this.loadingStates.formInteractions = true;
+    this.cdr.markForCheck();
+    
+    // Call API with new pagination parameters
+    this.analyticsAPIService.getFormInteractions(
+      this.currentDateRange || undefined,
+      page,
+      event.rows
+    ).subscribe({
+      next: (response) => {
+        this.formInteractions = response.forms || [];
+        this.formInteractionsTotal = response.total || 0;
+        this.loadingStates.formInteractions = false;
+        this.cdr.markForCheck();
+      },
+      error: (error) => {
+        console.error('Error loading form interactions:', error);
+        this.loadingStates.formInteractions = false;
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
   private async loadFeaturesDataWithDelay(): Promise<void> {
     this.loadingStates.features = true;
     this.cdr.markForCheck();
@@ -1000,8 +1186,22 @@ export class DashboardOverview implements OnInit, OnDestroy {
       case 'scroll': return 'pi pi-arrows-v';
       case 'form_submit': return 'pi pi-pencil';
       case 'purchase': return 'pi pi-shopping-cart';
+      case 'user_sign_in': case 'user_login': return 'pi pi-sign-in';
+      case 'user_sign_up': case 'user_register': return 'pi pi-user-plus';
+      case 'user_sign_in_failed': case 'user_login_failed': return 'pi pi-times-circle';
+      case 'user_sign_out': case 'user_logout': return 'pi pi-sign-out';
       default: return 'pi pi-bolt';
     }
+  }
+
+  isAuthEvent(eventName: string): boolean {
+    const authEvents = [
+      'user_sign_in', 'user_login', 
+      'user_sign_up', 'user_register',
+      'user_sign_in_failed', 'user_login_failed',
+      'user_sign_out', 'user_logout'
+    ];
+    return authEvents.includes(eventName);
   }
 
   // Date range picker

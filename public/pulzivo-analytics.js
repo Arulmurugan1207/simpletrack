@@ -32,7 +32,7 @@
   const PLAN_FEATURES = {
     free: ['page_views', 'clicks'],
     pro: ['page_views', 'clicks', 'auto_clicks', 'scroll_depth', 'page_exit', 'visibility', 'unique_visitors', 'sessions', 'performance', 'utm_attribution', 'user_identity', 'custom_events'],
-    enterprise: ['page_views', 'clicks', 'auto_clicks', 'scroll_depth', 'page_exit', 'visibility', 'unique_visitors', 'sessions', 'performance', 'utm_attribution', 'user_identity', 'custom_events', 'client_hints', 'form_tracking', 'error_tracking', 'rage_clicks', 'web_vitals']
+    enterprise: ['page_views', 'clicks', 'auto_clicks', 'scroll_depth', 'page_exit', 'visibility', 'unique_visitors', 'sessions', 'performance', 'utm_attribution', 'user_identity', 'custom_events', 'client_hints', 'form_tracking', 'tooltip_tracking', 'error_tracking', 'rage_clicks', 'web_vitals']
   };
 
   let currentPlan = 'free';
@@ -709,33 +709,55 @@
     if (hasFeature('form_tracking')) {
       const formInteractions = new Map();
       
+      // Track form start and field interactions
       document.addEventListener('focus', (event) => {
         if (event.target.matches('input, textarea, select')) {
-          const formId = event.target.form?.id || 'unknown-form';
+          const form = event.target.form;
+          const formId = form?.id || form?.name || 'unknown-form';
           const fieldName = event.target.name || event.target.id || event.target.type;
           
+          // Track form_start on first field interaction
           if (!formInteractions.has(formId)) {
-            formInteractions.set(formId, { startTime: Date.now(), fields: new Set() });
+            formInteractions.set(formId, { 
+              startTime: Date.now(), 
+              fields: new Set(),
+              started: false 
+            });
+            
+            // Track form_start event
+            queueEvent('form_start', {
+              formId: formId,
+              page: window.location.pathname
+            });
+            formInteractions.get(formId).started = true;
           }
+          
+          // Track form_field_interaction
+          queueEvent('form_field_interaction', {
+            formId: formId,
+            fieldName: fieldName,
+            action: 'focus',
+            page: window.location.pathname
+          });
+          
           formInteractions.get(formId).fields.add(fieldName);
         }
       }, true);
 
+      // Track form submission
       document.addEventListener('submit', (event) => {
         if (event.target.matches('form')) {
-          const formId = event.target.id || 'unknown-form';
+          const formId = event.target.id || event.target.name || 'unknown-form';
           const interaction = formInteractions.get(formId);
           const timeToComplete = interaction ? Date.now() - interaction.startTime : 0;
           
           queueEvent('form_submit', {
-            category: 'form',
-            label: formId,
-            custom: {
-              form_id: formId,
-              fields_interacted: interaction ? Array.from(interaction.fields) : [],
-              time_to_complete: timeToComplete,
-              form_action: event.target.action || window.location.href
-            }
+            formId: formId,
+            success: true,
+            timeToComplete: timeToComplete,
+            page: window.location.pathname,
+            fields_interacted: interaction ? Array.from(interaction.fields) : [],
+            form_action: event.target.action || window.location.href
           });
           formInteractions.delete(formId);
         }
@@ -744,17 +766,76 @@
       // Track form abandonment on page exit
       window.addEventListener('pagehide', () => {
         formInteractions.forEach((interaction, formId) => {
-          queueEvent('form_abandon', {
-            category: 'form',
-            label: formId,
-            custom: {
-              form_id: formId,
-              fields_interacted: Array.from(interaction.fields),
-              time_spent: Date.now() - interaction.startTime
-            }
-          });
+          if (interaction.started && interaction.fields.size > 0) {
+            queueEvent('form_abandon', {
+              formId: formId,
+              fieldsCompleted: interaction.fields.size,
+              totalFields: interaction.fields.size, // Approximation
+              time_spent: Date.now() - interaction.startTime,
+              page: window.location.pathname
+            });
+          }
         });
       });
+    }
+
+    // Track tooltip/help interactions (Enterprise only)
+    if (hasFeature('tooltip_tracking')) {
+      const tooltipViews = new Map(); // Track unique views per session
+      
+      // Auto-track elements with data-tooltip attribute
+      document.addEventListener('mouseenter', (event) => {
+        if (!(event.target instanceof Element)) return;
+        const target = event.target.closest('[data-tooltip], [ptooltip], [title]');
+        if (!target) return;
+        
+        const tooltipText = target.getAttribute('data-tooltip') || 
+                           target.getAttribute('ptooltip') || 
+                           target.getAttribute('title') || 
+                           'unknown';
+        const tooltipId = target.getAttribute('data-tooltip-id') || 
+                         target.id || 
+                         tooltipText.substring(0, 50);
+        const section = target.getAttribute('data-tooltip-section') || 
+                       target.closest('[data-section]')?.getAttribute('data-section') || 
+                       'unknown';
+        
+        // Track only once per session per tooltip to avoid spam
+        const viewKey = `${section}:${tooltipId}`;
+        if (!tooltipViews.has(viewKey)) {
+          tooltipViews.set(viewKey, true);
+          
+          queueEvent('tooltip_view', {
+            tooltip_id: tooltipId,
+            tooltip_text: tooltipText.substring(0, 100),
+            section: section,
+            page: window.location.pathname,
+            element_type: target.tagName.toLowerCase(),
+            element_class: target.className || null
+          });
+        }
+      }, true);
+      
+      // Track clicks on info icons specifically
+      document.addEventListener('click', (event) => {
+        if (!(event.target instanceof Element)) return;
+        const target = event.target.closest('.info-icon, .section-info-icon, [data-info-icon]');
+        if (!target) return;
+        
+        const section = target.closest('[data-section]')?.getAttribute('data-section') || 
+                       target.getAttribute('data-section') ||
+                       'unknown';
+        const tooltipText = target.getAttribute('ptooltip') || 
+                           target.getAttribute('title') || 
+                           'unknown';
+        
+        queueEvent('help_icon_click', {
+          section: section,
+          tooltip_text: tooltipText.substring(0, 100),
+          page: window.location.pathname,
+          icon_class: target.className || null
+        });
+      }, true);
     }
 
     // Track JavaScript errors (Enterprise only)

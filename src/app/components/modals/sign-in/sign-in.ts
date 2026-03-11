@@ -78,6 +78,15 @@ export class SignIn implements OnInit {
         next: (response) => {
           this.loading = false;
           if (response.status === 200) {
+            // Track successful sign-in event
+            if (typeof (window as any).PulzivoAnalytics !== 'undefined') {
+              (window as any).PulzivoAnalytics('event', 'user_sign_in', {
+                method: 'email',
+                remember_me: rememberMe,
+                timestamp: new Date().toISOString()
+              });
+            }
+            
             this.signInSuccess.emit(response.user);
             this.hide();
           } else {
@@ -90,6 +99,16 @@ export class SignIn implements OnInit {
         },
         error: (error) => {
           this.loading = false;
+          
+          // Track failed sign-in attempt
+          if (typeof (window as any).PulzivoAnalytics !== 'undefined') {
+            (window as any).PulzivoAnalytics('event', 'user_sign_in_failed', {
+              method: 'email',
+              error_type: error.status === 401 ? 'invalid_credentials' : 'server_error',
+              timestamp: new Date().toISOString()
+            });
+          }
+          
           this.messageService.add({
             severity: 'error',
             summary: 'Sign In Error',

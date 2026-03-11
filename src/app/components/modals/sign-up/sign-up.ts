@@ -61,6 +61,15 @@ export class SignUp {
     
     // Simulate API call
     setTimeout(() => {
+      // Track successful sign-up event
+      if (typeof (window as any).PulzivoAnalytics !== 'undefined') {
+        (window as any).PulzivoAnalytics('event', 'user_sign_up', {
+          method: 'email',
+          has_name: !!this.name,
+          timestamp: new Date().toISOString()
+        });
+      }
+      
       this.loading = false;
       this.signUpSuccess.emit({ name: this.name, email: this.email });
       this.hide();

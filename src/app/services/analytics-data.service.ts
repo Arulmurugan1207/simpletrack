@@ -37,6 +37,11 @@ export interface PageData {
   title?: string;
   views: number;
   percentage: number;
+  isEntry?: boolean;
+  isExit?: boolean;
+  exitRate?: number;
+  entrances?: number;
+  exits?: number;
 }
 
 export interface GeographicData {

@@ -27,6 +27,62 @@
     <h2>Events &amp; Interactions</h2>
     <span class="total-badge">{{ totalEvents | number }} total events</span>
   </div>
+  <div class="toolbar-actions">
+    <!-- Date Range Selector -->
+    <button pButton icon="pi pi-calendar" [label]="activePreset" class="p-button-outlined" (click)="datePopover.toggle($event)" #dateRangeBtn></button>
+    <p-popover #datePopover [style]="{ width: '320px' }">
+      <div class="date-popover-content">
+        <div class="date-presets">
+          @for (preset of datePresets; track preset.label) {
+            <button 
+              class="preset-item"
+              [class.active]="activePreset === preset.label"
+              (click)="applyDatePreset(preset.label); datePopover.hide()">
+              {{ preset.label }}
+            </button>
+          }
+        </div>
+        <div class="date-divider">or select custom range</div>
+        <div class="date-range-picker">
+          <p-datepicker 
+            [(ngModel)]="dateRange.start" 
+            (ngModelChange)="onDateRangeChange()"
+            placeholder="Start Date"
+            [maxDate]="dateRange.end || undefined"
+            dateFormat="M dd, yy"
+            [showIcon]="true">
+          </p-datepicker>
+          <span class="date-separator">to</span>
+          <p-datepicker 
+            [(ngModel)]="dateRange.end" 
+            (ngModelChange)="onDateRangeChange()"
+            placeholder="End Date"
+            [minDate]="dateRange.start || undefined"
+            [maxDate]="maxDate"
+            dateFormat="M dd, yy"
+            [showIcon]="true">
+          </p-datepicker>
+        </div>
+      </div>
+    </p-popover>
+    
+    <button pButton icon="pi pi-download" label="Export" class="p-button-outlined p-button-secondary" (click)="exportData('csv')"></button>
+  </div>
+</div>
+
+<!-- Event Categories -->
+<div class="categories-row">
+  @for (category of eventCategories; track category.name) {
+    <div class="category-card" [class.active]="selectedCategories.includes(category.name)" (click)="toggleCategory(category.name)">
+      <div class="category-icon" [style.background]="category.color + '20'" [style.color]="category.color">
+        <i [class]="'pi ' + category.icon"></i>
+      </div>
+      <div class="category-info">
+        <div class="category-label">{{ category.label }}</div>
+        <div class="category-count">{{ category.events.length }} types</div>
+      </div>
+    </div>
+  }
 </div>
 
 <!-- Summary Cards -->
@@ -82,6 +138,24 @@
 
 <!-- Charts Row -->
 <div class="charts-row">
+  <!-- Timeline Visualization -->
+  <div class="chart-card timeline-card">
+    <div class="card-header">
+      <h3>Event Timeline</h3>
+      <span class="card-sub">Last 7 days by category</span>
+      @if (loading.breakdown) {
+        <p-progressSpinner [style]="{ width: '18px', height: '18px' }" strokeWidth="4"></p-progressSpinner>
+      }
+    </div>
+    @if (loading.breakdown) {
+      <p-skeleton width="100%" height="200px"></p-skeleton>
+    } @else {
+      <div class="chart-wrap">
+        <p-chart type="line" [data]="timelineChartData" [options]="timelineChartOptions"></p-chart>
+      </div>
+    }
+  </div>
+
   <!-- Event Frequency Chart -->
   <div class="chart-card wide">
     <div class="card-header">
@@ -249,7 +323,64 @@
       placeholder="Filter by type"
       [style]="{ width: '200px' }">
     </p-select>
+    <button pButton 
+      [icon]="showAdvancedFilters ? 'pi pi-filter-slash' : 'pi pi-filter'" 
+      [label]="'Advanced ' + (activeFiltersCount ? '(' + activeFiltersCount + ')' : '')" 
+      class="p-button-outlined p-button-secondary"
+      [class.p-button-info]="activeFiltersCount > 0"
+      (click)="toggleAdvancedFilters()">
+    </button>
+    @if (activeFiltersCount > 0) {
+      <button pButton icon="pi pi-times" label="Clear All" class="p-button-outlined p-button-danger p-button-sm" (click)="clearAllFilters()"></button>
+    }
   </div>
+
+  <!-- Advanced Filters Panel -->
+  @if (showAdvancedFilters) {
+    <div class="advanced-filters-panel">
+      <div class="filter-grid">
+        <div class="filter-field">
+          <label>Countries</label>
+          <p-multiselect
+            [options]="countryOptions"
+            [(ngModel)]="selectedCountries"
+            (ngModelChange)="onAdvancedFilterChange()"
+            optionLabel="label"
+            optionValue="value"
+            placeholder="Select countries"
+            [maxSelectedLabels]="2"
+            [style]="{ width: '100%' }">
+          </p-multiselect>
+        </div>
+        <div class="filter-field">
+          <label>Devices</label>
+          <p-multiselect
+            [options]="deviceOptions"
+            [(ngModel)]="selectedDevices"
+            (ngModelChange)="onAdvancedFilterChange()"
+            optionLabel="label"
+            optionValue="value"
+            placeholder="Select devices"
+            [maxSelectedLabels]="2"
+            [style]="{ width: '100%' }">
+          </p-multiselect>
+        </div>
+        <div class="filter-field">
+          <label>Pages</label>
+          <p-multiselect
+            [options]="pageOptions"
+            [(ngModel)]="selectedPages"
+            (ngModelChange)="onAdvancedFilterChange()"
+            optionLabel="label"
+            optionValue="value"
+            placeholder="Select pages"
+            [maxSelectedLabels]="2"
+            [style]="{ width: '100%' }">
+          </p-multiselect>
+        </div>
+      </div>
+    </div>
+  }
 
   <!-- Table -->
   @if (loading.history) {
@@ -280,7 +411,7 @@
         </thead>
         <tbody>
           @for (evt of historyEvents; track evt.id) {
-            <tr>
+            <tr class="clickable-row" (click)="openEventDetail(evt)">
               <td class="time-cell">{{ formatTime(evt.timestamp) }}</td>
               <td>
                 <p-tag [value]="formatEventName(evt.event_name)" [severity]="getEventTagStyle(evt.event_name)" styleClass="event-tag"></p-tag>
@@ -326,3 +457,79 @@
     }
   }
 </div>
+
+<!-- Event Detail Modal -->
+<p-dialog 
+  [(visible)]="showEventDetail" 
+  [modal]="true" 
+  [draggable]="false" 
+  [resizable]="false"
+  [style]="{ width: '700px', maxWidth: '90vw' }"
+  header="Event Details"
+  (onHide)="closeEventDetail()">
+  
+  @if (selectedEvent) {
+    <div class="event-detail-content">
+      <!-- Header -->
+      <div class="event-detail-header">
+        <div class="event-name-section">
+          <p-tag [value]="formatEventName(selectedEvent.event_name)" [severity]="getEventTagStyle(selectedEvent.event_name)" styleClass="event-tag"></p-tag>
+          @if (getCategoryForEvent(selectedEvent.event_name); as category) {
+            <span class="category-badge" [style.background]="category.color + '20'" [style.color]="category.color">
+              <i [class]="'pi ' + category.icon"></i>
+              {{ category.label }}
+            </span>
+          }
+        </div>
+        <div class="event-time">{{ formatTime(selectedEvent.timestamp) }}</div>
+      </div>
+
+      <!-- Details Grid -->
+      <div class="event-detail-grid">
+        <div class="detail-item">
+          <div class="detail-label">Event ID</div>
+          <div class="detail-value">{{ selectedEvent.id }}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">User ID</div>
+          <div class="detail-value">{{ selectedEvent.user_id || 'Anonymous' }}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Page</div>
+          <div class="detail-value">{{ selectedEvent.page || '—' }}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Country</div>
+          <div class="detail-value">{{ selectedEvent.country || '—' }}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Device</div>
+          <div class="detail-value">
+            @if (selectedEvent.device) {
+              <span class="device-cell"><i [class]="getDeviceIcon(selectedEvent.device)"></i> {{ selectedEvent.device }}</span>
+            } @else {
+              <span>—</span>
+            }
+          </div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Timestamp</div>
+          <div class="detail-value">{{ selectedEvent.timestamp }}</div>
+        </div>
+      </div>
+
+      <!-- Event Data -->
+      <div class="event-data-section">
+        <div class="detail-label">Event Data</div>
+        <pre class="event-data-code">{{ formatEventData(selectedEvent.data) }}</pre>
+      </div>
+    </div>
+  }
+
+  <ng-template #footer>
+    <div class="modal-footer">
+      <button pButton label="Export Event" icon="pi pi-download" class="p-button-outlined p-button-secondary" (click)="exportData('json')"></button>
+      <button pButton label="Close" icon="pi pi-times" (click)="closeEventDetail()"></button>
+    </div>
+  </ng-template>
+</p-dialog>

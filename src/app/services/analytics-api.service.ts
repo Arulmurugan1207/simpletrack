@@ -179,14 +179,48 @@ export class AnalyticsAPIService {
     );
   }
 
-  getEventHistory(page = 1, limit = 50, eventType = '', search = ''): Observable<any> {
+  getEventHistory(
+    page = 1, 
+    limit = 50, 
+    eventType = '', 
+    search = '',
+    countries: string[] = [],
+    devices: string[] = [],
+    pages: string[] = [],
+    categories: string[] = [],
+    dateRange?: DateRange
+  ): Observable<any> {
     const selectedApiKey = this.apiKeysService.getSelectedApiKey();
-    if (!selectedApiKey) return of({ events: [], total: 0, eventTypes: [] });
-    const params = new URLSearchParams({ apiKey: selectedApiKey, page: String(page), limit: String(limit) });
+    if (!selectedApiKey) return of({ events: [], total: 0, eventTypes: [], filterOptions: { countries: [], devices: [], pages: [] } });
+    
+    const params = new URLSearchParams({ 
+      apiKey: selectedApiKey, 
+      page: String(page), 
+      limit: String(limit) 
+    });
+    
     if (eventType) params.set('eventType', eventType);
     if (search) params.set('search', search);
+    if (countries.length) params.set('countries', countries.join(','));
+    if (devices.length) params.set('devices', devices.join(','));
+    if (pages.length) params.set('pages', pages.join(','));
+    if (categories.length) params.set('categories', categories.join(','));
+    if (dateRange) {
+      params.set('startDate', dateRange.startDate.toISOString());
+      params.set('endDate', dateRange.endDate.toISOString());
+    }
+    
     return this.http.get(`${this.apiUrl}/analytics/event-history?${params}`).pipe(
-      catchError(() => of({ events: [], total: 0, eventTypes: [] }))
+      catchError(() => of({ 
+        events: [], 
+        total: 0, 
+        eventTypes: [],
+        filterOptions: { 
+          countries: ['United States', 'United Kingdom', 'Canada', 'Germany', 'France'], 
+          devices: ['Desktop', 'Mobile', 'Tablet'], 
+          pages: ['/home', '/dashboard', '/products', '/about', '/contact'] 
+        } 
+      }))
     );
   }
 
@@ -248,4 +282,65 @@ export class AnalyticsAPIService {
       );
     }
   }
+
+  /**
+   * Get Entry Pages - where users land first
+   */
+  getEntryPages(dateRange?: DateRange, limit: number = 10): Observable<any> {
+    const selectedApiKey = this.apiKeysService.getSelectedApiKey();
+    if (!selectedApiKey) return of({ pages: [], total: 0 });
+    
+    return this.http.get(`${this.apiUrl}/analytics/entry-pages?apiKey=${selectedApiKey}&limit=${limit}${this.buildDateParams(dateRange)}`).pipe(
+      catchError(() => of({ pages: [], total: 0 }))
+    );
+  }
+
+  /**
+   * Get Exit Pages - where users leave
+   */
+  getExitPages(dateRange?: DateRange, limit: number = 10): Observable<any> {
+    const selectedApiKey = this.apiKeysService.getSelectedApiKey();
+    if (!selectedApiKey) return of({ pages: [], total: 0 });
+    
+    return this.http.get(`${this.apiUrl}/analytics/exit-pages?apiKey=${selectedApiKey}&limit=${limit}${this.buildDateParams(dateRange)}`).pipe(
+      catchError(() => of({ pages: [], total: 0 }))
+    );
+  }
+
+  /**
+   * Get Events Breakdown with date range support
+   */
+  getEventsBreakdownWithDateRange(dateRange?: DateRange): Observable<any> {
+    const selectedApiKey = this.apiKeysService.getSelectedApiKey();
+    if (!selectedApiKey) return of({ events: [], customEvents: [], topClicks: [], summary: {}, totalEvents: 0 });
+    
+    return this.http.get(`${this.apiUrl}/analytics/events-breakdown?apiKey=${selectedApiKey}${this.buildDateParams(dateRange)}`).pipe(
+      catchError(() => of({ events: [], customEvents: [], topClicks: [], summary: {}, totalEvents: 0 }))
+    );
+  }
+
+  /**
+   * Get Form Interactions - track form submissions, abandonment, and engagement metrics
+   */
+  getFormInteractions(dateRange?: DateRange, page: number = 1, limit: number = 10): Observable<any> {
+    const selectedApiKey = this.apiKeysService.getSelectedApiKey();
+    if (!selectedApiKey) return of({ forms: [], total: 0, page: 1, limit: 10, pages: 0 });
+    
+    return this.http.get(`${this.apiUrl}/analytics/form-interactions?apiKey=${selectedApiKey}&page=${page}&limit=${limit}${this.buildDateParams(dateRange)}`).pipe(
+      catchError(() => of({ forms: [], total: 0, page: 1, limit: 10, pages: 0 }))
+    );
+  }
+
+  /**
+   * Get Tooltip Insights - which tooltips/help icons users viewed the most
+   */
+  getTooltipInsights(dateRange?: DateRange, page: number = 1, limit: number = 10): Observable<any> {
+    const selectedApiKey = this.apiKeysService.getSelectedApiKey();
+    if (!selectedApiKey) return of({ tooltips: [], total: 0 });
+
+    return this.http.get(`${this.apiUrl}/analytics/tooltip-insights?apiKey=${selectedApiKey}&page=${page}&limit=${limit}${this.buildDateParams(dateRange)}`).pipe(
+      catchError(() => of({ tooltips: [], total: 0 }))
+    );
+  }
 }
+

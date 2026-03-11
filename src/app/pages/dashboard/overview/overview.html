@@ -52,6 +52,17 @@
         </div>
       </p-popover>
     </div>
+
+    <!-- Manual Refresh Button -->
+    <button 
+      pButton 
+      icon="pi pi-refresh" 
+      [loading]="isRefreshing"
+      (click)="manualRefresh()"
+      class="refresh-btn"
+      pTooltip="Refresh all data (auto-refreshes every 30s)"
+      tooltipPosition="bottom"></button>
+
     @if (isOwner) {
       <div class="owner-badge">
         <i class="pi pi-shield"></i>
@@ -74,9 +85,15 @@
         <!-- Key Metrics Cards -->
         <div class="metrics-row">
           <!-- Main Metrics -->
-          <div class="metric-card theme-blue">
+          <div class="metric-card theme-blue" data-section="live-analytics">
             <div class="metric-header">
-              <h3>Live Analytics</h3>
+              <h3>
+                Live Analytics
+                <i class="pi pi-info-circle section-info-icon" 
+                   pTooltip="Real-time visitors currently on your site. Updates every 30 seconds. Use this to monitor campaign launches or viral content."
+                   tooltipPosition="top"
+                   data-tooltip-id="live-analytics-info"></i>
+              </h3>
               @if (loadingStates.metrics) {
                 <p-progressSpinner [style]="{ width: '20px', height: '20px' }" strokeWidth="4"></p-progressSpinner>
               }
@@ -94,9 +111,15 @@
             }
           </div>
 
-          <div class="metric-card theme-violet">
+          <div class="metric-card theme-violet" data-section="total-page-views">
             <div class="metric-header">
-              <h3>Total Page Views</h3>
+              <h3>
+                Total Page Views
+                <i class="pi pi-info-circle section-info-icon" 
+                   pTooltip="Total number of pages viewed across all sessions. Includes repeat views by the same user. Higher is better for content sites."
+                   tooltipPosition="top"
+                   data-tooltip-id="page-views-info"></i>
+              </h3>
               @if (loadingStates.metrics) {
                 <p-progressSpinner [style]="{ width: '20px', height: '20px' }" strokeWidth="4"></p-progressSpinner>
               }
@@ -114,9 +137,15 @@
             }
           </div>
 
-          <div class="metric-card theme-rose">
+          <div class="metric-card theme-rose" data-section="bounce-rate">
             <div class="metric-header">
-              <h3>Bounce Rate</h3>
+              <h3>
+                Bounce Rate
+                <i class="pi pi-info-circle section-info-icon" 
+                   pTooltip="% of visitors who leave after viewing only one page. Lower is better. 40-60% is average. High bounce = poor landing page experience."
+                   tooltipPosition="top"
+                   data-tooltip-id="bounce-rate-info"></i>
+              </h3>
               @if (loadingStates.metrics) {
                 <p-progressSpinner [style]="{ width: '20px', height: '20px' }" strokeWidth="4"></p-progressSpinner>
               }
@@ -134,9 +163,15 @@
             }
           </div>
 
-          <div class="metric-card theme-teal">
+          <div class="metric-card theme-teal" data-section="unique-visitors">
             <div class="metric-header">
-              <h3>Unique Visitors</h3>
+              <h3>
+                Unique Visitors
+                <i class="pi pi-info-circle section-info-icon" 
+                   pTooltip="Number of distinct users who visited today. Counted once per user regardless of page views. Key metric for reach and audience size."
+                   tooltipPosition="top"
+                   data-tooltip-id="unique-visitors-info"></i>
+              </h3>
               @if (loadingStates.metrics) {
                 <p-progressSpinner [style]="{ width: '20px', height: '20px' }" strokeWidth="4"></p-progressSpinner>
               }
@@ -158,9 +193,15 @@
         <!-- Charts Row -->
         <div class="charts-row">
           <!-- Page Views Trend -->
-          <div class="chart-card theme-blue">
+          <div class="chart-card theme-blue" data-section="page-views-trend">
             <div class="card-header">
-              <h3>Page Views Trend</h3>
+              <h3>
+                Page Views Trend
+                <i class="pi pi-info-circle section-info-icon" 
+                   pTooltip="Visual timeline of page views over time. Spot traffic patterns, peak hours, and growth trends. Switch between hourly, daily, weekly views."
+                   tooltipPosition="top"
+                   data-tooltip-id="page-views-trend-info"></i>
+              </h3>
               @if (availableTrendPeriods.length > 1) {
                 <div class="trend-period-toggle">
                   @for (p of availableTrendPeriods; track p.value) {
@@ -190,9 +231,15 @@
           </div>
 
           <!-- Device Breakdown -->
-          <div class="chart-card theme-violet">
+          <div class="chart-card theme-violet" data-section="device-breakdown">
             <div class="card-header">
-              <h3>Device Breakdown</h3>
+              <h3>
+                Device Breakdown
+                <i class="pi pi-info-circle section-info-icon" 
+                   pTooltip="Distribution of users by device type. Optimize your design for the devices your audience uses most. Mobile-first if >60% mobile traffic."
+                   tooltipPosition="top"
+                   data-tooltip-id="device-breakdown-info"></i>
+              </h3>
               @if (loadingStates.devices) {
                 <p-progressSpinner [style]="{ width: '20px', height: '20px' }" strokeWidth="4"></p-progressSpinner>
               }
@@ -231,7 +278,12 @@
           <!-- Top Pages -->
           <div class="data-card theme-indigo">
             <div class="card-header">
-              <h3>Top Pages</h3>
+              <h3>
+                Top Pages
+                <i class="pi pi-info-circle section-info-icon" 
+                   pTooltip="Most viewed pages ranked by traffic. Identify your best content and optimize high-traffic pages for conversions."
+                   tooltipPosition="top"></i>
+              </h3>
               @if (loadingStates.topPages) {
                 <p-progressSpinner [style]="{ width: '20px', height: '20px' }" strokeWidth="4"></p-progressSpinner>
               }
@@ -284,7 +336,12 @@
           <!-- Geographic Data -->
           <div class="data-card theme-teal">
             <div class="card-header">
-              <h3>Top Countries</h3>
+              <h3>
+                Top Countries
+                <i class="pi pi-info-circle section-info-icon" 
+                   pTooltip="Geographic distribution of your audience. Use this to localize content, plan regional campaigns, and optimize for timezones."
+                   tooltipPosition="top"></i>
+              </h3>
               @if (loadingStates.geography) {
                 <p-progressSpinner [style]="{ width: '20px', height: '20px' }" strokeWidth="4"></p-progressSpinner>
               }
@@ -322,12 +379,143 @@
           </div>
         </div>
 
+        <!-- Entry & Exit Pages Row -->
+        <div class="data-row">
+          <!-- Entry Pages -->
+          <div class="data-card theme-emerald">
+            <div class="card-header">
+              <h3>
+                Top Entry Pages
+                <i class="pi pi-info-circle section-info-icon" 
+                   pTooltip="First pages users land on. Optimize these for strong first impressions and clear CTAs. High entrances = good SEO or ad targeting."
+                   tooltipPosition="top"></i>
+              </h3>
+              @if (loadingStates.entryExit) {
+                <p-progressSpinner [style]="{ width: '20px', height: '20px' }" strokeWidth="4"></p-progressSpinner>
+              }
+            </div>
+            @if (loadingStates.entryExit) {
+              <div class="table-skeleton">
+                @for (i of [1,2,3,4,5]; track i) {
+                  <div class="table-skeleton-row">
+                    <p-skeleton width="70%" height="1rem"></p-skeleton>
+                    <p-skeleton width="15%" height="1rem"></p-skeleton>
+                  </div>
+                }
+              </div>
+            } @else {
+              <p-table [value]="entryPages" styleClass="p-datatable-sm">
+                <ng-template #header>
+                  <tr>
+                    <th>Page</th>
+                    <th class="col-num">Entrances</th>
+                    <th class="col-num">%</th>
+                  </tr>
+                </ng-template>
+                <ng-template #body let-page>
+                  <tr>
+                    <td class="page-cell">
+                      <div class="page-path">{{ page.path }}</div>
+                    </td>
+                    <td class="col-num">{{ page.entrances | number }}</td>
+                    <td class="col-num">{{ page.percentage | number:'1.1-1' }}%</td>
+                  </tr>
+                </ng-template>
+                <ng-template #emptymessage>
+                  <tr>
+                    <td colspan="3" class="no-data-row">
+                      <div style="text-align: center; padding: 1.5rem;">
+                        <i class="pi pi-sign-in" style="font-size: 2rem; color: #a7f3d0; margin-bottom: 0.5rem;"></i>
+                        <div style="font-size: 0.875rem; color: #64748b;">
+                          No entry pages tracked yet
+                        </div>
+                        <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 0.25rem;">
+                          Track <code style="background: #f0fdf6; padding: 2px 6px; border-radius: 3px;">page_view</code> events to see where users land
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                </ng-template>
+              </p-table>
+            }
+          </div>
+
+          <!-- Exit Pages -->
+          <div class="data-card theme-rose">
+            <div class="card-header">
+              <h3>
+                Top Exit Pages
+                <i class="pi pi-info-circle section-info-icon" 
+                   pTooltip="Last pages users visit before leaving. High exit rates may indicate dead ends, broken links, or conversion completion. Checkout pages should have high exits."
+                   tooltipPosition="top"></i>
+              </h3>
+              @if (loadingStates.entryExit) {
+                <p-progressSpinner [style]="{ width: '20px', height: '20px' }" strokeWidth="4"></p-progressSpinner>
+              }
+            </div>
+            @if (loadingStates.entryExit) {
+              <div class="table-skeleton">
+                @for (i of [1,2,3,4,5]; track i) {
+                  <div class="table-skeleton-row">
+                    <p-skeleton width="70%" height="1rem"></p-skeleton>
+                    <p-skeleton width="15%" height="1rem"></p-skeleton>
+                    <p-skeleton width="15%" height="1rem"></p-skeleton>
+                  </div>
+                }
+              </div>
+            } @else {
+              <p-table [value]="exitPages" styleClass="p-datatable-sm">
+                <ng-template #header>
+                  <tr>
+                    <th>Page</th>
+                    <th class="col-num">Exits</th>
+                    <th class="col-num">Exit Rate</th>
+                  </tr>
+                </ng-template>
+                <ng-template #body let-page>
+                  <tr>
+                    <td class="page-cell">
+                      <div class="page-path">{{ page.path }}</div>
+                    </td>
+                    <td class="col-num">{{ page.exits | number }}</td>
+                    <td class="col-num">
+                      <span [class]="'exit-rate ' + (page.exitRate > 70 ? 'high' : page.exitRate > 40 ? 'medium' : 'low')">
+                        {{ page.exitRate | number:'1.0-0' }}%
+                      </span>
+                    </td>
+                  </tr>
+                </ng-template>
+                <ng-template #emptymessage>
+                  <tr>
+                    <td colspan="3" class="no-data-row">
+                      <div style="text-align: center; padding: 1.5rem;">
+                        <i class="pi pi-sign-out" style="font-size: 2rem; color: #ffc9d2; margin-bottom: 0.5rem;"></i>
+                        <div style="font-size: 0.875rem; color: #64748b;">
+                          No exit pages tracked yet
+                        </div>
+                        <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 0.25rem;">
+                          Track <code style="background: #fff0f3; padding: 2px 6px; border-radius: 3px;">page_view</code> events to see where users leave
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                </ng-template>
+              </p-table>
+            }
+          </div>
+        </div>
+
         <!-- Traffic Sources Row -->
         <div class="tables-row">
           <!-- Traffic Sources -->
           <div class="data-card theme-amber">
             <div class="card-header">
-              <h3>Traffic Sources</h3>
+              <h3>
+                Traffic Sources
+                <i class="pi pi-info-circle section-info-icon" 
+                   pTooltip="Where your visitors come from: Direct (typed URL), Referral (other sites), Search (Google/Bing), Social (Twitter/FB). Focus marketing on top sources."
+                   tooltipPosition="top"></i>
+              </h3>
               @if (loadingStates.trafficSources) {
                 <p-progressSpinner [style]="{ width: '20px', height: '20px' }" strokeWidth="4"></p-progressSpinner>
               }
@@ -367,7 +555,12 @@
           <!-- UTM Campaigns -->
           <div class="data-card theme-orange">
             <div class="card-header">
-              <h3>UTM Campaigns</h3>
+              <h3>
+                UTM Campaigns
+                <i class="pi pi-info-circle section-info-icon" 
+                   pTooltip="Track marketing campaigns using UTM parameters (utm_source, utm_medium, utm_campaign). Measure ROI of ads, emails, and social posts."
+                   tooltipPosition="top"></i>
+              </h3>
               @if (loadingStates.trafficSources) {
                 <p-progressSpinner [style]="{ width: '20px', height: '20px' }" strokeWidth="4"></p-progressSpinner>
               }
@@ -412,7 +605,12 @@
           <!-- Browser Breakdown -->
           <div class="data-card theme-slate">
             <div class="card-header">
-              <h3>Browsers</h3>
+              <h3>
+                Browsers
+                <i class="pi pi-info-circle section-info-icon" 
+                   pTooltip="Browser usage breakdown. Test your site on popular browsers. Safari dominance = many iOS users. Chrome dominance = general audience."
+                   tooltipPosition="top"></i>
+              </h3>
               @if (loadingStates.browsers) {
                 <p-progressSpinner [style]="{ width: '20px', height: '20px' }" strokeWidth="4"></p-progressSpinner>
               }
@@ -452,7 +650,12 @@
           <!-- OS Breakdown -->
           <div class="data-card theme-slate">
             <div class="card-header">
-              <h3>Operating Systems</h3>
+              <h3>
+                Operating Systems
+                <i class="pi pi-info-circle section-info-icon" 
+                   pTooltip="OS distribution of your visitors. High Windows = enterprise users. High MacOS/iOS = premium audience. Android = developing markets."
+                   tooltipPosition="top"></i>
+              </h3>
               @if (loadingStates.browsers) {
                 <p-progressSpinner [style]="{ width: '20px', height: '20px' }" strokeWidth="4"></p-progressSpinner>
               }
@@ -494,7 +697,12 @@
         <div class="tables-row">
           <div class="chart-card theme-rose">
             <div class="card-header">
-              <h3>Top Clicks</h3>
+              <h3>
+                Top Clicks
+                <i class="pi pi-info-circle section-info-icon" 
+                   pTooltip="Most clicked elements on your site. Identify popular CTAs, navigation patterns, and user engagement hotspots. Optimize high-click elements."
+                   tooltipPosition="top"></i>
+              </h3>
               <span class="card-subtitle">Most clicked elements</span>
               @if (loadingStates.clicks) {
                 <p-progressSpinner [style]="{ width: '20px', height: '20px' }" strokeWidth="4"></p-progressSpinner>
@@ -539,7 +747,12 @@
 
           <div class="chart-card theme-emerald">
             <div class="card-header">
-              <h3>Custom Events</h3>
+              <h3>
+                Custom Events
+                <i class="pi pi-info-circle section-info-icon" 
+                   pTooltip="Track custom actions like button clicks, video plays, downloads, purchases. Use PulzivoAnalytics('event', 'name', data) to track business-critical actions."
+                   tooltipPosition="top"></i>
+              </h3>
               <span class="card-subtitle">Application events fired</span>
               @if (loadingStates.customEvents) {
                 <p-progressSpinner [style]="{ width: '20px', height: '20px' }" strokeWidth="4"></p-progressSpinner>
@@ -569,8 +782,13 @@
                   </tr>
                 </ng-template>
                 <ng-template #body let-ev>
-                  <tr>
-                    <td class="truncate">{{ ev.name }}</td>
+                  <tr [class.auth-event]="isAuthEvent(ev.name)">
+                    <td class="truncate">
+                      @if (isAuthEvent(ev.name)) {
+                        <i [class]="getEventIcon(ev.name)" style="margin-right: 6px; color: #8b5cf6;"></i>
+                      }
+                      <strong [style.color]="isAuthEvent(ev.name) ? '#8b5cf6' : 'inherit'">{{ ev.name }}</strong>
+                    </td>
                     <td class="text-muted text-xs">{{ ev.lastSeen ? getTimeAgo(ev.lastSeen) : '—' }}</td>
                     <td class="col-num">{{ ev.count | number }}</td>
                   </tr>
@@ -583,11 +801,230 @@
           </div>
         </div>
 
+        <!-- Form Interactions + Tooltip Insights Row -->
+        <div class="tables-row">
+          <!-- Form Interactions -->
+          <div class="chart-card theme-teal">
+            <div class="card-header">
+              <h3>
+                Form Interactions
+                <i class="pi pi-info-circle section-info-icon" 
+                   pTooltip="Monitor form performance: submissions, abandons, conversion rates, completion times. Low conversion = form friction. High abandonment = simplify your form."
+                   tooltipPosition="top"></i>
+              </h3>
+              <span class="card-subtitle">Track form submissions & abandonment</span>
+              @if (loadingStates.formInteractions) {
+                <p-progressSpinner [style]="{ width: '20px', height: '20px' }" strokeWidth="4"></p-progressSpinner>
+              }
+            </div>
+            
+            <!-- Product Owner Insights -->
+            @if (!loadingStates.formInteractions && formInteractions.length > 0) {
+              <div class="insights-banner">
+                <i class="pi pi-lightbulb"></i>
+                <div class="insights-content">
+                  <strong>How to use this data:</strong>
+                  <ul>
+                    <li><strong>Low Conversion (&lt;50%)?</strong> Your form may be too long, confusing, or asking for too much info</li>
+                    <li><strong>High Abandonment?</strong> Check which fields users drop off at - simplify or remove unnecessary fields</li>
+                    <li><strong>Long Avg Time (&gt;60s)?</strong> Users are struggling - consider better labels, validation, or autofill</li>
+                    <li><strong>Compare forms:</strong> A/B test different form lengths to find optimal conversion rates</li>
+                  </ul>
+                </div>
+              </div>
+            }
+
+            @if (loadingStates.formInteractions) {
+              @for (i of [1,2,3,4,5]; track i) {
+                <p-skeleton height="2.5rem" styleClass="mb-2"></p-skeleton>
+              }
+            } @else {
+              <p-table
+                [value]="formInteractions"
+                [paginator]="true"
+                [rows]="formInteractionsRows"
+                [totalRecords]="formInteractionsTotal"
+                [rowsPerPageOptions]="[10, 25, 50]"
+                [lazy]="true"
+                [first]="(formInteractionsPage - 1) * formInteractionsRows"
+                (onPage)="onFormInteractionsChange($event)"
+                styleClass="p-datatable-sm"
+                [loading]="loadingStates.formInteractions">
+                <ng-template #header>
+                  <tr>
+                    <th>Form ID</th>
+                    <th class="col-num">
+                      Submissions
+                      <i class="pi pi-info-circle info-icon" 
+                         pTooltip="Total successful form submissions. Higher is better."
+                         tooltipPosition="top"></i>
+                    </th>
+                    <th class="col-num">
+                      Abandons
+                      <i class="pi pi-info-circle info-icon" 
+                         pTooltip="Users who started but didn't submit. Lower is better - high abandonment means friction in your form."
+                         tooltipPosition="top"></i>
+                    </th>
+                    <th class="col-num">
+                      Conv. Rate
+                      <i class="pi pi-info-circle info-icon" 
+                         pTooltip="(Submissions ÷ Starts) × 100. Industry average is 50-70%. Below 50% = needs improvement."
+                         tooltipPosition="top"></i>
+                    </th>
+                    <th class="col-num">
+                      Avg Time
+                      <i class="pi pi-info-circle info-icon" 
+                         pTooltip="Average seconds to complete. Longer times may indicate confusion or complexity. Optimize for &lt;30s for simple forms."
+                         tooltipPosition="top"></i>
+                    </th>
+                  </tr>
+                </ng-template>
+                <ng-template #body let-form>
+                  <tr>
+                    <td class="truncate">
+                      <i class="pi pi-file-edit" style="margin-right: 6px; color: #14b8a6;"></i>
+                      <strong>{{ form.formId }}</strong>
+                    </td>
+                    <td class="col-num">
+                      <span class="metric-badge success">{{ form.submissions | number }}</span>
+                    </td>
+                    <td class="col-num">
+                      <span class="metric-badge warning">{{ form.abandons | number }}</span>
+                    </td>
+                    <td class="col-num">
+                      <span [class]="form.conversionRate >= 70 ? 'conversion-good' : form.conversionRate >= 50 ? 'conversion-ok' : 'conversion-poor'">
+                        {{ form.conversionRate | number:'1.1-1' }}%
+                      </span>
+                    </td>
+                    <td class="col-num text-muted">{{ form.avgTimeToComplete | number:'1.1-1' }}s</td>
+                  </tr>
+                </ng-template>
+                <ng-template #emptymessage>
+                  <tr>
+                    <td colspan="5" class="no-data-row">
+                      <div style="text-align: center; padding: 2rem;">
+                        <i class="pi pi-inbox" style="font-size: 3rem; color: #cbd5e1; margin-bottom: 1rem;"></i>
+                        <div style="font-size: 1rem; font-weight: 600; color: #64748b; margin-bottom: 0.5rem;">
+                          No form interactions tracked yet
+                        </div>
+                        <div style="font-size: 0.875rem; color: #94a3b8; margin-bottom: 1rem;">
+                          Start tracking form events to see submission rates, abandonment, and completion times
+                        </div>
+                        <div style="font-size: 0.75rem; color: #94a3b8; background: #f8fafc; padding: 0.75rem; border-radius: 6px; text-align: left; max-width: 500px; margin: 0 auto;">
+                          <strong style="color: #64748b;">Track these events:</strong><br>
+                          • <code style="background: #e2e8f0; padding: 2px 6px; border-radius: 3px; font-size: 0.7rem;">form_start</code> - When user begins filling form<br>
+                          • <code style="background: #e2e8f0; padding: 2px 6px; border-radius: 3px; font-size: 0.7rem;">form_submit</code> - When user submits form<br>
+                          • <code style="background: #e2e8f0; padding: 2px 6px; border-radius: 3px; font-size: 0.7rem;">form_abandon</code> - When user leaves without submitting<br>
+                          • <code style="background: #e2e8f0; padding: 2px 6px; border-radius: 3px; font-size: 0.7rem;">form_field_interaction</code> - Field focus/blur events
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                </ng-template>
+              </p-table>
+            }
+          </div>
+
+          <!-- Tooltip Insights -->
+          <div class="chart-card theme-violet">
+            <div class="card-header">
+              <h3>
+                Tooltip Insights
+                <i class="pi pi-info-circle section-info-icon"
+                   pTooltip="Shows which help icons and tooltips your users view the most. High views on a section = users are confused there. Use this to simplify your UI."
+                   tooltipPosition="top"></i>
+              </h3>
+              <span class="card-subtitle">Which sections users need help with</span>
+              @if (loadingStates.tooltipInsights) {
+                <p-progressSpinner [style]="{ width: '20px', height: '20px' }" strokeWidth="4"></p-progressSpinner>
+              }
+            </div>
+            @if (loadingStates.tooltipInsights) {
+              @for (i of [1,2,3,4,5]; track i) {
+                <p-skeleton height="2.5rem" styleClass="mb-2"></p-skeleton>
+              }
+            } @else {
+              <p-table
+                [value]="tooltipInsights"
+                [paginator]="true"
+                [rows]="tooltipInsightsRows"
+                [totalRecords]="tooltipInsightsTotal"
+                [rowsPerPageOptions]="[10, 25, 50]"
+                [lazy]="true"
+                [first]="(tooltipInsightsPage - 1) * tooltipInsightsRows"
+                (onPage)="onTooltipInsightsChange($event)"
+                styleClass="p-datatable-sm"
+                [loading]="loadingStates.tooltipInsights">
+                <ng-template #header>
+                  <tr>
+                    <th>Section</th>
+                    <th class="col-num">
+                      Hovers
+                      <i class="pi pi-info-circle info-icon"
+                         pTooltip="Number of times users hovered over this tooltip"
+                         tooltipPosition="top"></i>
+                    </th>
+                    <th class="col-num">
+                      Clicks
+                      <i class="pi pi-info-circle info-icon"
+                         pTooltip="Number of times users clicked the info icon"
+                         tooltipPosition="top"></i>
+                    </th>
+                    <th class="col-num">Total</th>
+                  </tr>
+                </ng-template>
+                <ng-template #body let-tip>
+                  <tr>
+                    <td>
+                      <div class="tooltip-section-name">
+                        <i class="pi pi-question-circle" style="color: #8b5cf6; margin-right: 6px;"></i>
+                        <strong>{{ tip.section | titlecase }}</strong>
+                      </div>
+                      @if (tip.tooltip_text) {
+                        <div class="text-muted text-xs" style="padding-left: 22px;">{{ tip.tooltip_text | slice:0:60 }}{{ tip.tooltip_text.length > 60 ? '…' : '' }}</div>
+                      }
+                    </td>
+                    <td class="col-num">
+                      <span class="metric-badge info">{{ tip.views | number }}</span>
+                    </td>
+                    <td class="col-num">
+                      <span class="metric-badge warning">{{ tip.clicks | number }}</span>
+                    </td>
+                    <td class="col-num">
+                      <strong>{{ tip.total_interactions | number }}</strong>
+                    </td>
+                  </tr>
+                </ng-template>
+                <ng-template #emptymessage>
+                  <tr>
+                    <td colspan="4" class="no-data-row">
+                      <div style="text-align: center; padding: 2rem;">
+                        <i class="pi pi-info-circle" style="font-size: 3rem; color: #cbd5e1; margin-bottom: 1rem;"></i>
+                        <div style="font-size: 1rem; font-weight: 600; color: #64748b; margin-bottom: 0.5rem;">
+                          No tooltip views tracked yet
+                        </div>
+                        <div style="font-size: 0.875rem; color: #94a3b8;">
+                          Enterprise plan auto-tracks when users hover or click your <code style="background:#f1f5f9; padding: 2px 6px; border-radius: 3px;">data-tooltip</code> elements
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                </ng-template>
+              </p-table>
+            }
+          </div>
+        </div>
+
         <!-- Core Web Vitals Row -->
         <div class="vitals-row">
           <div class="chart-card vitals-card">
             <div class="card-header">
-              <h3>Core Web Vitals</h3>
+              <h3>
+                Core Web Vitals
+                <i class="pi pi-info-circle section-info-icon" 
+                   pTooltip="Google's performance metrics affecting SEO rankings. LCP (load speed), FID (interactivity), CLS (visual stability). Green = good, Yellow = needs improvement, Red = poor."
+                   tooltipPosition="top"></i>
+              </h3>
               <span class="card-subtitle">Google performance signals</span>
               @if (loadingStates.webVitals) {
                 <p-progressSpinner [style]="{ width: '20px', height: '20px' }" strokeWidth="4"></p-progressSpinner>
@@ -668,7 +1105,12 @@
           <!-- Session Insights -->
           <div class="chart-card session-card">
             <div class="card-header">
-              <h3>Session Insights</h3>
+              <h3>
+                Session Insights
+                <i class="pi pi-info-circle section-info-icon" 
+                   pTooltip="User engagement metrics: avg session duration, pages per session, new vs returning visitors. Higher = more engagement and loyalty."
+                   tooltipPosition="top"></i>
+              </h3>
             </div>
             @if (loadingStates.metrics) {
               <div class="session-skeleton">
