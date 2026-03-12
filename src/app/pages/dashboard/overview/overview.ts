@@ -423,8 +423,19 @@ export class DashboardOverview implements OnInit, OnDestroy {
   }
 
   onApiKeyChange(): void {
+    // Stop any ongoing updates and subscriptions
+    if (this.updateInterval) {
+      clearInterval(this.updateInterval);
+      this.updateInterval = null;
+    }
+    this.subscriptions.unsubscribe();
+    this.subscriptions = new Subscription();
+    
     if (this.selectedApiKey) {
       this.apiKeysService.setSelectedApiKey(this.selectedApiKey);
+      // Clear old data first to show loading state
+      this.clearAllData();
+      // Load fresh data with new API key
       this.loadAllData();
     } else {
       this.clearAllData();
