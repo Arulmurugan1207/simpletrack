@@ -75,3 +75,10 @@
 </app-forgot-password>
 
 <app-success></app-success>
+
+<!-- Owner Mode Badge -->
+@if (isOwnerModeActive()) {
+  <div class="owner-mode-badge">
+    🛡️ Owner Mode Active
+  </div>
+}

@@ -117,6 +117,17 @@ export class Header implements OnInit, OnDestroy {
     this.userInitials = name.split(' ').map((n: string) => n[0]).join('').toUpperCase();
   }
 
+  /**
+   * Check if owner mode is active (tracking suppressed)
+   */
+  isOwnerModeActive(): boolean {
+    try {
+      return localStorage.getItem('pulz_is_owner') === 'true';
+    } catch {
+      return false;
+    }
+  }
+
   logout() {
     this.authService.signout();
     this.isLoggedIn = false;

@@ -133,12 +133,44 @@ export class AuthService {
    * Clearing is done exclusively via PulzivoAnalytics.enableTracking() in the browser.
    */
   applyOwnerTracking(role: string | undefined): void {
-    if (role !== 'owner') return;
+    if (role !== 'owner') {
+      console.log('🔍 [OwnerMode] Role is not owner:', role);
+      return;
+    }
+    
+    console.log('🛡️ [OwnerMode] Activating owner mode...');
     const win = window as any;
+    
+    // Method 1: Via SDK (preferred)
     if (win.PulzivoAnalytics?.setOwner) {
       // persist=true writes pulz_is_owner to localStorage so it survives page refreshes
       win.PulzivoAnalytics.setOwner(true, true);
+      console.log('✅ [OwnerMode] SDK setOwner() called');
+    } else {
+      console.warn('⚠️ [OwnerMode] PulzivoAnalytics SDK not loaded yet');
     }
+    
+    // Method 2: Direct localStorage (fallback/verification)
+    try {
+      localStorage.setItem('pulz_is_owner', 'true');
+      console.log('✅ [OwnerMode] localStorage flag set');
+    } catch (e) {
+      console.error('❌ [OwnerMode] Failed to set localStorage:', e);
+    }
+    
+    // Verify it worked
+    setTimeout(() => {
+      const isSet = localStorage.getItem('pulz_is_owner') === 'true';
+      const hasSDK = !!win.PulzivoAnalytics;
+      console.log('🔍 [OwnerMode] Verification:');
+      console.log('  - localStorage flag:', isSet ? '✅ true' : '❌ false');
+      console.log('  - SDK loaded:', hasSDK ? '✅ yes' : '❌ no');
+      console.log('  - Tracking suppressed:', isSet && hasSDK ? '✅ yes' : '❌ no');
+      
+      if (!isSet || !hasSDK) {
+        console.error('❌ [OwnerMode] FAILED TO ACTIVATE! Your activity may be tracked.');
+      }
+    }, 500);
   }
 
   /**
