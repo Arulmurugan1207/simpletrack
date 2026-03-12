@@ -1,10 +1,30 @@
 ﻿<footer class="site-footer">
   <div class="container">
-    <div>© 2026 Pulzivo Analytics</div>
-    <nav>
+    <div class="footer-brand">
+      <span class="footer-logo">⚡ Pulzivo Analytics</span>
+      @if (totalPageViews() !== null) {
+        <span class="footer-stat" [class.footer-stat--loading]="totalPageViews() === null" title="Page views tracked">
+          @if (totalPageViews()! > 0) {
+            <i class="pi pi-eye footer-stat-icon"></i>
+            <span class="footer-stat-value">{{ formatCount(totalPageViews()!) }}</span>
+          } @else {
+            <i class="pi pi-eye footer-stat-icon" style="opacity:0.4"></i>
+            <span class="footer-stat-value" style="opacity:0.4">—</span>
+          }
+        </span>
+      }
+      @if (scriptCopied() !== null && scriptCopied()! > 0) {
+        <span class="footer-stat footer-stat--green" title="Scripts copied">
+          <i class="pi pi-copy footer-stat-icon"></i>
+          <span class="footer-stat-value">{{ formatCount(scriptCopied()!) }}</span>
+        </span>
+      }
+    </div>
+    <nav class="footer-nav">
       <a routerLink="/privacy">Privacy</a>
       <a routerLink="/terms">Terms</a>
       <a href="mailto:support@pulzivo.com">Contact</a>
     </nav>
+    <div class="footer-copy">© 2026 Pulzivo Analytics</div>
   </div>
 </footer>

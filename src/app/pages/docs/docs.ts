@@ -347,7 +347,11 @@ PulzivoAnalytics('event', 'impression_click', {
   private trackCodeCopy(section: string) {
     try {
       if (typeof PulzivoAnalytics !== 'undefined') {
-        PulzivoAnalytics('event', 'code_copy', { section });
+        if (section === 'script-tag') {
+          PulzivoAnalytics('event', 'script_copied', { page: 'docs', section: 'script-tag' });
+        } else {
+          PulzivoAnalytics('event', 'code_copy', { page: 'docs', section });
+        }
       }
     } catch (_) {}
   }

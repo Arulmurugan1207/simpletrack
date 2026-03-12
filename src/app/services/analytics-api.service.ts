@@ -342,5 +342,14 @@ export class AnalyticsAPIService {
       catchError(() => of({ tooltips: [], total: 0 }))
     );
   }
+
+  /**
+   * Public stats — no API key required (used in site footer)
+   */
+  getPublicStats(): Observable<{ totalPageViews: number; scriptCopied: number }> {
+    return this.http.get<{ totalPageViews: number; scriptCopied: number }>(`${this.apiUrl}/analytics/public-stats`).pipe(
+      catchError(() => of({ totalPageViews: 0, scriptCopied: 0 }))
+    );
+  }
 }
 

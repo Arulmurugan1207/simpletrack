@@ -4,7 +4,7 @@ import { AuthGuard } from './guards/auth.guard';
 export const routes: Routes = [
   {
     path: '',
-    title: 'Home',
+    title: 'Pulzivo Analytics — The Pulse of Modern Web & Product Analytics | Free & Privacy-First',
     loadComponent: () => import('./pages/home/home').then(m => m.Home)
   },
   {

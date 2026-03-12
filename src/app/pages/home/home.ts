@@ -12,6 +12,8 @@ import javascript from 'highlight.js/lib/languages/javascript';
 hljs.registerLanguage('xml', xml);
 hljs.registerLanguage('javascript', javascript);
 
+declare const PulzivoAnalytics: ((cmd: string, ...args: any[]) => void) | undefined;
+
 @Component({
   selector: 'app-home',
   standalone: true,
@@ -39,6 +41,7 @@ PulzivoAnalytics.sendBatch();`;
 
   copied = signal(false);
   activeTab = signal<'html' | 'js'>('html');
+  scriptCopyCount = signal(0);
   private highlighted = false;
 
   constructor(private meta: Meta, private titleService: Title) {
@@ -87,6 +90,21 @@ PulzivoAnalytics.sendBatch();`;
     try {
       await navigator.clipboard.writeText(text);
       this.copied.set(true);
+      this.scriptCopyCount.update(c => c + 1);
+      if (typeof PulzivoAnalytics !== 'undefined') {
+        if (this.activeTab() === 'html') {
+          PulzivoAnalytics('event', 'script_copied', {
+            page: 'home',
+            section: 'script-tag',
+            copy_number: this.scriptCopyCount(),
+          });
+        } else {
+          PulzivoAnalytics('event', 'code_copy', {
+            page: 'home',
+            section: 'js-api',
+          });
+        }
+      }
       setTimeout(() => this.copied.set(false), 2000);
     } catch (e) {
       console.error('Copy failed', e);

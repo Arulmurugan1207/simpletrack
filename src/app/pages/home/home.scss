@@ -298,11 +298,31 @@
   border-left: 1px solid rgba(226,232,240,0.15);
 }
 
-.copy-button {
+.copy-button-wrap {
   position: absolute;
   top: 0.6rem;
   right: 0.75rem;
   z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.copy-button {
+  position: static;
+}
+
+.copy-count-badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #4ade80;
+  background: rgba(74, 222, 128, 0.12);
+  border: 1px solid rgba(74, 222, 128, 0.3);
+  border-radius: 999px;
+  padding: 0.1rem 0.45rem;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  animation: fadeIn 0.2s ease;
 }
 
 .code-block {

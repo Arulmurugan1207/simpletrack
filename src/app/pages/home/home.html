@@ -1,4 +1,7 @@
-﻿<section class="hero">
+﻿<section class="hero"
+         data-track-impression="home_hero"
+         data-impression-name="Home Hero"
+         data-impression-category="hero">
   <div class="container">
     <div class="hero-badge fade-in">⚡ Web &amp; Product Analytics · built for developers</div>
     <h1 class="scale-in">One line drops.<br><span class="gradient-text">The pulse never stops.</span></h1>
@@ -69,7 +72,10 @@
     </div>
 
     <!-- Code snippet with tabs -->
-    <div class="install-card slide-up" style="animation-delay: 0.2s">
+    <div class="install-card slide-up" style="animation-delay: 0.2s"
+         data-track-impression="home_install_card"
+         data-impression-name="Home Install Card"
+         data-impression-category="install">
       <div class="code-tabs">
         <button class="code-tab" [class.active]="activeTab() === 'html'" (click)="setTab('html')">HTML</button>
         <button class="code-tab" [class.active]="activeTab() === 'js'" (click)="setTab('js')">JavaScript API</button>
@@ -81,13 +87,18 @@
           <span class="dot green"></span>
           <span class="code-title">{{ activeTab() === 'html' ? 'index.html' : 'app.js' }}</span>
         </div>
-        <button pButton type="button"
-                [label]="copied() ? 'Copied!' : 'Copy'"
-                [icon]="copied() ? 'pi pi-check' : 'pi pi-copy'"
-                (click)="copyActive()"
-                [class.p-button-success]="copied()"
-                class="copy-button"
-                size="small"></button>
+        <div class="copy-button-wrap">
+          <button pButton type="button"
+                  [label]="copied() ? 'Copied!' : 'Copy'"
+                  [icon]="copied() ? 'pi pi-check' : 'pi pi-copy'"
+                  (click)="copyActive()"
+                  [class.p-button-success]="copied()"
+                  class="copy-button"
+                  size="small"></button>
+          @if (scriptCopyCount() > 0) {
+            <span class="copy-count-badge" title="Times copied this session">{{ scriptCopyCount() }}×</span>
+          }
+        </div>
         @if (activeTab() === 'html') {
           <pre class="code-block"><code class="language-html" [textContent]="script"></code></pre>
         } @else {
@@ -109,7 +120,10 @@
 
 <p-divider></p-divider>
 
-<section class="features-section">
+<section class="features-section"
+         data-track-impression="home_features"
+         data-impression-name="Home Features Grid"
+         data-impression-category="features">
   <div class="container">
     <h2 class="fade-in">Why Developers Choose Pulzivo</h2>
     <p class="section-subtitle fade-in" style="animation-delay: 0.1s">Everything you need. Nothing you don't.</p>
@@ -185,7 +199,10 @@
   </div>
 </section>
 
-<section class="cta-section">
+<section class="cta-section"
+         data-track-impression="home_cta"
+         data-impression-name="Home CTA"
+         data-impression-category="cta">
   <div class="container text-center">
     <h2 class="scale-in">Start tracking in 60 seconds.</h2>
     <p class="fade-in" style="animation-delay: 0.2s">No credit card. No complex setup. Just paste one script tag.</p>
