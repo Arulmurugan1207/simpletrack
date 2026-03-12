@@ -1,57 +1,76 @@
 import { Routes } from '@angular/router';
 import { AuthGuard } from './guards/auth.guard';
 
+// Public pages — eagerly loaded for fast navigation and better SEO
+import { Home } from './pages/home/home';
+import { Pricing } from './pages/pricing/pricing';
+import { Docs } from './pages/docs/docs';
+import { Features } from './pages/features/features';
+import { WhyPulzivo } from './pages/why-pulzivo/why-pulzivo';
+import { UseCases } from './pages/use-cases/use-cases';
+import { Blog } from './pages/blog/blog';
+import { Contact } from './pages/contact/contact';
+import { Privacy } from './pages/privacy/privacy';
+import { Terms } from './pages/terms/terms';
+import { ResetPassword } from './pages/reset-password/reset-password';
+
 export const routes: Routes = [
   {
     path: '',
     title: 'Pulzivo Analytics — The Pulse of Modern Web & Product Analytics | Free & Privacy-First',
-    loadComponent: () => import('./pages/home/home').then(m => m.Home)
+    component: Home
   },
   {
     path: 'pricing',
     title: 'Pricing',
-    loadComponent: () => import('./pages/pricing/pricing').then(m => m.Pricing)
+    component: Pricing
   },
   {
     path: 'docs',
     title: 'Documentation',
-    loadComponent: () => import('./pages/docs/docs').then(m => m.Docs)
+    component: Docs
   },
   {
     path: 'features',
     title: 'Features',
-    loadComponent: () => import('./pages/features/features').then(m => m.Features)
+    component: Features
   },
   {
     path: 'why-pulzivo',
     title: 'Why Pulzivo',
-    loadComponent: () => import('./pages/why-pulzivo/why-pulzivo').then(m => m.WhyPulzivo)
+    component: WhyPulzivo
   },
   {
     path: 'use-cases',
     title: 'Use Cases',
-    loadComponent: () => import('./pages/use-cases/use-cases').then(m => m.UseCases)
+    component: UseCases
   },
   {
     path: 'blog',
     title: 'Blog',
-    loadComponent: () => import('./pages/blog/blog').then(m => m.Blog)
+    component: Blog
   },
   {
     path: 'contact',
     title: 'Contact',
-    loadComponent: () => import('./pages/contact/contact').then(m => m.Contact)
+    component: Contact
   },
   {
     path: 'privacy',
     title: 'Privacy Policy',
-    loadComponent: () => import('./pages/privacy/privacy').then(m => m.Privacy)
+    component: Privacy
   },
   {
     path: 'terms',
     title: 'Terms of Service',
-    loadComponent: () => import('./pages/terms/terms').then(m => m.Terms)
+    component: Terms
   },
+  {
+    path: 'reset-password/:token',
+    title: 'Reset Password',
+    component: ResetPassword
+  },
+  // Dashboard — lazy loaded (auth-gated, heavy, no SEO value)
   {
     path: 'dashboard',
     loadComponent: () => import('./pages/dashboard/dashboard').then(m => m.Dashboard),
@@ -103,10 +122,5 @@ export const routes: Routes = [
         loadComponent: () => import('./pages/dashboard/settings/settings').then(m => m.DashboardSettings)
       }
     ]
-  },
-  {
-    path: 'reset-password/:token',
-    title: 'Reset Password',
-    loadComponent: () => import('./pages/reset-password/reset-password').then(m => m.ResetPassword)
   }
 ];
