@@ -41,6 +41,7 @@ export class Header implements OnInit, OnDestroy {
   currentPath = '/';
   private routerSub!: Subscription;
   private destroy$ = new Subject<void>();
+  private signUpCompleted = false;
 
   readonly navItems: NavItem[] = [
     { label: 'Home', path: '/' },
@@ -96,7 +97,8 @@ export class Header implements OnInit, OnDestroy {
   }
 
   openSignIn() { this.signInModal.show(); }
-  openSignUp() { this.signUpModal.show(); }
+  openSignUp() { this.signUpCompleted = false; this.signUpModal.show(); }
+  onSignUpClosed() { if (!this.signUpCompleted) this.authService.notifySignUpDismissed(); }
 
   onSwitchToSignUp() { this.signInModal.hide(); this.signUpModal.show(); }
   onSwitchToSignIn() { this.signUpModal.hide(); this.signInModal.show(); }
@@ -110,6 +112,7 @@ export class Header implements OnInit, OnDestroy {
   }
 
   onSignUpSuccess() {
+    this.signUpCompleted = true;
     this.signUpModal.hide();
     this.setLoggedInUser('John Doe');
     this.successModal.show('Account Created!', 'Your account has been created successfully.');

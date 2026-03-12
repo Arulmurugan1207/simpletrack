@@ -16,7 +16,11 @@ export class MainLayout {
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
 
-  isDashboardRoute = signal(this.router.url.startsWith('/dashboard'));
+  private isDashboardLike(url: string): boolean {
+    return url.startsWith('/dashboard') || url.startsWith('/demo');
+  }
+
+  isDashboardRoute = signal(this.isDashboardLike(this.router.url || (typeof window !== 'undefined' ? window.location.pathname : '')));
 
   constructor() {
     this.router.events
@@ -25,7 +29,7 @@ export class MainLayout {
         takeUntilDestroyed(this.destroyRef)
       )
       .subscribe((event) => {
-        this.isDashboardRoute.set(event.urlAfterRedirects.startsWith('/dashboard'));
+        this.isDashboardRoute.set(this.isDashboardLike(event.urlAfterRedirects));
       });
   }
 

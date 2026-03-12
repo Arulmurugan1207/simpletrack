@@ -17,6 +17,7 @@ import { PopoverModule } from 'primeng/popover';
 import { Subscription } from 'rxjs';
 import { AnalyticsAPIService } from '../../../services/analytics-api.service';
 import { ApiKeysService, ApiKey } from '../../../services/api-keys.service';
+import { DemoService } from '../../../services/demo.service';
 import { MenuItem } from 'primeng/api';
 
 interface EventSummary {
@@ -256,10 +257,15 @@ export class DashboardEvents implements OnInit, OnDestroy {
   constructor(
     private analyticsAPI: AnalyticsAPIService,
     private apiKeysService: ApiKeysService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    public demoService: DemoService
   ) {}
 
   ngOnInit(): void {
+    if (this.demoService.isDemoMode()) {
+      this.loadDemoData();
+      return;
+    }
     this.initChart();
     this.initTimelineChart();
     this.initDateRange();
@@ -269,6 +275,33 @@ export class DashboardEvents implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();
     clearTimeout(this.searchTimer);
+  }
+
+  private loadDemoData(): void {
+    const d = this.demoService;
+    this.availableApiKeys = [{ apiKey: 'DEMO-KEY', name: 'demo-site.com', isActive: true } as any];
+    this.selectedApiKey = 'DEMO-KEY';
+    this.totalEvents = 8423;
+    this.events = d.eventsBreakdown as any;
+    this.customEvents = d.customEvents as any;
+    this.topClicks = d.eventsTopClicks as any;
+    this.summary = d.eventsSummary;
+    this.historyEvents = d.eventsHistory as any;
+    this.historyTotal = d.eventsHistory.length;
+    this.historyPages = 1;
+    this.eventTypes = [...new Set(d.eventsHistory.map(e => e.event_name))];
+    this.filterOptions = {
+      countries: ['US', 'GB', 'DE', 'IN', 'CA', 'FR', 'AU', 'NL'],
+      devices: ['Desktop', 'Mobile', 'Tablet'],
+      pages: ['/', '/pricing', '/docs', '/features', '/contact', '/blog']
+    };
+    this.initChart();
+    this.initTimelineChart();
+    this.barChartData = d.eventsBarChart;
+    this.timelineChartData = d.eventsTimelineChart;
+    this.loading.breakdown = false;
+    this.loading.history = false;
+    this.cdr.markForCheck();
   }
 
   private initDateRange(): void {

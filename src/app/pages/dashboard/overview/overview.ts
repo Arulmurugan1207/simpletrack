@@ -32,6 +32,7 @@ import {
 import { AnalyticsAPIService } from '../../../services/analytics-api.service';
 import { ApiKeysService, ApiKey } from '../../../services/api-keys.service';
 import { AuthService } from '../../../services/auth.service';
+import { DemoService } from '../../../services/demo.service';
 
 // Plan feature access map
 const PLAN_FEATURES: Record<string, string[]> = {
@@ -231,10 +232,16 @@ export class DashboardOverview implements OnInit, OnDestroy {
     private analyticsAPIService: AnalyticsAPIService,
     private apiKeysService: ApiKeysService,
     private authService: AuthService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    public demoService: DemoService
   ) {}
 
   ngOnInit(): void {
+    if (this.demoService.isDemoMode()) {
+      this.loadDemoData();
+      return;
+    }
+
     console.log('🚀 Overview: Component initializing...');
     
     // Initialize default date range: last 7 days
@@ -278,6 +285,39 @@ export class DashboardOverview implements OnInit, OnDestroy {
     this.stopLiveEvents();
     this.subscriptions.unsubscribe();
     if (this.updateInterval) clearInterval(this.updateInterval);
+  }
+
+  private loadDemoData(): void {
+    const d = this.demoService;
+    this.userPlan = 'pro';
+    this.isOwner = false;
+    this.availableApiKeys = [{ apiKey: 'DEMO-KEY', name: 'demo-site.com', isActive: true } as any];
+    this.selectedApiKey = 'DEMO-KEY';
+    this.activePreset = 'Last 7 Days';
+    this.availableTrendPeriods = [
+      { label: 'Daily', value: 'daily' },
+      { label: 'Weekly', value: 'weekly' }
+    ];
+    this.metrics = { ...d.overviewMetrics } as any;
+    this.deviceBreakdown = d.deviceBreakdown as any;
+    this.topPages = d.topPages as any;
+    this.geoData = d.geoData as any;
+    this.trafficSources = d.trafficSources as any;
+    this.topClicks = d.topClicks as any;
+    this.customEvents = d.customEvents as any;
+    this.browsers = d.browsers as any;
+    this.utmSources = d.utmSources as any;
+    this.webVitals = d.webVitals as any;
+    this.funnelLabels = d.funnelData.labels;
+    this.funnelSteps = d.funnelData.steps;
+    this.realtimeEvents = d.realtimeEvents as any;
+    this.enabledFeatures = ['page_views', 'clicks', 'scroll_depth', 'unique_visitors', 'sessions', 'custom_events', 'web_vitals', 'rage_clicks', 'dead_clicks', 'form_tracking'];
+    this.availableFeatures = [...this.enabledFeatures];
+    this.initChartOptions();
+    this.barChartData = d.barChartData;
+    this.doughnutChartData = d.doughnutChartData;
+    Object.keys(this.loadingStates).forEach(k => (this.loadingStates as any)[k] = false);
+    this.cdr.markForCheck();
   }
 
   private loadUserPlan(): void {
@@ -493,6 +533,7 @@ export class DashboardOverview implements OnInit, OnDestroy {
   }
 
   private startRealtimeUpdates(): void {
+    if (this.demoService.isDemoMode()) return;
     if (this.updateInterval) clearInterval(this.updateInterval);
     this.updateInterval = setInterval(() => {
       if (this.selectedApiKey) {
@@ -506,7 +547,7 @@ export class DashboardOverview implements OnInit, OnDestroy {
   }
 
   manualRefresh(): void {
-    if (this.isRefreshing || !this.selectedApiKey) return;
+    if (this.demoService.isDemoMode() || this.isRefreshing || !this.selectedApiKey) return;
     
     this.isRefreshing = true;
     this.cdr.markForCheck();

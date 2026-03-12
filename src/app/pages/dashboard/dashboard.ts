@@ -10,6 +10,7 @@ import { RippleModule } from 'primeng/ripple';
 import { BehaviorSubject } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import { AuthService } from '../../services/auth.service';
+import { DemoService } from '../../services/demo.service';
 import { DateRange } from '../../services/analytics-data.service';
 
 // App owner email
@@ -40,6 +41,14 @@ export class Dashboard implements OnInit {
   sidebarCollapsed = false;
   currentRoute = '';
 
+  readonly lockedNavItems = [
+    { label: 'API Keys',  icon: 'pi-key' },
+    { label: 'Reports',  icon: 'pi-chart-bar' },
+    { label: 'Users',    icon: 'pi-users' },
+    { label: 'Plans',    icon: 'pi-credit-card' },
+    { label: 'Settings', icon: 'pi-cog' },
+  ];
+
   private dateRangeSubject = new BehaviorSubject<DateRange | null>(null);
   dateRange$ = this.dateRangeSubject.asObservable();
 
@@ -48,10 +57,18 @@ export class Dashboard implements OnInit {
   constructor(
     private router: Router,
     private route: ActivatedRoute,
-    private authService: AuthService
+    private authService: AuthService,
+    public demoService: DemoService
   ) {}
 
   ngOnInit() {
+    if (this.demoService.isDemoMode()) {
+      this.user = { firstname: 'Demo', lastname: 'User' };
+      this.userRole = 'admin';
+      this.buildSidebarItems();
+      return;
+    }
+
     if (!this.authService.isAuthenticated()) {
       this.router.navigate(['/']);
       return;
@@ -202,6 +219,11 @@ export class Dashboard implements OnInit {
 
   logout() {
     this.authService.signout();
+    this.router.navigate(['/']);
+  }
+
+  signUpFromDemo() {
+    this.authService.requestOpenSignUp();
     this.router.navigate(['/']);
   }
 }

@@ -1,3 +1,47 @@
+// ── Demo Banner ──
+.demo-banner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  background: linear-gradient(90deg, #f59e0b, #f97316);
+  color: #1c1400;
+  font-size: 0.875rem;
+  font-weight: 600;
+  padding: 0.6rem 1.5rem;
+
+  i.pi-eye { font-size: 1rem; }
+
+  .demo-signup-btn {
+    background: #1c1400;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 0.35rem 0.875rem;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    transition: opacity 0.15s ease;
+    white-space: nowrap;
+
+    &:hover { opacity: 0.85; }
+  }
+}
+
+// Push layout down when demo banner is visible
+.dashboard-layout:has(.demo-banner) {
+  .sidebar { top: 2.35rem; }
+  .main-panel { padding-top: 2.35rem; }
+}
+
 // ── Dashboard Layout ──
 .dashboard-layout {
   display: flex;
@@ -110,6 +154,23 @@ $sidebar-collapsed: 64px;
     i {
       color: var(--bright-blue);
     }
+  }
+}
+
+.nav-item--locked {
+  opacity: 0.45;
+  cursor: pointer;
+  position: relative;
+
+  &:hover {
+    opacity: 0.7;
+    background: rgba(255, 255, 255, 0.04);
+  }
+
+  .lock-icon {
+    font-size: 0.7rem;
+    margin-left: auto;
+    color: #64748b;
   }
 }
 

@@ -70,6 +70,24 @@ export const routes: Routes = [
     title: 'Reset Password',
     component: ResetPassword
   },
+  // Public demo — same shell+components as dashboard, no auth, mock data via DemoService
+  {
+    path: 'demo',
+    loadComponent: () => import('./pages/dashboard/dashboard').then(m => m.Dashboard),
+    children: [
+      { path: '', redirectTo: 'overview', pathMatch: 'full' },
+      {
+        path: 'overview',
+        title: 'Live Demo — Analytics Overview',
+        loadComponent: () => import('./pages/dashboard/overview/overview').then(m => m.DashboardOverview)
+      },
+      {
+        path: 'events',
+        title: 'Live Demo — Events',
+        loadComponent: () => import('./pages/dashboard/events/events').then(m => m.DashboardEvents)
+      }
+    ]
+  },
   // Dashboard — lazy loaded (auth-gated, heavy, no SEO value)
   {
     path: 'dashboard',

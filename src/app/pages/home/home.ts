@@ -1,4 +1,4 @@
-﻿import { Component, signal, AfterViewChecked } from '@angular/core';
+﻿import { Component, signal, AfterViewChecked, OnInit, OnDestroy, HostListener } from '@angular/core';
 import { Meta, Title } from '@angular/platform-browser';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
@@ -6,6 +6,7 @@ import { ButtonModule } from 'primeng/button';
 import { TagModule } from 'primeng/tag';
 import { DividerModule } from 'primeng/divider';
 import { AuthService } from '../../services/auth.service';
+import { AnalyticsAPIService } from '../../services/analytics-api.service';
 import hljs from 'highlight.js/lib/core';
 import xml from 'highlight.js/lib/languages/xml';
 import javascript from 'highlight.js/lib/languages/javascript';
@@ -22,7 +23,7 @@ declare const PulzivoAnalytics: ((cmd: string, ...args: any[]) => void) | undefi
   templateUrl: './home.html',
   styleUrl: './home.scss',
 })
-export class Home implements AfterViewChecked {
+export class Home implements AfterViewChecked, OnInit, OnDestroy {
   script = `<script src="https://pulzivo.com/pulzivo-analytics.min.js" data-api-key="YOUR_API_KEY"></script>`;
 
   jsSnippet = `// Track a custom event
@@ -43,9 +44,15 @@ PulzivoAnalytics.sendBatch();`;
   copied = signal(false);
   activeTab = signal<'html' | 'js'>('html');
   scriptCopyCount = signal(0);
+  livePageViews = signal<number | null>(null);
+  showNudgeBar = signal(false);
   private highlighted = false;
+  private statsTimer: ReturnType<typeof setInterval> | null = null;
+  private nudgeTimer: ReturnType<typeof setTimeout> | null = null;
+  private nudgeAutoHide: ReturnType<typeof setTimeout> | null = null;
+  private exitIntentFired = false;
 
-  constructor(private meta: Meta, private titleService: Title, private authService: AuthService) {
+  constructor(private meta: Meta, private titleService: Title, private authService: AuthService, private analyticsApi: AnalyticsAPIService) {
     this.meta.updateTag({ name: 'description', content: 'The Pulse of Modern Web & Product Analytics. Track page views, clicks, custom events, and user journeys — privacy-first, cookieless, no banners required.' });
     this.meta.updateTag({ property: 'og:url', content: 'https://pulzivo.com/' });
     this.meta.updateTag({ property: 'og:title', content: 'Pulzivo Analytics — The Pulse of Modern Product Analytics' });
@@ -70,6 +77,48 @@ PulzivoAnalytics.sendBatch();`;
     { value: '0',      label: 'Cookies used' },
     { value: '100%',   label: 'Open source' },
   ];
+
+  ngOnInit() {
+    this.fetchLiveStats();
+    this.statsTimer = setInterval(() => this.fetchLiveStats(), 5 * 60 * 1000);
+    this.authService.signUpDismissed$.subscribe(() => {
+      this.nudgeTimer = setTimeout(() => {
+        this.showNudgeBar.set(true);
+        this.nudgeAutoHide = setTimeout(() => this.showNudgeBar.set(false), 45_000);
+      }, 3_000);
+    });
+  }
+
+  ngOnDestroy() {
+    if (this.statsTimer) clearInterval(this.statsTimer);
+    if (this.nudgeTimer) clearTimeout(this.nudgeTimer);
+    if (this.nudgeAutoHide) clearTimeout(this.nudgeAutoHide);
+  }
+
+  dismissNudge() {
+    this.showNudgeBar.set(false);
+    if (this.nudgeAutoHide) clearTimeout(this.nudgeAutoHide);
+  }
+
+  @HostListener('document:mouseleave', ['$event'])
+  onExitIntent(e: MouseEvent) {
+    if (this.exitIntentFired || e.clientY > 30) return;
+    this.exitIntentFired = true;
+    this.dismissNudge();
+    this.authService.requestOpenSignUp();
+  }
+
+  private fetchLiveStats() {
+    this.analyticsApi.getPublicStats().subscribe(s => {
+      this.livePageViews.set(s.totalPageViews ?? 0);
+    });
+  }
+
+  formatCount(n: number): string {
+    if (n >= 1_000_000) return (n / 1_000_000).toFixed(1).replace(/\.0$/, '') + 'M';
+    if (n >= 1_000)     return (n / 1_000).toFixed(1).replace(/\.0$/, '') + 'K';
+    return n.toLocaleString();
+  }
 
   openSignUp() {
     this.authService.requestOpenSignUp();

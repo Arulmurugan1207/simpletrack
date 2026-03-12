@@ -54,14 +54,16 @@
     </div>
 
     <!-- Manual Refresh Button -->
-    <button 
-      pButton 
-      icon="pi pi-refresh" 
-      [loading]="isRefreshing"
-      (click)="manualRefresh()"
-      class="refresh-btn"
-      pTooltip="Refresh all data (auto-refreshes every 30s)"
-      tooltipPosition="bottom"></button>
+    @if (!demoService.isDemoMode()) {
+      <button 
+        pButton 
+        icon="pi pi-refresh" 
+        [loading]="isRefreshing"
+        (click)="manualRefresh()"
+        class="refresh-btn"
+        pTooltip="Refresh all data (auto-refreshes every 30s)"
+        tooltipPosition="bottom"></button>
+    }
 
     @if (isOwner) {
       <div class="owner-badge">
