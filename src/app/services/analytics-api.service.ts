@@ -347,7 +347,7 @@ export class AnalyticsAPIService {
    * Public stats — no API key required (used in site footer)
    */
   getPublicStats(): Observable<{ totalPageViews: number; scriptCopied: number }> {
-    return this.http.get<{ totalPageViews: number; scriptCopied: number }>(`${this.apiUrl}/analytics/public-stats`).pipe(
+    return this.http.get<{ totalPageViews: number; scriptCopied: number }>(`${this.apiUrl}/analytics/public-stats?apiKey=${environment.siteApiKey}`).pipe(
       catchError(() => of({ totalPageViews: 0, scriptCopied: 0 }))
     );
   }
