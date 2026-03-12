@@ -435,8 +435,8 @@ export class DashboardOverview implements OnInit, OnDestroy {
       this.apiKeysService.setSelectedApiKey(this.selectedApiKey);
       // Clear old data first to show loading state
       this.clearAllData();
-      // Load fresh data with new API key
-      this.loadAllData();
+      // Load ALL fresh data with new API key (including tooltip insights)
+      this.loadAnalyticsDataWithLoading();
     } else {
       this.clearAllData();
     }
@@ -597,6 +597,8 @@ export class DashboardOverview implements OnInit, OnDestroy {
     };
     this.topClicks = [];
     this.customEvents = [];
+    this.tooltipInsights = [];
+    this.tooltipInsightsTotal = 0;
     this.updateBarChart();
     this.updateDoughnutChart();
   }
