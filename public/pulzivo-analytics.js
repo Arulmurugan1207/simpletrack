@@ -782,13 +782,10 @@
     // Track tooltip/help interactions (Enterprise only)
     if (hasFeature('tooltip_tracking')) {
       const tooltipViews = new Map(); // Track unique views per session
+      const isMobile = /iPhone|iPad|iPod|Android|webOS|BlackBerry|Windows Phone/i.test(navigator.userAgent);
       
-      // Auto-track elements with data-tooltip attribute
-      document.addEventListener('mouseenter', (event) => {
-        if (!(event.target instanceof Element)) return;
-        const target = event.target.closest('[data-tooltip], [ptooltip], [title]');
-        if (!target) return;
-        
+      // Helper to track tooltip view
+      const trackTooltipView = (target, interactionType) => {
         const tooltipText = target.getAttribute('data-tooltip') || 
                            target.getAttribute('ptooltip') || 
                            target.getAttribute('title') || 
@@ -811,9 +808,43 @@
             section: section,
             page: window.location.pathname,
             element_type: target.tagName.toLowerCase(),
-            element_class: target.className || null
+            element_class: target.className || null,
+            interaction_type: interactionType, // 'hover' or 'click'
+            device_type: isMobile ? 'mobile' : 'desktop'
           });
         }
+      };
+      
+      // Desktop: Track on hover (mouseenter)
+      document.addEventListener('mouseenter', (event) => {
+        if (isMobile) return; // Skip on mobile to avoid duplicate tracking
+        if (!(event.target instanceof Element)) return;
+        const target = event.target.closest('[data-tooltip], [ptooltip], [title]');
+        if (!target) return;
+        
+        // Don't track if it's an info icon (those are tracked via click)
+        if (target.classList.contains('info-icon') || 
+            target.classList.contains('section-info-icon') ||
+            target.hasAttribute('data-info-icon')) {
+          return;
+        }
+        
+        trackTooltipView(target, 'hover');
+      }, true);
+      
+      // Mobile & Desktop: Track clicks on tooltip elements (but not info icons)
+      document.addEventListener('click', (event) => {
+        if (!(event.target instanceof Element)) return;
+        
+        // Check if it's an info icon first (different tracking)
+        const isInfoIcon = event.target.closest('.info-icon, .section-info-icon, [data-info-icon]');
+        if (isInfoIcon) return; // Let the help_icon_click handler deal with it
+        
+        // Track tooltip click (mainly for mobile)
+        const target = event.target.closest('[data-tooltip], [ptooltip], [title]');
+        if (!target) return;
+        
+        trackTooltipView(target, 'click');
       }, true);
       
       // Track clicks on info icons specifically

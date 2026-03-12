@@ -17,6 +17,22 @@ export const appConfig: ApplicationConfig = {
     providePrimeNG({
       theme: {
         preset: Lara
+      },
+      pt: {
+        tooltip: {
+          root: {
+            // Make tooltips work on both hover and focus (better for mobile)
+            'data-pc-section': 'root'
+          }
+        }
+      },
+      // Global PrimeNG configuration
+      ripple: true,
+      zIndex: {
+        modal: 1100,
+        overlay: 1000,
+        menu: 1000,
+        tooltip: 1100
       }
     }),
     provideRouter(routes),
