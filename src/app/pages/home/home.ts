@@ -103,6 +103,7 @@ PulzivoAnalytics.sendBatch();`;
   @HostListener('document:mouseleave', ['$event'])
   onExitIntent(e: MouseEvent) {
     if (this.exitIntentFired || e.clientY > 30) return;
+    if (this.authService.isAuthenticated()) return; // already logged in
     this.exitIntentFired = true;
     this.dismissNudge();
     this.authService.requestOpenSignUp();

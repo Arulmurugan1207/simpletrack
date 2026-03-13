@@ -72,7 +72,9 @@ export class Header implements OnInit, OnDestroy {
       const userData = this.authService.getUserData();
       if (userData) this.setLoggedInUser(`${userData.firstname} ${userData.lastname}`);
     }
-    this.authService.openSignUp$.pipe(takeUntil(this.destroy$)).subscribe(() => this.openSignUp());
+    this.authService.openSignUp$.pipe(takeUntil(this.destroy$)).subscribe(() => {
+      if (!this.isLoggedIn) this.openSignUp();
+    });
   }
 
   private normalizePath(url: string): string {
@@ -97,7 +99,7 @@ export class Header implements OnInit, OnDestroy {
   }
 
   openSignIn() { this.signInModal.show(); }
-  openSignUp() { this.signUpCompleted = false; this.signUpModal.show(); }
+  openSignUp() { if (this.isLoggedIn) return; this.signUpCompleted = false; this.signUpModal.show(); }
   onSignUpClosed() { if (!this.signUpCompleted) this.authService.notifySignUpDismissed(); }
 
   onSwitchToSignUp() { this.signInModal.hide(); this.signUpModal.show(); }
