@@ -1173,6 +1173,12 @@
         setStorageItem('analytics_visit_count', count.toString());
       }
 
+      // Skip tracking for headless browsers / automated tools
+      if (typeof navigator !== 'undefined' && navigator.webdriver === true) {
+        if (config.debug) console.log('[Analytics] Headless browser detected — tracking suppressed.');
+        return;
+      }
+
       // Initialize session
       initializeSession();
 
