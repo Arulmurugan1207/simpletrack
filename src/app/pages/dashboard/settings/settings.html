@@ -78,9 +78,10 @@
                   <input pInputText id="lastname" formControlName="lastname" />
                 </div>
                 
-                <div class="form-group full-width">
+        <div class="form-group full-width">
                   <label for="email">Email Address</label>
                   <input pInputText id="email" formControlName="email" readonly />
+                  <small class="field-hint">Email address is linked to your account and cannot be changed.</small>
                 </div>
 
                 <div class="form-group full-width">
@@ -104,50 +105,104 @@
     <!-- Security Tab -->
     @if (activeTab() === 'security') {
       <div class="security-section">
-        <!-- Password & Authentication -->
         <p-card>
-          <!-- <ng-template pTemplate="header">
-            <div class="card-header">
-              <h3>Password & Authentication</h3>
-            </div>
-          </ng-template> -->
-
           <ng-template pTemplate="content">
             <div class="security-items">
+
+              <!-- Password -->
               <div class="security-item">
                 <div class="security-info">
                   <h4>Password</h4>
                   <p>Last changed {{ formatDate(user()?.updatedAt || user()?.createdAt || '') }}</p>
                 </div>
                 <div class="security-actions">
-                  <button pButton label="Change Password" class="p-button-outlined" 
-                    (click)="showChangePasswordDialog.set(true)">
+                  <button pButton
+                    [label]="showPasswordForm() ? 'Cancel' : 'Change Password'"
+                    [class]="showPasswordForm() ? 'p-button-outlined p-button-secondary' : 'p-button-outlined'"
+                    (click)="showPasswordForm.set(!showPasswordForm()); passwordForm.reset(); passwordStrength.set(0)">
                   </button>
                 </div>
               </div>
 
+              @if (showPasswordForm()) {
+                <div class="inline-password-form">
+                  <form [formGroup]="passwordForm" (ngSubmit)="changePassword()">
+                    <div class="password-form-grid">
+                      <div class="form-group">
+                        <label for="currentPassword">Current Password</label>
+                        <p-password
+                          id="currentPassword"
+                          formControlName="currentPassword"
+                          placeholder="Enter current password"
+                          [feedback]="false"
+                          [toggleMask]="true"
+                          styleClass="w-full">
+                        </p-password>
+                      </div>
+
+                      <div class="form-group">
+                        <label for="newPassword">New Password</label>
+                        <p-password
+                          id="newPassword"
+                          formControlName="newPassword"
+                          placeholder="At least 8 characters"
+                          [feedback]="false"
+                          [toggleMask]="true"
+                          styleClass="w-full">
+                        </p-password>
+                        @if (passwordStrength() > 0) {
+                          <div class="password-strength-bar">
+                            <div class="strength-fill strength-{{ getPasswordStrengthLabel() }}"
+                              [style.width.%]="passwordStrength() * 25">
+                            </div>
+                          </div>
+                          <span class="strength-text strength-{{ getPasswordStrengthLabel() }}">
+                            {{ getPasswordStrengthLabel() | titlecase }} password
+                          </span>
+                        }
+                      </div>
+
+                      <div class="form-group">
+                        <label for="confirmPassword">Confirm New Password</label>
+                        <p-password
+                          id="confirmPassword"
+                          formControlName="confirmPassword"
+                          placeholder="Repeat new password"
+                          [feedback]="false"
+                          [toggleMask]="true"
+                          styleClass="w-full">
+                        </p-password>
+                        @if (passwordForm.hasError('passwordMismatch') && passwordForm.get('confirmPassword')?.touched) {
+                          <small class="error-text">Passwords do not match</small>
+                        }
+                      </div>
+                    </div>
+
+                    <div class="form-actions">
+                      <button pButton type="submit" label="Update Password"
+                        [loading]="loading()" [disabled]="!passwordForm.valid">
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              }
+
               <p-divider></p-divider>
 
+              <!-- Two-Factor Authentication -->
               <div class="security-item">
                 <div class="security-info">
                   <h4>Two-Factor Authentication</h4>
-                  <p>{{ twoFactorEnabled() ? 'Enabled' : 'Add an extra layer of security' }}</p>
+                  <p>Add an extra layer of security with an authenticator app</p>
                 </div>
                 <div class="security-actions">
-                  @if (!twoFactorEnabled()) {
-                    <button pButton label="Coming Soon" class="p-button-outlined" 
-                      [disabled]="true">
-                    </button>
-                  } @else {
-                    <p-tag value="Enabled" severity="success"></p-tag>
-                  }
+                  <p-tag value="Coming Soon" severity="secondary"></p-tag>
                 </div>
               </div>
+
             </div>
           </ng-template>
         </p-card>
-
-
       </div>
     }
 
@@ -162,10 +217,10 @@
               <div class="data-action">
                 <div class="action-info">
                   <h4>Export Your Data</h4>
-                  <p>Download a copy of all your data in JSON format</p>
+                  <p>Download a copy of your profile and analytics preferences in JSON format</p>
                 </div>
-                <button pButton label="Export Data" icon="pi pi-download" 
-                  class="p-button-outlined" (click)="exportData()">
+                <button pButton label="Export Data" icon="pi pi-download"
+                  class="p-button-outlined" (click)="exportProfileData()">
                 </button>
               </div>
 
@@ -174,8 +229,12 @@
               <div class="data-action danger">
                 <div class="action-info">
                   <h4>Delete Account</h4>
-                  <p>Permanently delete your account and all associated data</p>
+                  <p>Permanently delete your account and all associated data. This action cannot be undone.</p>
                 </div>
+                <button pButton label="Delete Account" icon="pi pi-trash"
+                  class="p-button-danger p-button-outlined"
+                  (click)="showDeleteAccountDialog.set(true)">
+                </button>
               </div>
             </div>
           </ng-template>
@@ -186,151 +245,138 @@
     <!-- Analytics Tab -->
     @if (activeTab() === 'analytics') {
       <div class="analytics-section">
-        <p-card>
-          <ng-template pTemplate="header">
-            <div class="card-header">
-              <h3>Analytics Tracking Preferences</h3>
-              <p class="card-subtitle">Control what data is tracked on your websites. Available features depend on your plan.</p>
-            </div>
-          </ng-template>
 
+        <!-- Plan Summary Card -->
+        <p-card>
           <ng-template pTemplate="content">
             <div class="current-plan-info">
-              <div class="plan-badge">
-                <p-tag [value]="userPlan.toUpperCase()" 
+              <div class="plan-header-row">
+                <p-tag [value]="userPlan.toUpperCase()"
                   [severity]="userPlan === 'enterprise' ? 'success' : userPlan === 'pro' ? 'info' : 'secondary'">
                 </p-tag>
-                <span>Current Plan</span>
+                <span class="plan-label">Current Plan</span>
+                @if (userPlan !== 'enterprise') {
+                  <a routerLink="/dashboard/plans" class="upgrade-link">
+                    <i class="pi pi-arrow-up"></i> Upgrade Plan
+                  </a>
+                }
               </div>
               <p class="plan-description">
                 @switch (userPlan) {
-                  @case ('free') { 
-                    Basic tracking with {{ availableFeatures.length }} features. 
-                    <a routerLink="/dashboard/plans">Upgrade</a> for more advanced analytics.
+                  @case ('free') {
+                    Access to {{ availableFeatures.length }} basic tracking features.
+                    <a routerLink="/dashboard/plans">Upgrade to Pro</a> to unlock {{ proFeatures.length }} more features.
                   }
-                  @case ('pro') { 
-                    Professional analytics with {{ availableFeatures.length }} features enabled.
+                  @case ('pro') {
+                    Access to {{ availableFeatures.length }} professional tracking features.
+                    <a routerLink="/dashboard/plans">Upgrade to Enterprise</a> to unlock {{ enterpriseOnlyFeatures.length }} advanced features.
                   }
-                  @case ('enterprise') { 
-                    Full enterprise analytics suite with all {{ availableFeatures.length }} features.
+                  @case ('enterprise') {
+                    Full enterprise analytics suite — all {{ availableFeatures.length }} features available.
                   }
                 }
               </p>
             </div>
+          </ng-template>
+        </p-card>
 
-            <p-divider></p-divider>
+        <!-- Tracking Preferences Card -->
+        <p-card>
+          <ng-template pTemplate="header">
+            <div class="card-header">
+              <h3>Tracking Features</h3>
+              <p class="card-subtitle">Control what data is collected by the Pulzivo SDK on your websites.</p>
+            </div>
+          </ng-template>
 
+          <ng-template pTemplate="content">
             <form [formGroup]="analyticsForm" (ngSubmit)="saveAnalyticsPreferences()">
-              <div class="analytics-features">
-                <h4>Tracking Features</h4>
-                <p class="features-description">
-                  Enable or disable specific tracking features. All changes are applied immediately to your analytics SDK.
-                </p>
+              <div class="features-grid">
 
-                <div class="features-grid">
-                  @for (feature of availableFeatures; track feature) {
-                    <div class="feature-item">
-                      <div class="feature-checkbox">
-                        <p-checkbox 
-                          [formControlName]="feature"
-                          [inputId]="feature"
-                          [binary]="true">
-                        </p-checkbox>
-                      </div>
-                      <div class="feature-info">
-                        <label [for]="feature" class="feature-label">
-                          {{ featureDescriptions[feature]?.label || feature }}
-                        </label>
-                        <p class="feature-description">
-                          {{ featureDescriptions[feature]?.description || 'No description available' }}
-                        </p>
-                      </div>
+                <!-- Available features (can be toggled) -->
+                @for (feature of availableFeatures; track feature) {
+                  <div class="feature-item">
+                    <div class="feature-checkbox">
+                      <p-checkbox
+                        [formControlName]="feature"
+                        [inputId]="feature"
+                        [binary]="true">
+                      </p-checkbox>
                     </div>
-                  }
-                </div>
-
-                @if (availableFeatures.length === 0) {
-                  <p-message severity="info" text="No tracking features available for your plan."></p-message>
+                    <div class="feature-info">
+                      <label [for]="feature" class="feature-label">
+                        {{ featureDescriptions[feature]?.label || feature }}
+                      </label>
+                      <p class="feature-description">{{ featureDescriptions[feature]?.description }}</p>
+                    </div>
+                  </div>
                 }
+
+                <!-- Locked features (upgrade required) -->
+                @for (feature of lockedFeatures; track feature) {
+                  <div class="feature-item locked">
+                    <div class="feature-checkbox">
+                      <p-checkbox [binary]="true" [disabled]="true"
+                        [ngModel]="false" [ngModelOptions]="{standalone: true}">
+                      </p-checkbox>
+                    </div>
+                    <div class="feature-info">
+                      <div class="feature-label-row">
+                        <span class="feature-label">{{ featureDescriptions[feature]?.label || feature }}</span>
+                        <p-tag
+                          [value]="getFeatureMinPlan(feature).toUpperCase()"
+                          [severity]="getFeatureMinPlan(feature) === 'pro' ? 'info' : 'success'"
+                          styleClass="plan-require-tag">
+                        </p-tag>
+                      </div>
+                      <p class="feature-description">{{ featureDescriptions[feature]?.description }}</p>
+                    </div>
+                  </div>
+                }
+
               </div>
 
+              @if (lockedFeatures.length > 0) {
+                <div class="upgrade-notice">
+                  <i class="pi pi-lock"></i>
+                  <span>{{ lockedFeatures.length }} features require a higher plan.</span>
+                  <a routerLink="/dashboard/plans">View plans →</a>
+                </div>
+              }
+
               <div class="form-actions">
-                <button pButton type="submit" label="Save Preferences" 
-                  [loading]="loading()" 
-                  icon="pi pi-check">
+                <button pButton type="submit" label="Save Preferences"
+                  [loading]="loading()" icon="pi pi-check">
                 </button>
-                <button pButton type="button" label="Reset to Defaults" 
-                  class="p-button-outlined"
-                  (click)="resetToDefaults()">
+                <button pButton type="button" label="Reset to Defaults"
+                  class="p-button-outlined" (click)="resetToDefaults()">
                 </button>
               </div>
             </form>
+
+            <p-divider></p-divider>
+
+            <!-- SDK Snippet -->
+            <div class="sdk-usage">
+              <h4>Apply via SDK</h4>
+              <p class="sdk-description">
+                Preferences are stored locally and applied automatically when the SDK initializes.
+                You can also update them at runtime:
+              </p>
+              <pre class="code-block"><code>PulzivoAnalytics.updatePreferences(&#123;
+  page_views: true,
+  clicks: true,
+  custom_events: true
+&#125;);</code></pre>
+            </div>
+
           </ng-template>
         </p-card>
+
       </div>
     }
   </div>
 </div>
-
-<!-- Dialogs -->
-<!-- Change Password Dialog -->
-<p-dialog 
-  header="Change Password" 
-  [modal]="true" 
-  [visible]="showChangePasswordDialog()"
-  (visibleChange)="showChangePasswordDialog.set($event)"
-  styleClass="change-password-dialog">
-  
-  <form [formGroup]="passwordForm" (ngSubmit)="changePassword()">
-    <div class="form-group">
-      <label for="currentPassword">Current Password</label>
-      <p-password 
-        id="currentPassword" 
-        formControlName="currentPassword"
-        placeholder="Enter current password"
-        [feedback]="false"
-        [toggleMask]="true">
-      </p-password>
-    </div>
-    
-    <div class="form-group">
-      <label for="newPassword">New Password</label>
-      <p-password 
-        id="newPassword" 
-        formControlName="newPassword"
-        placeholder="Enter new password"
-        [feedback]="false"
-        [toggleMask]="true">
-      </p-password>
-    </div>
-    
-    <div class="form-group">
-      <label for="confirmPassword">Confirm New Password</label>
-      <p-password 
-        id="confirmPassword" 
-        formControlName="confirmPassword"
-        placeholder="Confirm new password"
-        [feedback]="false"
-        [toggleMask]="true">
-      </p-password>
-    </div>
-
-    @if (passwordForm.get('confirmPassword')?.hasError('mismatch') && passwordForm.get('confirmPassword')?.touched) {
-      <p-message severity="error" text="Passwords do not match"></p-message>
-    }
-    
-    <div class="dialog-buttons">
-      <button pButton type="button" label="Cancel" class="p-button-outlined" 
-        (click)="showChangePasswordDialog.set(false)">
-      </button>
-      <button pButton type="submit" label="Change Password" 
-        [loading]="loading()" [disabled]="!passwordForm.valid">
-      </button>
-    </div>
-  </form>
-</p-dialog>
-
-
 
 <!-- Delete Account Confirmation Dialog -->
 <p-dialog 

@@ -11,16 +11,11 @@ import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { PasswordModule } from 'primeng/password';
 import { AvatarModule } from 'primeng/avatar';
-import { FileUploadModule } from 'primeng/fileupload';
 import { TextareaModule } from 'primeng/textarea';
 import { ToastModule } from 'primeng/toast';
-import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { TableModule } from 'primeng/table';
-import { BadgeModule } from 'primeng/badge';
 import { TagModule } from 'primeng/tag';
 import { DialogModule } from 'primeng/dialog';
 import { DividerModule } from 'primeng/divider';
-import { ChipModule } from 'primeng/chip';
 import { CheckboxModule } from 'primeng/checkbox';
 import { MessageModule } from 'primeng/message';
 
@@ -68,46 +63,10 @@ interface User {
   timezone?: string;
   bio?: string;
   role?: string;
+  plan?: string;
   createdAt: string;
   updatedAt?: string;
   lastLoginAt?: string;
-  preferences?: {
-    notifications: {
-      email: boolean;
-      browser: boolean;
-      weeklyReports: boolean;
-      securityAlerts: boolean;
-    };
-    dashboard: {
-      defaultDateRange: string;
-      theme: string;
-      timeFormat: string;
-    };
-    privacy: {
-      dataRetention: string;
-      shareUsageData: boolean;
-    };
-  };
-}
-
-interface ApiToken {
-  _id: string;
-  name: string;
-  token: string;
-  lastUsed?: string;
-  createdAt: string;
-  permissions: string[];
-  isActive: boolean;
-}
-
-interface ActiveSession {
-  _id: string;
-  device: string;
-  browser: string;
-  location: string;
-  ipAddress: string;
-  lastActivity: string;
-  isCurrent: boolean;
 }
 
 @Component({
@@ -123,16 +82,11 @@ interface ActiveSession {
     InputTextModule,
     PasswordModule,
     AvatarModule,
-    FileUploadModule,
     TextareaModule,
     ToastModule,
-    ConfirmDialogModule,
-    TableModule,
-    BadgeModule,
     TagModule,
     DialogModule,
     DividerModule,
-    ChipModule,
     CheckboxModule,
     MessageModule
   ],
@@ -143,41 +97,23 @@ interface ActiveSession {
 export class DashboardSettings implements OnInit {
   user = signal<User | null>(null);
   loading = signal(false);
-  
+
   // Form groups
   profileForm!: FormGroup;
   passwordForm!: FormGroup;
-  apiTokenForm!: FormGroup;
   analyticsForm!: FormGroup;
-  
-  // Data
-  
-  // State
+
+  // Tab state
   activeTab = signal('profile');
-  apiTokens = signal<ApiToken[]>([]);
-  activeSessions = signal<ActiveSession[]>([]);
-  showApiTokenDialog = signal(false);
   showDeleteAccountDialog = signal(false);
-  showChangePasswordDialog = signal(false);
-  show2FASetup = signal(false);
-  
-  // Security
-  twoFactorEnabled = signal(false);
-  qrCode = signal('');
-  backupCodes = signal<string[]>([]);
-  
-  // API Token Creation
-  selectedPermissions: string[] = [];
-  availablePermissions = [
-    { key: 'read', label: 'Read Access', description: 'View analytics data and settings' },
-    { key: 'write', label: 'Write Access', description: 'Create and modify analytics data' },
-    { key: 'delete', label: 'Delete Access', description: 'Remove analytics data' },
-    { key: 'admin', label: 'Admin Access', description: 'Full administrative privileges' }
-  ];
-  
+  showPasswordForm = signal(false);
+
   // Delete Account
   deleteConfirmation = '';
-  
+
+  // Password strength (0-4)
+  passwordStrength = signal(0);
+
   // Analytics tracking preferences
   userPlan = 'free';
   availableFeatures: string[] = [];
@@ -195,9 +131,11 @@ export class DashboardSettings implements OnInit {
 
   ngOnInit() {
     this.loadUserData();
-    this.loadApiTokens();
-    this.loadActiveSessions();
     this.loadAnalyticsPreferences();
+    // Track password strength as user types
+    this.passwordForm.get('newPassword')?.valueChanges.subscribe(value => {
+      this.passwordStrength.set(this.computePasswordStrength(value || ''));
+    });
   }
 
   initializeForms() {
@@ -210,15 +148,11 @@ export class DashboardSettings implements OnInit {
 
     this.passwordForm = this.fb.group({
       currentPassword: ['', Validators.required],
-      newPassword: ['', [Validators.required, Validators.minLength(6)]],
+      newPassword: ['', [Validators.required, Validators.minLength(8)]],
       confirmPassword: ['', Validators.required]
     }, { validators: this.passwordMatchValidator });
 
-    this.apiTokenForm = this.fb.group({
-      name: ['', Validators.required]
-    });
-    
-    // Analytics form will be initialized in loadAnalyticsPreferences
+    // Analytics form is built dynamically in loadAnalyticsPreferences()
     this.analyticsForm = this.fb.group({});
   }
 
@@ -233,26 +167,6 @@ export class DashboardSettings implements OnInit {
     if (userData) {
       this.user.set(userData);
       this.profileForm.patchValue(userData);
-    }
-  }
-
-  loadApiTokens() {
-    const userId = this.user()?._id;
-    if (userId) {
-      this.http.get<ApiToken[]>(`${environment.apiUrl}/users/${userId}/api-tokens`).subscribe({
-        next: (tokens) => this.apiTokens.set(tokens),
-        error: (error) => console.error('Failed to load API tokens:', error)
-      });
-    }
-  }
-
-  loadActiveSessions() {
-    const userId = this.user()?._id;
-    if (userId) {
-      this.http.get<ActiveSession[]>(`${environment.apiUrl}/users/${userId}/sessions`).subscribe({
-        next: (sessions) => this.activeSessions.set(sessions),
-        error: (error) => console.error('Failed to load sessions:', error)
-      });
     }
   }
 
@@ -291,15 +205,16 @@ export class DashboardSettings implements OnInit {
     if (this.passwordForm.valid) {
       this.loading.set(true);
       const userId = this.user()?._id;
-      
+
       this.http.put(`${environment.apiUrl}/users/${userId}/password`, {
         currentPassword: this.passwordForm.value.currentPassword,
         newPassword: this.passwordForm.value.newPassword
       }).subscribe({
         next: () => {
           this.loading.set(false);
-          this.showChangePasswordDialog.set(false);
+          this.showPasswordForm.set(false);
           this.passwordForm.reset();
+          this.passwordStrength.set(0);
           this.messageService.add({
             severity: 'success',
             summary: 'Password Changed',
@@ -317,126 +232,40 @@ export class DashboardSettings implements OnInit {
       });
     }
   }
-
-  setup2FA() {
-    const userId = this.user()?._id;
-    this.http.post(`${environment.apiUrl}/users/${userId}/2fa/setup`, {}).subscribe({
-      next: (response: any) => {
-        this.qrCode.set(response.qrCode);
-        this.backupCodes.set(response.backupCodes);
-        this.show2FASetup.set(true);
+  exportProfileData() {
+    const userData = this.authService.getUserData();
+    const analyticsPrefs = localStorage.getItem('analytics_preferences');
+    const exportData = {
+      profile: {
+        firstname: userData?.firstname,
+        lastname: userData?.lastname,
+        email: userData?.email,
+        role: userData?.role,
+        plan: userData?.plan,
+        createdAt: userData?.createdAt,
       },
-      error: (error) => {
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Setup Failed',
-          detail: 'Failed to setup two-factor authentication'
-        });
-      }
-    });
-  }
+      analyticsPreferences: analyticsPrefs ? JSON.parse(analyticsPrefs) : {},
+      exportedAt: new Date().toISOString()
+    };
 
-  createApiToken() {
-    if (this.apiTokenForm.valid) {
-      const userId = this.user()?._id;
-      
-      this.http.post(`${environment.apiUrl}/users/${userId}/api-tokens`, this.apiTokenForm.value).subscribe({
-        next: (response: any) => {
-          this.loadApiTokens();
-          this.showApiTokenDialog.set(false);
-          this.apiTokenForm.reset();
-          this.messageService.add({
-            severity: 'success',
-            summary: 'Token Created',
-            detail: 'API token created successfully'
-          });
-        },
-        error: (error) => {
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Creation Failed',
-            detail: 'Failed to create API token'
-          });
-        }
-      });
-    }
-  }
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `pulzivo-profile-${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
 
-  revokeApiToken(tokenId: string) {
-    const userId = this.user()?._id;
-    
-    this.http.delete(`${environment.apiUrl}/users/${userId}/api-tokens/${tokenId}`).subscribe({
-      next: () => {
-        this.loadApiTokens();
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Token Revoked',
-          detail: 'API token has been revoked'
-        });
-      },
-      error: (error) => {
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Revocation Failed',
-          detail: 'Failed to revoke API token'
-        });
-      }
-    });
-  }
-
-  revokeSession(sessionId: string) {
-    const userId = this.user()?._id;
-    
-    this.http.delete(`${environment.apiUrl}/users/${userId}/sessions/${sessionId}`).subscribe({
-      next: () => {
-        this.loadActiveSessions();
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Session Revoked',
-          detail: 'Session has been terminated'
-        });
-      },
-      error: (error) => {
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Revocation Failed',
-          detail: 'Failed to revoke session'
-        });
-      }
-    });
-  }
-
-  exportData() {
-    const userId = this.user()?._id;
-    
-    this.http.post(`${environment.apiUrl}/users/${userId}/export-data`, {}, { responseType: 'blob' }).subscribe({
-      next: (blob) => {
-        const url = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `Pulzivo-data-${new Date().toISOString().split('T')[0]}.json`;
-        link.click();
-        window.URL.revokeObjectURL(url);
-        
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Data Exported',
-          detail: 'Your data has been exported successfully'
-        });
-      },
-      error: (error) => {
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Export Failed',
-          detail: 'Failed to export your data'
-        });
-      }
+    this.messageService.add({
+      severity: 'success',
+      summary: 'Data Exported',
+      detail: 'Your profile and preferences have been exported'
     });
   }
 
   deleteAccount() {
     const userId = this.user()?._id;
-    
+
     this.http.delete(`${environment.apiUrl}/users/${userId}/account`).subscribe({
       next: () => {
         this.messageService.add({
@@ -444,7 +273,6 @@ export class DashboardSettings implements OnInit {
           summary: 'Account Deleted',
           detail: 'Your account has been deleted successfully'
         });
-        
         setTimeout(() => {
           this.authService.signout();
           window.location.href = '/';
@@ -460,39 +288,6 @@ export class DashboardSettings implements OnInit {
     });
   }
 
-  onAvatarUpload(event: any) {
-    const file = event.files[0];
-    if (file) {
-      const formData = new FormData();
-      formData.append('avatar', file);
-      
-      const userId = this.user()?._id;
-      this.http.post(`${environment.apiUrl}/users/${userId}/avatar`, formData).subscribe({
-        next: (response: any) => {
-          const currentUser = this.user();
-          if (currentUser) {
-            const updatedUser = { ...currentUser, avatar: response.avatarUrl };
-            this.user.set(updatedUser);
-            this.authService.updateUserData(updatedUser);
-          }
-          
-          this.messageService.add({
-            severity: 'success',
-            summary: 'Avatar Updated',
-            detail: 'Your profile picture has been updated'
-          });
-        },
-        error: (error) => {
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Upload Failed',
-            detail: 'Failed to update profile picture'
-          });
-        }
-      });
-    }
-  }
-
   getUserInitials(): string {
     const user = this.user();
     if (user) {
@@ -501,27 +296,39 @@ export class DashboardSettings implements OnInit {
     return '';
   }
 
-  getSessionSeverity(session: ActiveSession): 'success' | 'info' {
-    return session.isCurrent ? 'success' : 'info';
-  }
-
-  getTokenStatusSeverity(token: ApiToken): 'success' | 'danger' {
-    return token.isActive ? 'success' : 'danger';
-  }
-
   formatDate(date: string): string {
+    if (!date) return 'Never';
     return new Date(date).toLocaleDateString();
   }
 
-  formatDateTime(date: string): string {
-    return new Date(date).toLocaleString();
+  // ── Analytics Preferences ────────────────────────────────────────────────
+
+  get lockedFeatures(): string[] {
+    return Object.keys(FEATURE_DESCRIPTIONS).filter(
+      feature => !this.availableFeatures.includes(feature)
+    );
+  }
+
+  get proFeatures(): string[] {
+    return PLAN_FEATURES['pro'].filter(f => !PLAN_FEATURES['free'].includes(f));
+  }
+
+  get enterpriseOnlyFeatures(): string[] {
+    return PLAN_FEATURES['enterprise'].filter(f => !PLAN_FEATURES['pro'].includes(f));
+  }
+
+  getFeatureMinPlan(feature: string): string {
+    if (PLAN_FEATURES['free'].includes(feature)) return 'free';
+    if (PLAN_FEATURES['pro'].includes(feature)) return 'pro';
+    return 'enterprise';
   }
 
   loadAnalyticsPreferences() {
-    // Get user plan (fallback to 'free' if not available)
+    // Owners always have enterprise access regardless of the stored plan value
     const userData = this.authService.getUserData();
-    this.userPlan = userData?.plan || 'free';
-    
+    const isOwner = userData?.role === 'owner';
+    this.userPlan = isOwner ? 'enterprise' : (userData?.plan || 'free');
+
     // Get available features for the plan
     this.availableFeatures = PLAN_FEATURES[this.userPlan] || PLAN_FEATURES['free'];
     
@@ -587,25 +394,16 @@ export class DashboardSettings implements OnInit {
   saveAnalyticsPreferences() {
     if (this.analyticsForm.valid) {
       this.loading.set(true);
-      
-      // Get form value (already has boolean values for each feature)
       const formValue = this.analyticsForm.value;
-      
-      // Get enabled features for the signal (array format)
-      const enabledFeatures = Object.keys(formValue)
-        .filter(key => formValue[key] === true);
-      
-      // Save to localStorage
+      const enabledFeatures = Object.keys(formValue).filter(key => formValue[key] === true);
+
       localStorage.setItem('analytics_preferences', JSON.stringify(formValue));
-      
-      // Update the signal
       this.enabledFeatures.set(enabledFeatures);
-      
-      // Notify analytics SDK if it exists (use PulzivoAnalytics global)
-      if ((window as any).PulzivoAnalytics && (window as any).PulzivoAnalytics.updatePreferences) {
+
+      if ((window as any).PulzivoAnalytics?.updatePreferences) {
         (window as any).PulzivoAnalytics.updatePreferences(formValue);
       }
-      
+
       this.loading.set(false);
       this.messageService.add({
         severity: 'success',
@@ -616,21 +414,35 @@ export class DashboardSettings implements OnInit {
   }
 
   resetToDefaults() {
-    // Enable all available features by default
-    const defaultPreferences = [...this.availableFeatures];
-    
-    // Update form
     this.availableFeatures.forEach(feature => {
       this.analyticsForm.get(feature)?.setValue(true);
     });
-    
-    this.enabledFeatures.set(defaultPreferences);
-    
+    this.enabledFeatures.set([...this.availableFeatures]);
     this.messageService.add({
       severity: 'info',
       summary: 'Reset Complete',
-      detail: 'Analytics preferences have been reset to defaults (all features enabled)'
+      detail: 'Analytics preferences reset — all available features enabled'
     });
+  }
+
+  // ── Password Strength ────────────────────────────────────────────────────
+
+  computePasswordStrength(password: string): number {
+    if (!password) return 0;
+    let strength = 0;
+    if (password.length >= 8) strength++;
+    if (/[A-Z]/.test(password)) strength++;
+    if (/[0-9]/.test(password)) strength++;
+    if (/[^A-Za-z0-9]/.test(password)) strength++;
+    return strength;
+  }
+
+  getPasswordStrengthLabel(): string {
+    const s = this.passwordStrength();
+    if (s <= 1) return 'weak';
+    if (s === 2) return 'fair';
+    if (s === 3) return 'good';
+    return 'strong';
   }
 
   setActiveTab(tab: string): void {
