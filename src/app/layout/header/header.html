@@ -68,7 +68,7 @@
 <app-sign-up
   (switchToSignIn)="onSwitchToSignIn()"
   (close)="onSignUpClosed()"
-  (signUpSuccess)="onSignUpSuccess()">
+  (signUpSuccess)="onSignUpSuccess($event)">
 </app-sign-up>
 
 <app-forgot-password
